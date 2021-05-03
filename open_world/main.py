@@ -5,6 +5,7 @@ from open_world import RecognitionModels
 import torch
 import os
 import torch.nn as nn
+import time
 
 ENABLE_TRAINING = False
 SAVE_IMAGES = True
@@ -16,30 +17,26 @@ def main():
 		print("Cuda device not available make sure CUDA has been installed")
 		return
 	torch.manual_seed(42)
-	dataset_path = 'datasets/MNIST'
-	model_path = '../networks/MNIST/test_model.pt'
-	batch_size = 10
-	learning_rate = 0.001
-	epochs = 1
+
+	# config_file = '../config/MNIST_fashion_test.yaml'
+	# config_file = '../config/MNIST_test.yaml'
+	config_file = '../config/CATDOG_test.yaml'
+
+	# Parse config file
+	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
 
 
 	## Setup dataset
-	dataset = ObjectDatasets.MNISTDataset(dataset_path)
 	(train_data, test_data) = dataset.getData()
 	(train_loader, test_loader) = dataset.getDataloaders(batch_size)
 
-
-	## Setup model
-	model = RecognitionModels.MNISTNetwork().cuda()
-	if not ENABLE_TRAINING:
-		OpenWorldUtils.loadModel(model, model_path)
-
-	criterion = nn.CrossEntropyLoss()
-	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 	if ENABLE_TRAINING:
 		OpenWorldUtils.trainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
-		OpenWorldUtils.saveModel(model, model_path)
-	OpenWorldUtils.testModel(model, test_data)
+		OpenWorldUtils.saveModel(model, model.model_path)
+
+	for i in range(0, 10):
+		OpenWorldUtils.testModel(model, dataset)
+		time.sleep(1)
 
 	return
 

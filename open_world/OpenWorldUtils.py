@@ -2,6 +2,44 @@ import time
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import yaml
+import os
+
+from open_world import ObjectDatasets
+from open_world import RecognitionModels
+import torch.nn as nn
+
+
+
+
+def parseConfigFile(config_file, enable_training):
+
+    with open(config_file) as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Load dataset
+    dataset_path = config['dataset_path']
+    dataset_class = config['dataset_class']
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
+
+
+    # Load model
+    model_path = config['model_path']
+    model_class = config['model_class']
+    model = eval('RecognitionModels.' + model_class)(model_path).cuda()
+    if not enable_training:
+        loadModel(model, model_path)
+
+    # Training parameters
+    batch_size = config['batch_size']
+    learning_rate = config['learning_rate']
+    epochs = config['epochs']
+    criterion = eval('nn.' + config['criterion'])()
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
+
+    return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate)
+
+
 
 
 def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
@@ -12,12 +50,19 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
     train_correct = []
     test_correct = []
 
+    max_trn_batch = 800
+    max_tst_batch = 300
+
     for i in range(epochs):
         trn_corr = 0
         tst_corr = 0
 
         # Run the training batches
         for b, (X_train, y_train) in enumerate(train_loader):
+
+            # Limit the number of batches
+            if b == max_trn_batch:
+                break
             b += 1
             # Apply the model
             y_pred = model(X_train.cuda())  # we don't flatten X-train here
@@ -57,21 +102,31 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-def testModel(model, test_data):
+def testModel(model, dataset):
+    test_data = dataset.test_data
+    class_labels = dataset.class_names
     x = np.random.randint(0, len(test_data))
-
     model.eval()
-    with torch.no_grad():
-        new_pred = model(test_data[x][0].view(1, 1, 28, 28).cuda()).argmax()
-    print("Predicted value:", new_pred.item())
 
-    
-    plt.figure(figsize=(1, 1))
-    plt.imshow(test_data[x][0].reshape((28, 28)), cmap="gist_yarg")
-    plt.title(str(new_pred.item()))
+    with torch.no_grad():
+        new_pred = model(test_data[x][0].view(dataset.image_shape).cuda()).argmax()
+    print("Predicted value:", class_labels[new_pred.item()])
+
+
+    im = dataset.getImage(x)
+
+
+    plt.figure()
+    plt.imshow(im, cmap="gist_yarg")
+    plt.title(str(class_labels[new_pred.item()]))
     plt.show()
 
 def saveModel(model, file_path):
+
+    # if folder does not exist: make folder
+    directory = '/'.join(file_path.split('/')[:-1])
+    if not os.path.isdir(directory):
+        os.mkdir(directory)
     torch.save(model.state_dict(), file_path)
 
 def loadModel(model, file_path):

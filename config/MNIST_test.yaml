@@ -1,0 +1,9 @@
+dataset_path: '../datasets/MNIST'
+dataset_class: MNISTDataset
+model_path: '../networks/MNIST/test_model.pt'
+model_class: MNISTNetwork
+criterion: CrossEntropyLoss
+optimizer: Adam
+learning_rate: 0.001
+batch_size: 10
+epochs: 5
