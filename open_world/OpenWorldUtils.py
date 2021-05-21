@@ -28,6 +28,7 @@ def parseConfigFile(config_file, enable_training):
     model_class = config['model_class']
     model = eval('RecognitionModels.' + model_class)(model_path).cuda()
     if not enable_training:
+        print('Load model ' + model_path)
         loadModel(model, model_path)
 
     # Training parameters
@@ -35,7 +36,7 @@ def parseConfigFile(config_file, enable_training):
     learning_rate = config['learning_rate']
     epochs = config['epochs']
     criterion = eval('nn.' + config['criterion'])()
-    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=config['learning_rate'])
 
     return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate)
 
@@ -61,8 +62,8 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
         for b, (X_train, y_train) in enumerate(train_loader):
 
             # Limit the number of batches
-            if b == max_trn_batch:
-                break
+            # if b == max_trn_batch:
+            #     break
             b += 1
             # Apply the model
             y_pred = model(X_train.cuda())  # we don't flatten X-train here
@@ -83,8 +84,8 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
                 print(f'epoch: {i:2}  batch: {b:4} [{10 * b:6}/60000]  loss: {loss.item():10.8f}  \
     accuracy: {trn_corr.item() * 100 / (10 * b):7.3f}%')
 
-        train_losses.append(loss)
-        train_correct.append(trn_corr)
+        train_losses.append(loss.cpu())
+        train_correct.append(trn_corr.cpu())
 
         # Run the testing batches
         with torch.no_grad():
@@ -97,10 +98,17 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
                 tst_corr += (predicted == y_test.cuda()).sum()
 
         loss = criterion(y_val, y_test.cuda())
-        test_losses.append(loss)
-        test_correct.append(tst_corr)
+        test_losses.append(loss.cpu())
+        test_correct.append(tst_corr.cpu())
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
+
+    return (train_losses, test_losses, train_correct, test_correct)
+
+
+def saveTrainingLosses(train_losses, test_losses, train_correct, test_correct, file_path):
+    np.savez(file_path, train_losses=train_losses, train_correct=train_correct, test_correct=test_correct, test_losses=test_losses)
+
 
 def testModel(model, dataset):
     test_data = dataset.test_data
@@ -131,3 +139,32 @@ def saveModel(model, file_path):
 
 def loadModel(model, file_path):
     model.load_state_dict(torch.load(file_path))
+
+def plotLosses(trainig_file_path, n_training, n_test, figure_path):
+
+    data = np.load(trainig_file_path + '.npz')
+    train_losses = data['train_losses']
+    test_losses = data['test_losses']
+    train_correct = data['train_correct']
+    test_correct = data['test_correct']
+    fig = plt.figure()
+    plt.plot(train_losses, label='training loss')
+    plt.plot(test_losses, label='validation loss')
+    plt.title('Loss at the end of each epoch')
+    plt.legend();
+    plt.show()
+    fig.savefig(figure_path + 'losses')
+
+    fig = plt.figure()
+    plt.plot([float(t) / float(n_training)*100 for t in train_correct], label='training accuracy')
+    plt.plot([float(t) / float(n_test)*100 for t in test_correct], label='validation accuracy')
+    plt.title('Accuracy at the end of each epoch')
+    plt.legend();
+    plt.show()
+    fig.savefig(figure_path + 'accuracy')
+
+
+
+    return
+
+

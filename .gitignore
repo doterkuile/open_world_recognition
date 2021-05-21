@@ -1,3 +1,7 @@
 /datasets/*
+!/datasets/.gitignore
 /networks/*
+!/networks/.gitignore
 *npz
+/open_world/__pychache__/*
+

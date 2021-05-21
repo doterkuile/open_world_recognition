@@ -1,6 +1,8 @@
 dataset_path: '../datasets/FashionMNIST'
 dataset_class: FashionMNISTDataset
 model_path: '../networks/Fashion_MNIST/test_model.pt'
+training_history_path: '../networks/Fashion_MNIST/test_model_history'
+figures_path: '../figures/FashionMNIST_'
 model_class: FashionMNISTNetwork
 criterion: CrossEntropyLoss
 optimizer: Adam

@@ -18,12 +18,19 @@ def main():
 		return
 	torch.manual_seed(42)
 
-	# config_file = '../config/MNIST_fashion_test.yaml'
-	# config_file = '../config/MNIST_test.yaml'
-	config_file = '../config/CATDOG_test.yaml'
+	# config_file_path = '../config/MNIST_fashion_test.yaml'
+	# config_file_path = '../config/MNIST_test.yaml'
+	config_file_path = '../config/CATDOG_test.yaml'
 
 	# Parse config file
-	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
+	(dataset, model, criterion, optimizer, config) = OpenWorldUtils.parseConfigFile(config_file_path, ENABLE_TRAINING)
+
+	batch_size = config['batch_size']
+	epochs = config['epochs']
+	training_history_path = config['training_history_path']
+	figure_path = config['figures_path']
+
+
 
 
 	## Setup dataset
@@ -31,8 +38,13 @@ def main():
 	(train_loader, test_loader) = dataset.getDataloaders(batch_size)
 
 	if ENABLE_TRAINING:
-		OpenWorldUtils.trainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
+		(train_losses, test_losses, train_correct, test_correct) = OpenWorldUtils.trainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
+		OpenWorldUtils.saveTrainingLosses(train_losses, test_losses, train_correct, test_correct, training_history_path)
 		OpenWorldUtils.saveModel(model, model.model_path)
+
+	# n_training = len(train_loader.dataset)
+	# n_test = len(test_loader.dataset)
+	# OpenWorldUtils.plotLosses(training_history_path, n_training, n_test, figure_path)
 
 	for i in range(0, 10):
 		OpenWorldUtils.testModel(model, dataset)

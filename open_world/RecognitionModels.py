@@ -35,6 +35,15 @@ class MNISTNetwork(nn.Module):
         X = self.fc3(X)
         return F.log_softmax(X, dim=1)
 
+    def getFeatureExtractor(self, X):
+        X = F.relu(self.conv1(X))
+        X = F.max_pool2d(X, 2, 2)
+        X = F.relu(self.conv2(X))
+        X = F.max_pool2d(X, 2, 2)
+        X = X.view(-1, 5 * 5 * 16)
+
+        return X
+
 class FashionMNISTNetwork(nn.Module):
     def __init__(self, model_path):
         super().__init__()

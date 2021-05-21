@@ -1,6 +1,8 @@
 dataset_path: '../datasets/CATS_DOGS'
 dataset_class: CatDogDataset
 model_path: '../networks/CATDOG/test_model.pt'
+training_history_path: '../networks/CATDOG/test_model_history'
+figures_path: '../figures/CATDOG_'
 model_class: CATDOGNetwork
 criterion: CrossEntropyLoss
 optimizer: Adam
