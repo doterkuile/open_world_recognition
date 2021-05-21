@@ -46,10 +46,48 @@ class MNISTDataset(ObjectDatasetBase):
         self.train_data = datasets.MNIST(root='../datasets', train=True, download=True, transform=self.transform)
         self.test_data = datasets.MNIST(root='../datasets', train=False, download=True, transform=self.transform)
         self.image_shape = [1, 1, 28, 28]
-        self.class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        self.classes = 	[int(cls.split(' -')[0]) for cls in self.train_data.classes]
+
 
     def getImage(self, x):
         return self.test_data[x][0].reshape(self.image_shape[-2:])
+
+# CIFAR100
+class CIFAR100Dataset(ObjectDatasetBase):
+
+    def __init__(self, dataset_path):
+        super().__init__(dataset_path)
+
+        self.transform_train = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276])
+        ])
+
+        self.transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276])
+        ])
+
+        self.train_data = datasets.CIFAR100(root='../datasets', train=True, download=True, transform=self.transform_train)
+        self.test_data = datasets.CIFAR100(root='../datasets', train=False, download=True, transform=self.transform_test)
+        self.image_shape = [1, 3, 32, 32]
+        self.classes = [i for i in range(len(self.train_data.classes))]
+
+    def getImage(self, x):
+
+        # inv_normalize = transforms.Normalize(
+        #     mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225],
+        #     std=[1 / 0.229, 1 / 0.224, 1 / 0.225]
+        # )
+        # im = inv_normalize(self.test_data[x][0])
+        im =self.test_data[x][0]
+        im = np.transpose(im.numpy(), (1, 2, 0))
+        return im
+
+
+
 
 
 # MNIST FASHION
@@ -61,7 +99,7 @@ class FashionMNISTDataset(ObjectDatasetBase):
         self.train_data = datasets.FashionMNIST(root='../datasets', train=True, download=True, transform=self.transform)
         self.test_data = datasets.FashionMNIST(root='../datasets', train=False, download=True, transform=self.transform)
         self.image_shape = self.image_shape = [1, 1, 28, 28]
-        self.class_names = ['T-shirt', 'Trouser', 'Sweater', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Boot']
+        self.classes = ['T-shirt', 'Trouser', 'Sweater', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Boot']
 
 
     def getImage(self, x):
@@ -93,7 +131,7 @@ class CatDogDataset(ObjectDatasetBase):
         self.train_data = datasets.ImageFolder(os.path.join(dataset_path, 'train'), transform=self.train_transform)
         self.test_data = datasets.ImageFolder(os.path.join(dataset_path, 'test'), transform=self.test_transform)
         self.image_shape = [1, 3, 224, 224]
-        self.class_names = ["Cat", "Dog"]
+        self.classes = ["Cat", "Dog"]
 
 
     def getImage(self, x):

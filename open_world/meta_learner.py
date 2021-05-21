@@ -3,6 +3,7 @@ from open_world import OpenWorldUtils
 from open_world import RecognitionModels
 
 import torch
+import torchvision
 import sklearn
 
 import os
@@ -11,41 +12,46 @@ import time
 
 import numpy as np
 
-ENABLE_TRAINING = False
+ENABLE_TRAINING = True
 SAVE_IMAGES = True
 
 
 
 
 
-def extract_features(train_data, model, load_data):
+def extract_features(train_data, model, load_data, classes):
 
-	classes = [train_data.class_to_idx[key] for key in train_data.class_to_idx.keys()]
 
-	class_samples = {key: None for key in classes}
+
+	class_samples= {key: [] for key in classes}
+	dataset_path = "../datasets/MNIST/memory.npz"
 
 	train_rep, train_cls_rep = [], []
-	if not load_data:
+	if load_data:
+		train_rep = np.load(dataset_path)['data_rep']
+		train_cls_rep = np.load(dataset_path)['train_cls_rep']
+
+
+	else:
 		with torch.no_grad():
 
-			for cls in classes:
-				class_samples[cls] = torch.stack([s[0] for s in train_data if s[1] == cls])
+			for sample, label in train_data:
+				class_samples[label].append(sample)
 
-
 			for cls in classes:
+				class_samples[cls] = torch.stack(class_samples[cls])
 				cls_rep = model.getFeatureExtractor(class_samples[cls].view(-1, 1, 28, 28).cuda()).cpu()
 				train_rep.append(cls_rep)
 				train_cls_rep.append(cls_rep.mean(dim=0))
 			train_rep = torch.cat(train_rep)
 			train_cls_rep = torch.stack(train_cls_rep)
 
-			np.savez( "memory.npz",data_rep=train_rep, train_cls_rep=train_cls_rep)
-	else:
-		train_rep = np.load("memory.npz")['data_rep']
-		train_cls_rep = np.load("memory.npz")['train_cls_rep']
+			np.savez(dataset_path, data_rep=train_rep, train_cls_rep=train_cls_rep)
+
+
 	return (train_rep, train_cls_rep)
 
-def data2np_train_idx_neg_cls(class_set, data_rep, data_cls_rep, classes, train_per_cls, top_k):
+def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_per_cls, top_k):
 	X0, X1, Y = [], [], []
 	base_cls_offset = classes.index(class_set[0])  # -> gives index of first class of interest
 	for cls in class_set:
@@ -126,47 +132,45 @@ def main():
 		print("Cuda device not available make sure CUDA has been installed")
 		return
 	torch.manual_seed(42)
-	load_data = True
+	load_data = False
 	# # config_file = '../config/MNIST_fashion_test.yaml'
-	config_file = '../config/MNIST_test.yaml'
+	config_file = '../config/CIFAR100_features.yaml'
+	# config_file = '../config/MNIST_test.yaml'
 	# config_file = '../config/CATDOG_test.yaml'
-    #
-	# # Parse config file
+
+	# transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+	#
+	# model = torchvision.models.resnet50(pretrained=True)
+	# model2 = torchvision.models.AlexNet
+	# model = RecognitionModels.ResNet50Features()
+
+	# Parse config file
 	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
 
-    #
-    #
-	# ## Setup dataset
+	# Setup dataset
 	(train_data, test_data) = dataset.getData()
 	(train_loader, test_loader) = dataset.getDataloaders(batch_size)
-	classes = [cls.split(' -')[0] for cls in train_data.classes]
+	classes = dataset.classes
 
 
-	(data_rep, data_cls_rep) = extract_features(train_data,model,load_data)
+	(data_rep, data_cls_rep) = extract_features(train_data,model,load_data, classes)
 
-	top_k = 5	# Top similar classes
+	top_k = 3	# Top similar classes
 	train_per_cls = 100 # Number of samples per class
 
 	class_set = classes
 
-	num_train = 9 # Number of classes used for training
-	num_valid = 1
+	num_train = 6 # Classes used for training
+	num_valid = 4 # Classes used for validation
 
 
-	train_X0, train_X1, train_Y = data2np_train_idx_neg_cls(class_set[:num_train], data_rep, data_cls_rep, classes, train_per_cls, top_k)
-	valid_X0, valid_X1, valid_Y = data2np_train_idx_neg_cls(class_set[-num_valid:], data_rep, data_cls_rep, classes, train_per_cls, top_k)
+	train_X0, train_X1, train_Y = rank_samples_from_memory(class_set[:num_train], data_rep, data_cls_rep, classes, train_per_cls, top_k)
+	valid_X0, valid_X1, valid_Y = rank_samples_from_memory(class_set[-num_valid:], data_rep, data_cls_rep, classes, train_per_cls, top_k)
 
-	# class_vectors = calculate_class_vector(features,classes, labels)
-	# classes =
-    #
-	# if ENABLE_TRAINING:
-	# 	OpenWorldUtils.trainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
-	# 	OpenWorldUtils.saveModel(model, model.model_path)
-    #
-	# for i in range(0, 10):
-	# 	OpenWorldUtils.testModel(model, dataset)
-	# 	time.sleep(1)
-
+	np.savez("../datasets/MNIST/train_idx.npz",
+			 train_rep=data_rep,  # including all validation examples.
+			 train_X0=train_X0, train_X1=train_X1, train_Y=train_Y,
+			 valid_X0=valid_X0, valid_X1=valid_X1, valid_Y=valid_Y)
 	return
 
 

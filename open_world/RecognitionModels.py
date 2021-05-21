@@ -2,9 +2,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
-from torchvision.utils import make_grid
+from torchvision import datasets, transforms, models
 
+import torchvision.models.resnet as resnet
+from torchvision.utils import make_grid
+import torch.utils.model_zoo as model_zoo
+
+from torchvision.models import resnet50
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
@@ -14,13 +18,13 @@ import abc
 
 
 class MNISTNetwork(nn.Module):
-    def __init__(self, model_path):
+    def __init__(self, model_path, num_classes):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, 1)
         self.conv2 = nn.Conv2d(6, 16, 3, 1)
         self.fc1 = nn.Linear(5*5*16, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84,10)
+        self.fc3 = nn.Linear(84,num_classes)
 
         self.model_path = model_path
 
@@ -45,12 +49,12 @@ class MNISTNetwork(nn.Module):
         return X
 
 class FashionMNISTNetwork(nn.Module):
-    def __init__(self, model_path):
+    def __init__(self, model_path, num_classes):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, 1)
         self.conv2 = nn.Conv2d(6, 16, 3, 1)
         self.fc1 = nn.Linear(5*5*16, 100)
-        self.fc2 = nn.Linear(100, 10)
+        self.fc2 = nn.Linear(100, num_classes)
 
         self.model_path = model_path
 
@@ -65,13 +69,13 @@ class FashionMNISTNetwork(nn.Module):
         return F.log_softmax(X, dim=1)
 
 class CATDOGNetwork(nn.Module):
-    def __init__(self,  model_path):
+    def __init__(self,  model_path, num_classes):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 3, 1)
         self.conv2 = nn.Conv2d(6, 16, 3, 1)
         self.fc1 = nn.Linear(54 * 54 * 16, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 2)
+        self.fc3 = nn.Linear(84,num_classes)
 
         self.model_path = model_path
 
@@ -86,3 +90,34 @@ class CATDOGNetwork(nn.Module):
         X = F.relu(self.fc2(X))
         X = self.fc3(X)
         return F.log_softmax(X, dim=1)
+
+
+class ResNet50(models.ResNet):
+    def __init__(self, model_path, num_classes):
+
+        super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
+        self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
+        for param in self.parameters():
+            param.requires_grad = False
+        self.fc = nn.Linear(512 , num_classes)
+        self.model_path = model_path
+
+
+class ResNet50Features(models.ResNet):
+    def __init__(self, model_path, num_classes):
+        super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
+        self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
+        for param in self.parameters():
+            param.requires_grad = False
+        self.fc = Identity()
+
+        self.model_path = model_path
+
+
+class Identity(torch.nn.Module):
+
+    def __init__(self):
+        super(Identity,self).__init__()
+
+    def forward(self, x):
+        return x

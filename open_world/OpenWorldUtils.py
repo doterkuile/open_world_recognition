@@ -22,11 +22,11 @@ def parseConfigFile(config_file, enable_training):
     dataset_class = config['dataset_class']
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
 
-
+    num_classes = len(dataset.classes)
     # Load model
     model_path = config['model_path']
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path).cuda()
+    model = eval('RecognitionModels.' + model_class)(model_path, num_classes).cuda()
     if not enable_training:
         print('Load model ' + model_path)
         loadModel(model, model_path)
@@ -138,7 +138,11 @@ def saveModel(model, file_path):
     torch.save(model.state_dict(), file_path)
 
 def loadModel(model, file_path):
-    model.load_state_dict(torch.load(file_path))
+    try:
+        model.load_state_dict(torch.load(file_path))
+    except FileNotFoundError:
+        print('Model not found')
+
 
 def plotLosses(trainig_file_path, n_training, n_test, figure_path):
 
