@@ -70,8 +70,8 @@ class CIFAR100Dataset(ObjectDatasetBase):
             transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276])
         ])
 
-        self.train_data = datasets.CIFAR100(root='../datasets', train=True, download=True, transform=self.transform_train)
-        self.test_data = datasets.CIFAR100(root='../datasets', train=False, download=True, transform=self.transform_test)
+        self.train_data = datasets.CIFAR100(root='datasets', train=True, download=True, transform=self.transform_train)
+        self.test_data = datasets.CIFAR100(root='datasets', train=False, download=True, transform=self.transform_test)
         self.image_shape = [1, 3, 32, 32]
         self.classes = [i for i in range(len(self.train_data.classes))]
 
