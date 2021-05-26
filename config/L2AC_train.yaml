@@ -1,8 +1,8 @@
 dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
-model_path: 'networks/CIFAR100/encoder/resnet50_train.pt'
-model_class: ResNet50Features
-training_history_path: 'networks/CIFAR100/encoder/resnet50_train_model_history'
+model_path: 'networks/CIFAR100/L2AC.pt'
+model_class: L2AC
+training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 criterion: CrossEntropyLoss
 optimizer: Adam
 learning_rate: 0.001

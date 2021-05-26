@@ -1,8 +1,8 @@
-dataset_path: '../datasets/CIFAR100'
+dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
-model_path: '../networks/CIFAR100/test_model.pt'
-training_history_path: '../networks/CIFAR100/test_model_history'
-figures_path: '../figures/CIFAR100_'
+model_path: 'networks/CIFAR100/test_model.pt'
+training_history_path: 'networks/CIFAR100/test_model_history'
+figures_path: 'figures/CIFAR100_'
 model_class: CIFAR100Network
 criterion: CrossEntropyLoss
 optimizer: Adam

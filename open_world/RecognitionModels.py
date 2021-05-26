@@ -121,3 +121,31 @@ class Identity(torch.nn.Module):
 
     def forward(self, x):
         return x
+
+class L2AC(torch.nn.Module):
+
+    def __init__(self, model_path, num_classes):
+        super(L2AC, self).__init__()
+        self.fc1 = nn.Linear(2 * 2048, 2048)
+        self.fc2 = nn.Linear(2048, 1)
+        self.fc3 = nn.Linear(2, 1)
+
+
+
+    def forward(self,x0, x1):
+        x = self.similarity_function(x0, x1)
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.5)
+        x = F.sigmoid(self.fc2(x))
+
+        x = nn.LSTM(1)(x)
+
+
+        return x
+
+    def similarity_function(self, x0, x1):
+        x_abssub = x0.sub(x1)
+        x_abssub.abs_()
+        x_add = x0.add(x1)
+        x0 = torch.cat((x_abssub, x_add), dim=1)
+        return x0
