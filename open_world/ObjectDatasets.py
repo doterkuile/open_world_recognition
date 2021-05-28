@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from numpy.core._multiarray_umath import ndarray
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.utils import make_grid
+import torch.utils.data as data_utils
 
 import numpy as np
 import pandas as pd
@@ -12,6 +14,50 @@ import matplotlib.pyplot as plt
 import os
 
 import abc
+
+
+class MetaDataset(data_utils.Dataset):
+
+
+
+    def __init__(self, data_path, ncls=9, top_n=5):
+        self.data_path = data_path + '/train_idx.npz'
+        self.ncls = ncls
+        self.top_n = top_n
+        self.memory = self.load_memory(self.data_path)
+        self.load_train_idx(self.data_path)
+        self.load_valid_idx(self.data_path)
+        self.classes = [i for i in range(100)]
+
+    #
+    def __len__(self):
+        return self.train_X0.shape[0]
+
+    def __getitem__(self, idx):
+        # idx_X0 = np.where(self.train_X0 == idx)
+        idx_X0 = self.train_X0[idx]
+        idx_X1 = self.train_X1[idx,:]
+        x0_rep = self.memory[idx_X0,:]
+        x1_rep = self.memory[idx_X1,:]
+        y = torch.tensor(self.train_Y[idx], dtype=torch.float)
+
+        return [x0_rep, x1_rep], y
+
+
+    def load_memory(self, data_path):
+        return np.load(data_path)['train_rep']
+
+    def load_train_idx(self, data_path):
+        data = np.load(data_path)
+        self.train_X0 = np.repeat(data['train_X0'], self.ncls, axis=0)
+        self.train_X1 = data['train_X1'][:, -self.ncls:, -self.top_n:].reshape(-1, self.top_n)
+        self.train_Y = data['train_Y'][:, -self.ncls:].reshape(-1, )
+
+    def load_valid_idx(self, data_path):
+        data = np.load(data_path)
+        self.valid_X0 = np.repeat(data['valid_X0'], 2, axis=0)  # the validation data is balanced.
+        self.valid_X1 = data['valid_X1'][:, -2:, -self.top_n:].reshape(-1, self.top_n)
+        self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
 
 class ObjectDatasetBase(abc.ABC):
 

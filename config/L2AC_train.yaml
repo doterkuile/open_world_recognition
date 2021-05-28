@@ -1,11 +1,11 @@
 dataset_path: 'datasets/CIFAR100'
-dataset_class: CIFAR100Dataset
+dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
-criterion: CrossEntropyLoss
+criterion: BCELoss
 optimizer: Adam
 learning_rate: 0.001
-batch_size: 10
-epochs: 5
+batch_size: 1
+epochs: 10
 figures_path: 'figures/CIFAR100_'

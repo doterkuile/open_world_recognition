@@ -41,6 +41,90 @@ def parseConfigFile(config_file, enable_training):
     return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate)
 
 
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer):
+    start_time = time.time()
+
+    train_losses = []
+    test_losses = []
+    train_correct = []
+    test_correct = []
+
+    max_trn_batch = 2400
+    max_tst_batch = 300
+
+    ([X0_sample, X1_sample], y_sample) = next(iter(train_loader))
+    ([X0_sample2, X1_sample2], y_sample2) = next(iter(train_loader))
+
+    print("y_sample = " + str(y_sample))
+    for i in range(epochs):
+        trn_corr = 0
+        tst_corr = 0
+
+        # Run the training batches
+        for b, ((X0_train, X1_train), y_train) in enumerate(train_loader):
+
+            # X0_train = torch.cat([X0_sample, X0_sample2])
+            # X1_train = torch.cat([X1_sample, X1_sample2])
+            # y_train = torch.cat([y_sample, y_sample2])
+
+
+            # Limit the number of batches
+            if b == max_trn_batch:
+                break
+            b += 1
+
+            # Apply the model
+            y_pred = model(X0_train.cuda(), X1_train.cuda())
+            loss = criterion(y_pred, y_train.cuda())
+
+            # Tally the number of correct predictions
+            predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+            predicted[predicted <= 0.5] = 0
+            predicted[predicted > 0.5] = 1
+
+            batch_corr = (predicted == y_train.cuda()).sum()
+            trn_corr += batch_corr
+
+            # Update parameters
+            optimizer.zero_grad()
+            model.reset_hidden()
+            loss.backward()
+            optimizer.step()
+
+            # Print interim results
+            if b % 600 == 0:
+                print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader)}]  loss: {loss.item():10.8f}  \
+    accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+
+        train_losses.append(loss.cpu())
+        train_correct.append(trn_corr.cpu())
+
+        # Run the testing batches
+        with torch.no_grad():
+            for b, ([X0_test, X1_test], y_test) in enumerate(test_loader):
+                # Apply the model
+                y_val = model(X0_test.cuda(), X1_test.cuda())
+
+                # Tally the number of correct predictions
+
+
+                predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+                predicted[predicted <= 0.5] = 0
+                predicted[predicted > 0.5] = 1
+                tst_corr += (predicted == y_test.cuda()).sum()
+                if b == max_tst_batch:
+                    break
+                b += 1
+
+            print(f'epoch: {i:2} test accuracy: {tst_corr.item() * 100 / (test_loader.batch_size * b):7.3f}%')
+
+        loss = criterion(y_val, y_test.cuda())
+        test_losses.append(loss.cpu())
+        test_correct.append(tst_corr.cpu())
+
+    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
+
+    return (train_losses, test_losses, train_correct, test_correct)
 
 
 def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
@@ -53,6 +137,8 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
 
     max_trn_batch = 800
     max_tst_batch = 300
+
+
 
     for i in range(epochs):
         trn_corr = 0
