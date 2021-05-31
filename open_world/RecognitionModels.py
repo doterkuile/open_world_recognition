@@ -143,7 +143,7 @@ class L2AC(torch.nn.Module):
         x = F.dropout(x, p=0.5)
         x = torch.sigmoid(self.fc2(x))
         x, cell_state = self.lstm(x, self.hidden)
-        x = torch.sigmoid(self.fc3(x.reshape(x.shape[0], -1)))
+        x = self.fc3(x.reshape(x.shape[0], -1))
 
         return x.view(x.shape[0], -1)
 

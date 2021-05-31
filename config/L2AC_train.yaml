@@ -7,7 +7,7 @@ training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
 
 ## Training hyperparameters
-criterion: BCELoss
+criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 10

@@ -26,7 +26,8 @@ def parseConfigFile(config_file, enable_training):
     top_k = config['top_k']
     top_n = config['top_n']
     train_classes = config['train_classes']
-    # class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to('cuda')
+    class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to('cuda')
+    pos_weigth = torch.tensor([(top_n - 1)/top_n]).to('cuda')
 
 
     ## Classes
@@ -42,17 +43,8 @@ def parseConfigFile(config_file, enable_training):
     if not enable_training:
         print('Load model ' + model_path)
         loadModel(model, model_path)
-
-    criterion = eval('nn.' + config['criterion'])()
+    criterion = eval('nn.' + config['criterion'])(pos_weight=pos_weigth)
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=config['learning_rate'])
-    # Load dataset
-
-
-    # Load model
-
-
-    # Training parameters
-
 
 
     return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config)
