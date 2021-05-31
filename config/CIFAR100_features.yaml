@@ -1,11 +1,20 @@
+## Paths and classes
 dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
 model_path: 'networks/CIFAR100/encoder/resnet50_features.pt'
 model_class: ResNet50Features
 training_history_path: 'networks/CIFAR100/encoder/resnet50_features_model_history'
-criterion: CrossEntropyLoss
+figures_path: 'figures/CIFAR100_'
+
+## Training hyperparameters
+criterion: BCELoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
-epochs: 5
-figures_path: '/figures/CIFAR100_'
+epochs: 10
+
+
+## L2AC parameters
+top_k: 5
+top_n: 10
+train_classes: 80

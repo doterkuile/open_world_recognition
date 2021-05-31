@@ -104,7 +104,7 @@ class ResNet50(models.ResNet):
 
 
 class ResNet50Features(models.ResNet):
-    def __init__(self, model_path, num_classes):
+    def __init__(self, model_path, num_classes, top_k):
         super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
         self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
         for param in self.parameters():
@@ -126,30 +126,61 @@ class L2AC(torch.nn.Module):
 
     def __init__(self, model_path, num_classes, top_k=5):
         super(L2AC, self).__init__()
-        self.batch_size = 1
+        self.feature_size = 2048
+        self.batch_size = 10
         self.hidden_size = 1
-        self.fc1 = nn.Linear(2 * 2048, 2048)
-        self.fc2 = nn.Linear(2048, 1)
-        self.lstm = nn.LSTM(input_size=1, hidden_size=self.hidden_size, bidirectional=True, batch_first=False)
-        self.fc3 = nn.Linear(10, 1)
+        self.fc1 = nn.Linear(2 * self.feature_size, self.feature_size)
+        self.fc2 = nn.Linear(self.feature_size, 1)
+        self.lstm = nn.LSTM(input_size=1, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.fc3 = nn.Linear(2 * top_k, 1)
         self.reset_hidden()
-
-
-
 
     def forward(self,x0, x1):
 
-        x0 = x0.repeat_interleave(x1.shape[1],dim=1)
+        x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, p=0.5)
         x = torch.sigmoid(self.fc2(x))
-        # x_rep = keras.layers.Bidirectional(keras.layers.CuDNNLSTM(1))(x_rep)
-        x, cell_state = self.lstm(x.view(x1.shape[1], self.batch_size, -1), self.hidden)
-        x = torch.sigmoid(self.fc3(x.view(self.batch_size, -1, 10)))
+        x, cell_state = self.lstm(x, self.hidden)
+        x = torch.sigmoid(self.fc3(x.reshape(x.shape[0], -1)))
 
+        return x.view(x.shape[0], -1)
 
-        return x.view(self.batch_size,-1)
+    def similarity_function(self, x0, x1):
+        x_abssub = x0.sub(x1)
+        x_abssub.abs_()
+        x_add = x0.add(x1)
+        x0 = torch.cat((x_abssub, x_add), dim=2)
+        return x0
+
+    def reset_hidden(self):
+        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+
+class L2AC_crops(torch.nn.Module):
+
+    def __init__(self, model_path, num_classes, top_k=5):
+        super(L2AC, self).__init__()
+        self.feature_size = 17
+        self.batch_size = 2
+        self.hidden_size = 1
+        self.fc1 = nn.Linear(2 * self.feature_size, self.feature_size)
+        self.fc2 = nn.Linear(self.feature_size, 1)
+        self.lstm = nn.LSTM(input_size=1, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.fc3 = nn.Linear(10, 1)
+        self.reset_hidden()
+
+    def forward(self, x0, x1):
+        x0 = x0.repeat_interleave(x1.shape[1], dim=1)
+        x = self.similarity_function(x0, x1)
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.5)
+        x = torch.sigmoid(self.fc2(x))
+        x, cell_state = self.lstm(x, self.hidden)
+        x = torch.sigmoid(self.fc3(x.reshape(x.shape[0], -1)))
+
+        return x.view(x.shape[0], -1)
 
     def similarity_function(self, x0, x1):
         x_abssub = x0.sub(x1)

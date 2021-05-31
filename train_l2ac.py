@@ -1,6 +1,7 @@
 import torch
 import torch.utils.data as data_utils
 from open_world import OpenWorldUtils
+from open_world import ObjectDatasets
 import open_world.meta_learner.meta_learner_utils as meta_utils
 import yaml
 import numpy as np
@@ -17,17 +18,14 @@ def main():
 	load_data = True
 	config_file = 'config/L2AC_train.yaml'
 
-	with open(config_file) as file:
-		config = yaml.load(file, Loader=yaml.FullLoader)
-
-	memory_path = config['dataset_path'] + '/memory.npz'
 
 	# Parse config file
-	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
+	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
-	test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+	testdataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'], train=False)
+	test_loader = DataLoader(testdataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	OpenWorldUtils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer)
+	meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer)
 
 
 	# Setup dataset

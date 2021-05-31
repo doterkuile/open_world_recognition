@@ -17,114 +17,73 @@ def parseConfigFile(config_file, enable_training):
     with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
+    ## Training hyperparameters
+    batch_size = config['batch_size']
+    learning_rate = config['learning_rate']
+    epochs = config['epochs']
+
+    ## L2AC Parameters
+    top_k = config['top_k']
+    top_n = config['top_n']
+    train_classes = config['train_classes']
+    # class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to('cuda')
+
+
+    ## Classes
     # Load dataset
     dataset_path = config['dataset_path']
     dataset_class = config['dataset_class']
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k)
 
-    num_classes = len(dataset.classes)
     # Load model
     model_path = config['model_path']
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, num_classes).cuda()
+    model = eval('RecognitionModels.' + model_class)(model_path, train_classes, top_k).cuda()
     if not enable_training:
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    # Training parameters
-    batch_size = config['batch_size']
-    learning_rate = config['learning_rate']
-    epochs = config['epochs']
     criterion = eval('nn.' + config['criterion'])()
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=config['learning_rate'])
-
-    return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate)
-
-
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer):
-    start_time = time.time()
-
-    train_losses = []
-    test_losses = []
-    train_correct = []
-    test_correct = []
-
-    max_trn_batch = 2400
-    max_tst_batch = 300
-
-    ([X0_sample, X1_sample], y_sample) = next(iter(train_loader))
-    ([X0_sample2, X1_sample2], y_sample2) = next(iter(train_loader))
-
-    print("y_sample = " + str(y_sample))
-    for i in range(epochs):
-        trn_corr = 0
-        tst_corr = 0
-
-        # Run the training batches
-        for b, ((X0_train, X1_train), y_train) in enumerate(train_loader):
-
-            # X0_train = torch.cat([X0_sample, X0_sample2])
-            # X1_train = torch.cat([X1_sample, X1_sample2])
-            # y_train = torch.cat([y_sample, y_sample2])
+    # Load dataset
 
 
-            # Limit the number of batches
-            if b == max_trn_batch:
-                break
-            b += 1
+    # Load model
 
+
+    # Training parameters
+
+
+
+    return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config)
+
+
+
+
+
+def check_accuracy(loader, model):
+    num_correct = 0
+    num_samples = 0
+
+    # Set model to eval
+    model.eval()
+
+    with torch.no_grad():
+        for b, ([X0_test, X1_test], y_test) in enumerate(loader):
             # Apply the model
-            y_pred = model(X0_train.cuda(), X1_train.cuda())
-            loss = criterion(y_pred, y_train.cuda())
+            y_val = model(X0_test.cuda(), X1_test.cuda())
 
             # Tally the number of correct predictions
-            predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+
+            predicted = torch.tensor(torch.max(y_val.data, 1)[0], dtype=torch.float).to('cuda')
             predicted[predicted <= 0.5] = 0
             predicted[predicted > 0.5] = 1
+            num_correct += (predicted == y_test.cuda()).sum()
+            num_samples += predicted.size(0)
 
-            batch_corr = (predicted == y_train.cuda()).sum()
-            trn_corr += batch_corr
-
-            # Update parameters
-            optimizer.zero_grad()
-            model.reset_hidden()
-            loss.backward()
-            optimizer.step()
-
-            # Print interim results
-            if b % 600 == 0:
-                print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader)}]  loss: {loss.item():10.8f}  \
-    accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
-
-        train_losses.append(loss.cpu())
-        train_correct.append(trn_corr.cpu())
-
-        # Run the testing batches
-        with torch.no_grad():
-            for b, ([X0_test, X1_test], y_test) in enumerate(test_loader):
-                # Apply the model
-                y_val = model(X0_test.cuda(), X1_test.cuda())
-
-                # Tally the number of correct predictions
-
-
-                predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
-                predicted[predicted <= 0.5] = 0
-                predicted[predicted > 0.5] = 1
-                tst_corr += (predicted == y_test.cuda()).sum()
-                if b == max_tst_batch:
-                    break
-                b += 1
-
-            print(f'epoch: {i:2} test accuracy: {tst_corr.item() * 100 / (test_loader.batch_size * b):7.3f}%')
-
-        loss = criterion(y_val, y_test.cuda())
-        test_losses.append(loss.cpu())
-        test_correct.append(tst_corr.cpu())
-
-    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
-
-    return (train_losses, test_losses, train_correct, test_correct)
+    # Toggle model back to train
+    model.train()
+    return num_correct / num_samples
 
 
 def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
@@ -190,6 +149,7 @@ def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
     return (train_losses, test_losses, train_correct, test_correct)
+
 
 
 def saveTrainingLosses(train_losses, test_losses, train_correct, test_correct, file_path):

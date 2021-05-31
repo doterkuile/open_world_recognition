@@ -33,15 +33,16 @@ def main():
     memory_path = config['dataset_path'] + '/memory.npz'
 
     # Parse config file
-    (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
+    (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
+
     # Setup dataset
     (train_data, test_data) = dataset.getData()
     classes = dataset.classes
 
     # Extract features
-    data_rep, data_cls_rep = meta_utils.extract_features(train_data, model, classes, memory_path, load_data)
+    data_rep, data_cls_rep, labels_rep = meta_utils.extract_features(train_data, model, classes, memory_path, load_data)
 
-    np.savez(memory_path, data_rep=data_rep, train_cls_rep=data_cls_rep)
+    np.savez(memory_path, data_rep=data_rep, train_cls_rep=data_cls_rep, labels_rep=labels_rep)
 
     return
 

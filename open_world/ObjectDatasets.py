@@ -20,43 +20,60 @@ class MetaDataset(data_utils.Dataset):
 
 
 
-    def __init__(self, data_path, ncls=9, top_n=5):
+    def __init__(self, data_path, top_n=9, top_k=5, train=True):
         self.data_path = data_path + '/train_idx.npz'
-        self.ncls = ncls
         self.top_n = top_n
-        self.memory = self.load_memory(self.data_path)
+        self.top_k = top_k
+        self.train = train
+        self.memory, self.true_labels = self.load_memory(self.data_path)
         self.load_train_idx(self.data_path)
         self.load_valid_idx(self.data_path)
         self.classes = [i for i in range(100)]
 
     #
     def __len__(self):
-        return self.train_X0.shape[0]
+        if self.train:
+            return self.train_X0.shape[0]
+        else:
+            return self.valid_X0.shape[0]
 
     def __getitem__(self, idx):
         # idx_X0 = np.where(self.train_X0 == idx)
-        idx_X0 = self.train_X0[idx]
-        idx_X1 = self.train_X1[idx,:]
-        x0_rep = self.memory[idx_X0,:]
-        x1_rep = self.memory[idx_X1,:]
-        y = torch.tensor(self.train_Y[idx], dtype=torch.float)
+        if self.train:
+            idx_X0 = self.train_X0[idx]
+            idx_X1 = self.train_X1[idx,:]
+            x0_rep = self.memory[idx_X0,:]
+            x1_rep = self.memory[idx_X1,:]
+            y = torch.tensor(self.train_Y[idx], dtype=torch.float)
+            true_label_X0 = self.true_labels[idx_X0]
+            true_label_X1 = self.true_labels[idx_X1]
+        else:
+            idx_X0 = self.valid_X0[idx]
+            idx_X1 = self.valid_X1[idx,:]
+            x0_rep = self.memory[idx_X0, :]
+            x1_rep = self.memory[idx_X1, :]
+            y = torch.tensor(self.train_Y[idx], dtype=torch.float)
+            true_label_X0 = self.true_labels[idx_X0]
+            true_label_X1 = self.true_labels[idx_X1]
 
-        return [x0_rep, x1_rep], y
+        return [x0_rep, x1_rep], y, [true_label_X0, true_label_X1]
 
 
     def load_memory(self, data_path):
-        return np.load(data_path)['train_rep']
+        features = np.load(data_path)['train_rep']
+        labels = np.load(data_path)['labels_rep']
+        return features, labels
 
     def load_train_idx(self, data_path):
         data = np.load(data_path)
-        self.train_X0 = np.repeat(data['train_X0'], self.ncls, axis=0)
-        self.train_X1 = data['train_X1'][:, -self.ncls:, -self.top_n:].reshape(-1, self.top_n)
-        self.train_Y = data['train_Y'][:, -self.ncls:].reshape(-1, )
+        self.train_X0 = np.repeat(data['train_X0'], self.top_n, axis=0)
+        self.train_X1 = data['train_X1'][:, -self.top_n:, -self.top_k:].reshape(-1, self.top_k)
+        self.train_Y = data['train_Y'][:, -self.top_n:].reshape(-1, )
 
     def load_valid_idx(self, data_path):
         data = np.load(data_path)
         self.valid_X0 = np.repeat(data['valid_X0'], 2, axis=0)  # the validation data is balanced.
-        self.valid_X1 = data['valid_X1'][:, -2:, -self.top_n:].reshape(-1, self.top_n)
+        self.valid_X1 = data['valid_X1'][:, -2:, -self.top_k:].reshape(-1, self.top_k)
         self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
 
 class ObjectDatasetBase(abc.ABC):
@@ -101,7 +118,7 @@ class MNISTDataset(ObjectDatasetBase):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path):
+    def __init__(self, dataset_path, top_n, top_k):
         super().__init__(dataset_path)
 
         self.transform_train = transforms.Compose([

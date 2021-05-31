@@ -1,16 +1,108 @@
 import sklearn
 import numpy as np
 import torch
+import time
+
+
+
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer):
+    start_time = time.time()
+
+    train_losses = []
+    test_losses = []
+    train_correct = []
+    test_correct = []
+
+    max_trn_batch = 2400
+    max_tst_batch = 1200
+
+    # ([X0_sample, X1_sample], y_sample, [X0_label_s, X1_label_s]) = next(iter(train_loader))
+    # ([X0_sample2, X1_sample2], y_sample2, [X0_label2_s, X1_label2_s]) = next(iter(train_loader))
+
+    # print("y_sample = " + str(y_sample))
+    for i in range(epochs):
+        trn_corr = 0
+        tst_corr = 0
+
+        # Run the training batches
+        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
+
+            # X0_train = torch.cat([X0_sample, X0_sample2])
+            # X1_train = torch.cat([X1_sample, X1_sample2])
+            # y_train = torch.cat([y_sample, y_sample2])
+            # X0_labels = torch.cat([X0_label_s, X0_label2_s])
+            # X1_labels = torch.cat([X1_label_s, X1_label2_s])
+
+
+            # Limit the number of batches
+            if b == max_trn_batch:
+                break
+            b += 1
+
+            # Apply the model
+            y_pred = model(X0_train.cuda(), X1_train.cuda())
+            loss = criterion(y_pred, y_train.cuda())
+
+            # Tally the number of correct predictions
+            predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+            predicted[predicted <= 0.5] = 0
+            predicted[predicted > 0.5] = 1
+
+            batch_corr = (predicted == y_train.cuda()).sum()
+            trn_corr += batch_corr
+
+            # Update parameters
+            optimizer.zero_grad()
+            model.reset_hidden()
+            loss.backward()
+            optimizer.step()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
+
+            # Print interim results
+            if b % 600 == 0:
+                print(
+                    f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader)}]  loss: {loss.item():10.8f}  \
+    accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+
+        train_losses.append(loss.cpu())
+        train_correct.append(trn_corr.cpu())
+
+        # Run the testing batches
+        with torch.no_grad():
+            for b, ([X0_test, X1_test], y_test, [X0_test_labels, X1_test_labels]) in enumerate(test_loader):
+                # Apply the model
+                y_val = model(X0_test.cuda(), X1_test.cuda())
+
+                # Tally the number of correct predictions
+
+                predicted = torch.tensor(torch.max(y_val.data, 1)[0], dtype=torch.float).to('cuda')
+                predicted[predicted <= 0.5] = 0
+                predicted[predicted > 0.5] = 1
+                tst_corr += (predicted == y_test.cuda()).sum()
+                if b == max_tst_batch:
+                    break
+                b += 1
+
+            print(f'epoch: {i:2} test accuracy: {tst_corr.item() * 100 / (test_loader.batch_size * b):7.3f}%')
+
+        loss = criterion(y_val, y_test.cuda())
+        test_losses.append(loss.cpu())
+        test_correct.append(tst_corr.cpu())
+
+    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
+
+    return (train_losses, test_losses, train_correct, test_correct)
 
 
 def extract_features(train_data, model, classes, memory_path, load_data=False):
 
     class_samples = {key: [] for key in classes}
-    train_rep, train_cls_rep = [], []
+    train_rep, train_cls_rep, labels_rep= [], [], []
 
     if load_data:
         train_rep = np.load(memory_path)['data_rep']
         train_cls_rep = np.load(memory_path)['train_cls_rep']
+        labels_rep = np.load(memory_path)['labels_rep']
 
     else:
         with torch.no_grad():
@@ -26,6 +118,7 @@ def extract_features(train_data, model, classes, memory_path, load_data=False):
                 # calculate features
                 cls_rep = model(class_samples[cls].cuda())
                 train_rep.append(cls_rep)
+                labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 
                 # Mean feature vector per class
                 train_cls_rep.append(cls_rep.mean(dim=0))
@@ -33,12 +126,13 @@ def extract_features(train_data, model, classes, memory_path, load_data=False):
             # Convert to tensor
             train_rep = torch.cat(train_rep).cpu()
             train_cls_rep = torch.stack(train_cls_rep).cpu()
+            labels_rep = torch.cat(labels_rep, dim=0).cpu()
 
 
-    return train_rep, train_cls_rep
+    return train_rep, train_cls_rep, labels_rep
 
 
-def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_per_cls, top_k):
+def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_per_cls, top_n, randomize_samples=True):
 
     X0, X1, Y = [], [], []
     base_cls_offset = classes.index(class_set[0])  # -> gives index of first class of interest
@@ -48,9 +142,12 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_p
 
         # index of class of interest
         ix = classes.index(cls)  # considers validation_set that not start from zero.
-        cls_offset = ix * train_per_cls  # Some kind of offset?
 
-        # find top_k non similar classes.
+        # Get index of first sample of class
+        cls_offset = np.where(labels_rep == cls)[0].min()
+        # cls_offset = ix * train_per_cls  # Some kind of offset?
+
+        # find top_n similar classes.
         rest_cls_idx = [classes.index(cls1) for cls1 in class_set if
                         classes.index(cls1) != ix]  # Find all remaining classes
 
@@ -67,19 +164,21 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_p
         sim_idx[sim_idx >= ix] += 1
 
         # Get the top classes from the sorted similarities
-        sim_idx = sim_idx[:, -top_k:]
+        sim_idx = sim_idx[:, -top_n:] # -> For each of the train_per_cls samples of a class. Get the top_n
+                                      # similar classes
 
         # Loop over the k most similar classes based on the previous cosine similarity
-        for kx in range(-top_k, 0):
+        for kx in range(-top_n, 0):
             tmp_X1_batch = []
-            # Train per class is still unclear. Total number of samples used per class?
             for jx in range(train_per_cls):
                 # Same offset with unknown purpose
-                cls1_offset = sim_idx[jx, kx] * train_per_cls
+                cls1 = sim_idx[jx, kx]
+                cls1_offset = np.where(labels_rep == cls1)[0].min()
                 # Find cosine similarity between the two offsets? Gives an array with size [1, train_per_cls]
                 sim1 = sklearn.metrics.pairwise.cosine_similarity(data_rep[cls_offset + jx:cls_offset + jx + 1],
                                                                   data_rep[cls1_offset:cls1_offset + train_per_cls])
-                # Sort indices and find most similar samples
+                # Sort indices and find most similar samples. Remove least similar example to make array of same
+                # length as similarity of same class samples
                 sim1_idx = sim1.argsort(axis=1)[:1, -(train_per_cls - 1):]
                 sim1_idx += cls1_offset
                 # Give size a second dimension, useful for vstack i think
@@ -93,6 +192,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_p
         # put sim in the last dim
         sim = sklearn.metrics.pairwise.cosine_similarity(
             data_rep[cls_offset:cls_offset + train_per_cls])  # Similarity between same class
+        # Remove most similar sample as this is the same sample as input sample
         sim_idx = sim.argsort(axis=1)[:, :-1] + cls_offset  # add the offset to obtain the real offset in memory.
         # Append same class indices and labels to tmp_x1 and tmp_y
         tmp_X1.append(np.expand_dims(sim_idx, 1))
@@ -108,5 +208,10 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, classes, train_p
     X0 = np.vstack(X0)
     X1 = np.vstack(X1)
     Y = np.concatenate(Y)
-    shuffle_idx = np.random.permutation(X0.shape[0])
-    return X0[shuffle_idx], X1[shuffle_idx], Y[shuffle_idx]
+
+    if randomize_samples:
+        shuffle_idx = np.random.permutation(X0.shape[0])
+        return X0[shuffle_idx], X1[shuffle_idx], Y[shuffle_idx]
+    else:
+        return X0, X1, Y
+
