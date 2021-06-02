@@ -127,12 +127,14 @@ class L2AC(torch.nn.Module):
     def __init__(self, model_path, num_classes, top_k=5):
         super(L2AC, self).__init__()
         self.feature_size = 2048
+        # self.feature_size = 512
+
         self.batch_size = 10
         self.hidden_size = 1
         self.fc1 = nn.Linear(2 * self.feature_size, self.feature_size)
         self.fc2 = nn.Linear(self.feature_size, 1)
-        self.lstm = nn.LSTM(input_size=1, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc3 = nn.Linear(2 * top_k, 1)
+        self.lstm = nn.LSTM(input_size=5, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
         self.reset_hidden()
 
     def forward(self,x0, x1):
@@ -142,7 +144,7 @@ class L2AC(torch.nn.Module):
         x = F.relu(self.fc1(x))
         x = F.dropout(x, p=0.5)
         x = torch.sigmoid(self.fc2(x))
-        x, cell_state = self.lstm(x, self.hidden)
+        x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
         return x.view(x.shape[0], -1)

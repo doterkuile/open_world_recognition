@@ -52,7 +52,7 @@ class MetaDataset(data_utils.Dataset):
             idx_X1 = self.valid_X1[idx,:]
             x0_rep = self.memory[idx_X0, :]
             x1_rep = self.memory[idx_X1, :]
-            y = torch.tensor(self.train_Y[idx], dtype=torch.float)
+            y = torch.tensor(self.valid_Y[idx], dtype=torch.float)
             true_label_X0 = self.true_labels[idx_X0]
             true_label_X1 = self.true_labels[idx_X1]
 
@@ -61,7 +61,10 @@ class MetaDataset(data_utils.Dataset):
 
     def load_memory(self, data_path):
         features = np.load(data_path)['train_rep']
-        labels = np.load(data_path)['labels_rep']
+        try:
+            labels = np.load(data_path)['labels_rep']
+        except KeyError:
+            labels = np.zeros(features.shape[0])
         return features, labels
 
     def load_train_idx(self, data_path):

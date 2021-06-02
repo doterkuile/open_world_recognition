@@ -17,6 +17,8 @@ def main():
 	torch.manual_seed(42)
 	load_data = True
 	config_file = 'config/L2AC_train.yaml'
+	# config_file = 'config/L2AC_amazon_train.yaml'
+
 
 
 	# Parse config file
