@@ -30,6 +30,9 @@ def main():
     with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
+    print(config['dataset_path'])
+    if not os.path.exists(config['dataset_path']):
+        os.makedirs(config['dataset_path'])
     memory_path = config['dataset_path'] + '/memory.npz'
 
     # Parse config file
@@ -40,7 +43,10 @@ def main():
     classes = dataset.classes
 
     # Extract features
+    print('Extract features')
     data_rep, data_cls_rep, labels_rep = meta_utils.extract_features(train_data, model, classes, memory_path, load_data)
+
+    print('Save features at: ' + memory_path)
 
     np.savez(memory_path, data_rep=data_rep, train_cls_rep=data_cls_rep, labels_rep=labels_rep)
 
