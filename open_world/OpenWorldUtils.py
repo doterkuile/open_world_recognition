@@ -12,10 +12,15 @@ import torch.nn as nn
 
 
 
-def parseConfigFile(config_file, enable_training):
+def parseConfigFile(config_file, device, multiple_gpu):
 
-    with open(config_file) as file:
+    with open('config/' + config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
+
+    ## Training/laoding parameters:
+    load_memory = config['load_memory']
+    save_images = config['save_images']
+    enable_training = config['enable_training']
 
     ## Training hyperparameters
     batch_size = config['batch_size']
@@ -26,9 +31,8 @@ def parseConfigFile(config_file, enable_training):
     top_k = config['top_k']
     top_n = config['top_n']
     train_classes = config['train_classes']
-    class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to('cuda')
-    pos_weigth = torch.tensor([(1)/top_n]).to('cuda')
-
+    class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to(device)
+    pos_weight = torch.tensor([1/top_n]).to(device)
 
     ## Classes
     # Load dataset
@@ -39,16 +43,21 @@ def parseConfigFile(config_file, enable_training):
     # Load model
     model_path = config['model_path']
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, train_classes, top_k).cuda()
+    model = eval('RecognitionModels.' + model_class)(model_path, train_classes, top_k).to(device)
+
+    # If multiple gpu's available
+    if multiple_gpu:
+        print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
+        nn.DataParallel(model)
+
     if not enable_training:
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
     criterion = eval('nn.' + config['criterion'])()
-    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=config['learning_rate'])
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
-
-    return (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config)
+    return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 
 
 
@@ -179,8 +188,9 @@ def saveModel(model, file_path):
 def loadModel(model, file_path):
     try:
         model.load_state_dict(torch.load(file_path))
-    except FileNotFoundError:
-        print('Model not found')
+    except FileNotFoundError as e:
+        print(e)
+        print(f'Model at path {file_path} not found. Continuing with empty model')
 
 
 def plotLosses(trainig_file_path, n_training, n_test, figure_path):
