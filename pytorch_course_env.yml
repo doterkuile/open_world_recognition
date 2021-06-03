@@ -1,4 +1,4 @@
-name: pytorchenv
+name: l2acenv 
 channels:
   - defaults
   - pytorch
