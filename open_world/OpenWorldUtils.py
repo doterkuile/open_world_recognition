@@ -31,6 +31,8 @@ def parseConfigFile(config_file, device, multiple_gpu):
     top_k = config['top_k']
     top_n = config['top_n']
     train_classes = config['train_classes']
+    train_samples_per_cls = config['train_samples_per_cls']
+
     class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to(device)
     pos_weight = torch.tensor([1/top_n]).to(device)
 
@@ -38,7 +40,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     # Load dataset
     dataset_path = config['dataset_path']
     dataset_class = config['dataset_class']
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k)
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls)
 
     # Load model
     model_path = config['model_path']

@@ -2,10 +2,12 @@ import sklearn
 import numpy as np
 import torch
 import time
+from tqdm import tqdm
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer):
+
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device):
     start_time = time.time()
 
     train_losses = []
@@ -25,7 +27,11 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_corr = 0
 
         # Run the training batches
-        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
+        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
+
+            X0_train = X0_train.to(device)
+            X1_train = X1_train.to(device)
+            y_train = y_train.view(-1, 1).to(device)
 
             # X0_train = torch.cat([X0_sample, X0_sample2])
             # X1_train = torch.cat([X1_sample, X1_sample2])
@@ -40,15 +46,17 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             b += 1
 
             # Apply the model
-            y_pred = model(X0_train.cuda(), X1_train.cuda())
-            loss = criterion(y_pred.view(-1,1), y_train.view(-1,1).cuda())
+            y_pred = model(X0_train, X1_train)
+            loss = criterion(y_pred, y_train)
 
             # Tally the number of correct predictions
-            predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+            # predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
+            predicted = y_pred.detach().clone()
+
             predicted[predicted <= 0.5] = 0
             predicted[predicted > 0.5] = 1
 
-            batch_corr = (predicted == y_train.cuda()).sum()
+            batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
 
             # Update parameters
@@ -67,16 +75,16 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         train_losses.append(loss.cpu())
         train_correct.append(trn_corr.cpu())
         # Run the testing batches
-        tst_corr, loss = validate_model(test_loader, model, criterion)
+        tst_corr, loss = validate_model(test_loader, model, criterion, device)
         test_losses.append(loss.cpu())
         test_correct.append(tst_corr.cpu())
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return (train_losses, train_correct)
+    return (train_losses,test_losses, train_correct, test_correct)
 
 
-def validate_model(loader, model, criterion):
+def validate_model(loader, model, criterion, device):
     num_correct = 0
     num_samples = 0
 
@@ -90,21 +98,25 @@ def validate_model(loader, model, criterion):
     with torch.no_grad():
         for b, ([X0_test, X1_test], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
 
+            X0_test = X0_test.to(device)
+            X1_test = X1_test.to(device)
+            y_test = y_test.view(-1,1).to(device)
+
             if b*loader.batch_size >= len(loader):
                 break
 
             # Apply the model
-            y_val = model(X0_test.cuda(), X1_test.cuda())
-            loss = criterion(y_val.view(-1,1), y_test.view(-1,1).cuda())
+            y_val = model(X0_test, X1_test)
+            loss = criterion(y_val, y_test)
 
             # Tally the number of correct predictions
 
-            predicted = torch.tensor(torch.max(y_val.data, 1)[0], dtype=torch.float).to('cuda')
+            predicted = y_val
             predicted[predicted <= 0.5] = 0
             predicted[predicted > 0.5] = 1
             y_pred.extend(predicted)
             y_true.extend(y_test)
-            num_correct += (predicted == y_test.cuda()).sum()
+            num_correct += (predicted == y_test).sum()
             num_samples += predicted.size(0)
             b += 1
 

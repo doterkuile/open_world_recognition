@@ -3,6 +3,7 @@ import torch.utils.data as data_utils
 from open_world import OpenWorldUtils
 from open_world import ObjectDatasets
 import open_world.meta_learner.meta_learner_utils as meta_utils
+import open_world.plot_utils as plot_utils
 import yaml
 import numpy as np
 from torch.utils.data import DataLoader
@@ -39,8 +40,9 @@ def main():
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'], train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer)
-
+	figure_path = config['figures_path'] + 'L2AC'
+	(train_loss, test_loss, train_correct, test_correct) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device)
+	plot_utils.plot_losses(train_loss, test_loss, figure_path)
 	return
 
 

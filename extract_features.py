@@ -51,8 +51,10 @@ def main():
     if not os.path.exists(config['dataset_path']):
         os.makedirs(config['dataset_path'])
 
+    n_cls = config['train_classes']
+    n_smpl = config['train_samples_per_cls']
     load_memory = config['load_memory']
-    memory_path = config['dataset_path'] + '/memory.npz'
+    memory_path = config['dataset_path'] + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '.npz'
 
     # Extract features
     print('Extract features')

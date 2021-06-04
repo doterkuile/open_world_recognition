@@ -19,9 +19,11 @@ import abc
 class MetaDataset(data_utils.Dataset):
 
 
+    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train=True):
 
-    def __init__(self, data_path, top_n=9, top_k=5, train=True):
-        self.data_path = data_path + '/train_idx.npz'
+        self.n_cls = n_cls
+        self.n_smpl = n_smpl
+        self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '.npz'
         self.top_n = top_n
         self.top_k = top_k
         self.train = train
@@ -121,7 +123,7 @@ class MNISTDataset(ObjectDatasetBase):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path, top_n, top_k):
+    def __init__(self, dataset_path, top_n=9, top_k=5, n_cls=100, n_smpl=80, train=True):
         super().__init__(dataset_path)
 
         self.transform_train = transforms.Compose([

@@ -19,7 +19,9 @@ config_file=L2AC_train.yaml
 
 conda_env=l2acenv
 
+
 module use /opt/insy/modulefiles
+conda deactivate
 module purge
 
 

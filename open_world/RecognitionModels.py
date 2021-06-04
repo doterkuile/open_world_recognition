@@ -133,7 +133,7 @@ class L2AC(torch.nn.Module):
         self.hidden_size = 1
         self.fc1 = nn.Linear(2 * self.feature_size, self.feature_size)
         self.fc2 = nn.Linear(self.feature_size, 1)
-        self.lstm = nn.LSTM(input_size=5, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
         self.reset_hidden()
 
@@ -147,7 +147,7 @@ class L2AC(torch.nn.Module):
         x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
-        return x.view(x.shape[0], -1)
+        return x
 
     def similarity_function(self, x0, x1):
         x_abssub = x0.sub(x1)

@@ -67,8 +67,11 @@ def main():
     valid_X0, valid_X1, valid_Y = meta_utils.rank_samples_from_memory(class_set[-num_valid:], data_rep, data_cls_rep,
                                                                       labels_rep, classes, train_samples_per_cls, top_n,
                                                                       randomize_samples)
-    print(f'Save results to {config["dataset_path"]}/train_idx.npz')
-    np.savez(config['dataset_path'] + "/train_idx.npz",
+
+
+    memory_path = config['dataset_path'] + '/memory_' + str(num_train) + '_' + str(train_samples_per_cls) + '.npz'
+    print(f'Save results to {memory_path}')
+    np.savez(memory_path,
              train_rep=data_rep, labels_rep=labels_rep,  # including all validation examples.
              train_X0=train_X0, train_X1=train_X1, train_Y=train_Y,
              valid_X0=valid_X0, valid_X1=valid_X1, valid_Y=valid_Y)
