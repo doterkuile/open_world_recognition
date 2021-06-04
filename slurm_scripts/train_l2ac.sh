@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_data_setup   	# create a short name for your job
+#SBATCH --job-name=train_l2sh_setup   	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=short						# select quality of service
@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=1        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=4096                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:2             		# number of gpus per node
-#SBATCH --time=00:05:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=00:15:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
