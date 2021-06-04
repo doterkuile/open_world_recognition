@@ -11,14 +11,14 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
-epochs: 1
+epochs: 50
 
 
 ## L2AC parameters
 top_k: 20
 top_n: 10
 train_classes: 80
-train_samples_per_cls: 100
+train_samples_per_cls: 500
 
 ## Training/loading parameters
 load_memory: False

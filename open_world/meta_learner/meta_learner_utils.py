@@ -144,7 +144,7 @@ def extract_features(train_data, model, classes, memory_path, load_memory=False)
                 class_samples[label].append(sample)
 
             # Extract features of sample and mean feature vector per class
-            for cls in classes:
+            for cls in tqdm(classes):
                 # convert to tensor
                 class_samples[cls] = torch.stack(class_samples[cls])
 
@@ -169,7 +169,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
 
     X0, X1, Y = [], [], []
     base_cls_offset = classes.index(class_set[0])  # -> gives index of first class of interest
-    for cls in class_set:
+    for cls in tqdm(class_set):
         tmp_X1 = []
         tmp_Y = []
 

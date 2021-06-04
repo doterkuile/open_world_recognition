@@ -3,6 +3,7 @@ channels:
   - defaults
   - pytorch
   - nvidia
+  - conda-forge
 dependencies:
   - numpy=1.20.2
   - pandas
@@ -12,6 +13,7 @@ dependencies:
   - plotly
   - scikit-learn
   - seaborn
+  - tqdm
 #  - python=3.7.3
   - pytorch=1.1.0
   - torchvision=0.2.2
