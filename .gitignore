@@ -4,4 +4,4 @@
 !/networks/.gitignore
 *npz
 /open_world/__pychache__/*
-
+/logs/*
