@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=1        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=4096                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=00:05:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=00:15:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -23,14 +23,15 @@ data_path=/tudelft.net/staff_umbrella/openworldrecognition/
 
 #mkdir -p /tmp/$USER && cp -a $data_path$package /tmp/$USER
 
-#module use /opt/insy/modulefiles
-#module purge
+module use /opt/insy/modulefiles
+module purge
 
 module load miniconda
 conda activate $conda_env
-module load cuda/10.0
 
+module load cuda/10.0
 module load cudnn/10.0-7.6.0.64
 
 
 python $python_script $config_file
+conda deactivate
