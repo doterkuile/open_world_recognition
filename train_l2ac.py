@@ -19,7 +19,8 @@ def main():
 	if not torch.cuda.is_available():
 		print("Cuda device not available make sure CUDA has been installed")
 		return
-
+	else:
+		print(f'Running with {torch.cuda.device_count()} GPUs')
 	# Get config file argument
 	parser = argparse.ArgumentParser()
 	parser.add_argument("config_file")
@@ -39,7 +40,6 @@ def main():
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer)
-
 
 	return
 
