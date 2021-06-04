@@ -6,45 +6,39 @@ import open_world.meta_learner.meta_learner_utils as meta_utils
 import yaml
 import numpy as np
 from torch.utils.data import DataLoader
+import argparse
 
-
-ENABLE_TRAINING = True
 
 def main():
-
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+	# set random seed
 	torch.manual_seed(42)
-	load_data = True
-	config_file = 'config/L2AC_train.yaml'
-	# config_file = 'config/L2AC_amazon_train.yaml'
 
+	# Main gpu checks
+	multiple_gpu = True if torch.cuda.device_count() > 1 else False
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+	if not torch.cuda.is_available():
+		print("Cuda device not available make sure CUDA has been installed")
+		return
 
+	# Get config file argument
+	parser = argparse.ArgumentParser()
+	parser.add_argument("config_file")
+	args = parser.parse_args()
+	config_file = args.config_file
+
+	# Overwrite terminal argument if necessary
+	# config_file = 'config/L2AC_train.yaml'
 
 	# Parse config file
-	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(config_file, ENABLE_TRAINING)
+	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
+		config_file, device, multiple_gpu)
+
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
-	testdataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'], train=False)
-	test_loader = DataLoader(testdataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+
+	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'], train=False)
+	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer)
-
-
-	# Setup dataset
-	# (train_data, test_data) = dataset.getData()
-	# train_loader, test_loader = dataset.getDataloaders(batch_size)
-	classes = dataset.classes
-	# train = data_utils.TensorDataset()
-	ncls = 9	# Top similar classes
-	train_per_cls = 100 # Number of samples per class
-
-	top_n = 5 # Top samples used for comparison
-	class_set = classes
-
-	num_train = 80 # Classes used for training
-	num_valid = 20 # Classes used for validation
-
-
 
 
 	return
