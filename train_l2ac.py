@@ -35,9 +35,13 @@ def main():
 	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
 		config_file, device, multiple_gpu)
 
+	train_classes = config['train_classes']
+	train_samples_per_cls = config['train_samples_per_cls']
+
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'], train=False)
+	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
+											  train_classes, train_samples_per_cls,rain=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	figure_path = config['figures_path'] + 'L2AC'
