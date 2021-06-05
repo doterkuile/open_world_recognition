@@ -10,18 +10,14 @@ from tqdm import tqdm
 def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device):
     start_time = time.time()
 
-    train_losses = []
-    test_losses = []
-    train_correct = []
-    test_correct = []
+    trn_losses = []
+    tst_losses = []
+    trn_accs = []
+    tst_accs = []
 
-    max_trn_batch = 2400
+    max_trn_batch = 400
     max_tst_batch = 1200
 
-    # ([X0_sample, X1_sample], y_sample, [X0_label_s, X1_label_s]) = next(iter(train_loader))
-    # ([X0_sample2, X1_sample2], y_sample2, [X0_label2_s, X1_label2_s]) = next(iter(train_loader))
-
-    # print("y_sample = " + str(y_sample))
     for i in range(epochs):
         trn_corr = 0
         tst_corr = 0
@@ -33,13 +29,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
 
-            # X0_train = torch.cat([X0_sample, X0_sample2])
-            # X1_train = torch.cat([X1_sample, X1_sample2])
-            # y_train = torch.cat([y_sample, y_sample2])
-            # X0_labels = torch.cat([X0_label_s, X0_label2_s])
-            # X1_labels = torch.cat([X1_label_s, X1_label2_s])
-
-
             # Limit the number of batches
             if b == max_trn_batch:
                 break
@@ -47,10 +36,9 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             # Apply the model
             y_pred = model(X0_train, X1_train)
-            loss = criterion(y_pred, y_train)
+            trn_loss = criterion(y_pred, y_train)
 
             # Tally the number of correct predictions
-            # predicted = torch.tensor(torch.max(y_pred.data, 1)[0], dtype=torch.float).to('cuda')
             predicted = y_pred.detach().clone()
 
             predicted[predicted <= 0.5] = 0
@@ -62,26 +50,30 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # Update parameters
             optimizer.zero_grad()
             model.reset_hidden()
-            loss.backward()
+            trn_loss.backward()
             optimizer.step()
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
             # Print interim results
             if b % 600 == 0:
-                print(
-                    f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]  loss: {loss.item():10.8f}  \
-    accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+                print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
+                      f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
-        train_losses.append(loss.cpu())
-        train_correct.append(trn_corr.cpu())
+        trn_acc = trn_corr.item() * 100 / (train_loader.batch_size * b)
+
+        trn_losses.append(trn_loss.item())
+        trn_accs.append(trn_acc)
+
         # Run the testing batches
-        tst_corr, loss = validate_model(test_loader, model, criterion, device)
-        test_losses.append(loss.cpu())
-        test_correct.append(tst_corr.cpu())
+        tst_corr, tst_loss = validate_model(test_loader, model, criterion, device)
+        tst_acc = tst_corr.item() * 100 / (test_loader.batch_size * b)
+
+        tst_losses.append(tst_loss.item())
+        tst_accs.append(tst_acc)
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return (train_losses,test_losses, train_correct, test_correct)
+    return (trn_losses,tst_losses, trn_accs, tst_accs)
 
 
 def validate_model(loader, model, criterion, device):

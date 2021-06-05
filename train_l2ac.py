@@ -41,12 +41,18 @@ def main():
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
-											  train_classes, train_samples_per_cls,rain=False)
+											  train_classes, train_samples_per_cls, train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	figure_path = config['figures_path'] + 'L2AC'
-	(train_loss, test_loss, train_correct, test_correct) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device)
+	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device)
 	plot_utils.plot_losses(train_loss, test_loss, figure_path)
+	plot_utils.plot_accuracy(train_accs, test_accs, figure_path)
+
+
+	results_path = config['training_history_path'] + '_results.npz'
+	np.savez(results_path, train_loss=train_loss, test_loss=test_loss, train_accs=train_accs, test_accs=test_accs)
+
 	return
 
 

@@ -6,3 +6,5 @@
 /open_world/__pychache__/*
 /logs/*
 !/logs/.gitignore
+/figures/*
+!/figures/.gitignore
