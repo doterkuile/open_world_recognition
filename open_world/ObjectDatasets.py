@@ -138,7 +138,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
         self.transform_test = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276])
+            transforms.Normalize(mean=mean_pixel, std=std_pixel)
         ])
 
         self.train_data = datasets.CIFAR100(root='datasets', train=True, download=True, transform=self.transform_train)

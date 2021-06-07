@@ -8,6 +8,7 @@ import yaml
 import numpy as np
 from torch.utils.data import DataLoader
 import argparse
+import os
 
 
 def main():
@@ -53,7 +54,8 @@ def main():
 	plot_utils.plot_losses(train_loss, test_loss, figure_path)
 	plot_utils.plot_accuracy(train_accs, test_accs, figure_path)
 
-
+	if not os.path.exists(config['training_history_path']):
+		os.makedirs(config['training_history_path'])
 	results_path = config['training_history_path'] + '_results.npz'
 	np.savez(results_path, train_loss=train_loss, test_loss=test_loss, train_accs=train_accs, test_accs=test_accs)
 
