@@ -12,7 +12,7 @@ optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
 epochs: 2
-max_trn_batch: 600
+max_trn_batch: 30000
 
 
 ## L2AC parameters
