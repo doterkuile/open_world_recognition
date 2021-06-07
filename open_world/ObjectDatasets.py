@@ -126,11 +126,14 @@ class CIFAR100Dataset(ObjectDatasetBase):
     def __init__(self, dataset_path, top_n=9, top_k=5, n_cls=100, n_smpl=80, train=True):
         super().__init__(dataset_path)
 
+        mean_pixel = [x / 255.0 for x in [125.3, 123.0, 113.9]]
+        std_pixel = [x / 255.0 for x in [63.0, 62.1, 66.7]]
+
         self.transform_train = transforms.Compose([
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276])
+            transforms.Normalize(mean=mean_pixel, std=std_pixel)
         ])
 
         self.transform_test = transforms.Compose([

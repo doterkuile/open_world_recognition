@@ -12,6 +12,7 @@ optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
 epochs: 2
+max_trn_batch: 600
 
 
 ## L2AC parameters
@@ -19,6 +20,8 @@ top_k: 20
 top_n: 10
 train_classes: 80
 train_samples_per_cls: 500
+probability_threshold: 0.5
+
 
 ## Training/loading parameters
 load_memory: False

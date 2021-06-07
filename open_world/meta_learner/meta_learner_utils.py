@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device):
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, max_trn_batch, probability_treshold):
     start_time = time.time()
 
     trn_losses = []
@@ -15,8 +15,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     trn_accs = []
     tst_accs = []
 
-    max_trn_batch = 400
-    max_tst_batch = 1200
 
     for i in range(epochs):
         trn_corr = 0
@@ -41,8 +39,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # Tally the number of correct predictions
             predicted = y_pred.detach().clone()
 
-            predicted[predicted <= 0.5] = 0
-            predicted[predicted > 0.5] = 1
+            predicted[predicted <= probability_treshold] = 0
+            predicted[predicted > probability_treshold] = 1
 
             batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
@@ -65,8 +63,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_accs.append(trn_acc)
 
         # Run the testing batches
-        tst_corr, tst_loss = validate_model(test_loader, model, criterion, device)
-        tst_acc = tst_corr.item() * 100 / (test_loader.batch_size * b)
+        tst_acc, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
 
         tst_losses.append(tst_loss.item())
         tst_accs.append(tst_acc)
@@ -76,7 +73,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     return (trn_losses,tst_losses, trn_accs, tst_accs)
 
 
-def validate_model(loader, model, criterion, device):
+def validate_model(loader, model, criterion, device,probability_threshold):
     num_correct = 0
     num_samples = 0
 
@@ -104,8 +101,8 @@ def validate_model(loader, model, criterion, device):
             # Tally the number of correct predictions
 
             predicted = y_val
-            predicted[predicted <= 0.5] = 0
-            predicted[predicted > 0.5] = 1
+            predicted[predicted <= probability_threshold] = 0
+            predicted[predicted > probability_threshold] = 1
             y_pred.extend(predicted)
             y_true.extend(y_test)
             num_correct += (predicted == y_test).sum()
@@ -116,8 +113,9 @@ def validate_model(loader, model, criterion, device):
     y_true = torch.stack(y_true)
     # Toggle model back to train
     model.train()
+    test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-    return num_correct, loss
+    return test_acc, loss
 
 def extract_features(train_data, model, classes, memory_path, load_memory=False):
 
