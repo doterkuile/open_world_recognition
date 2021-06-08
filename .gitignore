@@ -3,7 +3,7 @@
 /networks/*
 !/networks/.gitignore
 *npz
-/open_world/__pychache__/*
+**/__pycache__
 /logs/*
 !/logs/.gitignore
 /figures/*

@@ -13,9 +13,9 @@ figures_path: 'figures/CIFAR100_'
 criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
-batch_size: 256
-epochs: 10
-max_trn_batch: 600
+batch_size: 10
+epochs: 50
+max_trn_batch: 30000
 
 
 ## L2AC parameters
