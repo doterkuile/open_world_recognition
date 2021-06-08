@@ -18,5 +18,6 @@ dependencies:
   - pytorch=1.1.0
   - torchvision=0.2.2
   - pyyaml
+  - tqdm=4.59.0 
 #  - cudatoolkit=11.1
   
