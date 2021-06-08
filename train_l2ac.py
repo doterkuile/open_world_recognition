@@ -39,10 +39,15 @@ def main():
 	train_samples_per_cls = config['train_samples_per_cls']
 	max_trn_batch = config['max_trn_batch']
 	probability_treshold = config['probability_threshold']
-	exp_name = config['name']
+	exp_name='no_name'
+	try:
+		exp_name = config['name']
+	except KeyError:
+		print(f'No exp name was given, continuing with no_name')
 
 
-	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+
+	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
 											  train_classes, train_samples_per_cls, train=False)

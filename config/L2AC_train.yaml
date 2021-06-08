@@ -14,8 +14,8 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
-epochs: 50
-max_trn_batch: 30000
+epochs: 10
+max_trn_batch: 10000
 
 
 ## L2AC parameters

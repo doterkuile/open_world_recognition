@@ -33,8 +33,12 @@ def parseConfigFile(config_file, device, multiple_gpu):
     train_classes = config['train_classes']
     train_samples_per_cls = config['train_samples_per_cls']
 
-    class_weight = torch.tensor([(top_n - 1)/top_n, 1/top_n]).to(device)
-    pos_weight = torch.tensor([1/top_n]).to(device)
+    weights = np.ones(batch_size-1) * 1/top_n
+    weights = np.append(weights, (top_n - 1)/top_n)
+    weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
+
+
+    pos_weight = torch.tensor([(top_n - 1)/top_n]).to(device)
 
     ## Classes
     # Load dataset
@@ -56,8 +60,10 @@ def parseConfigFile(config_file, device, multiple_gpu):
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    criterion = eval('nn.' + config['criterion'])()
+    criterion = eval('nn.' + config['criterion'])(weight=weights)
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
+
+    # nn.BCEWithLogitsLoss(weight=)
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 
