@@ -1,3 +1,6 @@
+## Experiment
+name: 'l2ac_batch_256'
+
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
@@ -10,8 +13,8 @@ figures_path: 'figures/CIFAR100_'
 criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
-batch_size: 10
-epochs: 2
+batch_size: 256
+epochs: 10
 max_trn_batch: 600
 
 

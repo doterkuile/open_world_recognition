@@ -28,7 +28,6 @@ def main():
 	parser.add_argument("config_file")
 	args = parser.parse_args()
 	config_file = args.config_file
-
 	# Overwrite terminal argument if necessary
 	# config_file = 'config/L2AC_train.yaml'
 
@@ -40,15 +39,16 @@ def main():
 	train_samples_per_cls = config['train_samples_per_cls']
 	max_trn_batch = config['max_trn_batch']
 	probability_treshold = config['probability_threshold']
+	exp_name = config['name']
 
 
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
 											  train_classes, train_samples_per_cls, train=False)
-	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
-	figure_path = config['figures_path'] + 'L2AC'
+	figure_path = config['figures_path'] + exp_name
 	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
 																			   criterion, optimizer, device, max_trn_batch, probability_treshold)
 	plot_utils.plot_losses(train_loss, test_loss, figure_path)
@@ -56,7 +56,7 @@ def main():
 
 	if not os.path.exists(config['training_history_path']):
 		os.makedirs(config['training_history_path'])
-	results_path = config['training_history_path'] + '_results.npz'
+	results_path = config['training_history_path'] + '_' + exp_name + '_results.npz'
 	np.savez(results_path, train_loss=train_loss, test_loss=test_loss, train_accs=train_accs, test_accs=test_accs)
 
 	return
