@@ -11,7 +11,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 10
-epochs: 2
+epochs: 50
 max_trn_batch: 30000
 
 
