@@ -37,7 +37,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             trn_loss = criterion(y_pred, y_train)
 
             # Tally the number of correct predictions
-            predicted = y_pred.detach().clone()
+            predicted = y_pred.detach().clone().sigmoid()
 
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
@@ -100,7 +100,7 @@ def validate_model(loader, model, criterion, device,probability_threshold):
 
             # Tally the number of correct predictions
 
-            predicted = y_val
+            predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
             y_pred.extend(predicted)

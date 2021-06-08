@@ -11,11 +11,13 @@ figures_path: 'figures/CIFAR100_'
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
+# criterion: BCELoss
+
 optimizer: Adam
-learning_rate: 0.001
-batch_size: 10
+learning_rate: 0.0001
+batch_size: 256   
 epochs: 10
-max_trn_batch: 10000
+max_trn_batch: 600
 
 
 ## L2AC parameters

@@ -47,11 +47,11 @@ def main():
 
 
 
-	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
 											  train_classes, train_samples_per_cls, train=False)
-	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	figure_path = config['figures_path'] + exp_name
 	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,

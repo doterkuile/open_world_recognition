@@ -60,7 +60,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    criterion = eval('nn.' + config['criterion'])(weight=weights)
+    criterion = eval('nn.' + config['criterion'])(pos_weight)
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
     # nn.BCEWithLogitsLoss(weight=)

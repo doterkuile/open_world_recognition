@@ -143,7 +143,8 @@ class L2AC(torch.nn.Module):
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, p=0.5)
-        x = torch.sigmoid(self.fc2(x))
+        x = self.fc2(x)
+        x = x.sigmoid()
         x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
