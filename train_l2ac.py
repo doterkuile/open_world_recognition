@@ -74,7 +74,7 @@ def main():
 											  train_classes, train_samples_per_cls, train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, test_loader, train_loader, epochs,
+	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
 																			   criterion, optimizer, device, probability_treshold)
 
 	# Train metrics
