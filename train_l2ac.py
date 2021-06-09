@@ -54,7 +54,7 @@ def main():
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	figure_path = config['figures_path'] + exp_name
-	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
+	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, test_loader, train_loader, epochs,
 																			   criterion, optimizer, device, max_trn_batch, probability_treshold)
 	plot_utils.plot_losses(train_loss, test_loss, figure_path)
 	plot_utils.plot_accuracy(train_accs, test_accs, figure_path)

@@ -53,7 +53,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
             # Print interim results
-            if b % round(len(train_loader)/10, 0) == 0:
+            if b % round(len(train_loader)/4, 0) == 0:
                 print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
                       f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 

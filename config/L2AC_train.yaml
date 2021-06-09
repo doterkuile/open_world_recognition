@@ -1,5 +1,5 @@
 ## Experiment
-name: 'l2ac_batch_256'
+name: 'l2ac_batch_no_pos_weigth'
 
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'

@@ -38,7 +38,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
 
 
-    pos_weight = torch.tensor([(1)/top_n]).to(device)
+    pos_weight = torch.tensor([(top_n - 1)/top_n]).to(device)
 
     ## Classes
     # Load dataset
@@ -60,7 +60,9 @@ def parseConfigFile(config_file, device, multiple_gpu):
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    criterion = eval('nn.' + config['criterion'])(pos_weight)
+    # criterion = eval('nn.' + config['criterion'])(pos_weight)
+    criterion = eval('nn.' + config['criterion'])()
+
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
     # nn.BCEWithLogitsLoss(weight=)
