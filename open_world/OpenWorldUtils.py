@@ -47,7 +47,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls)
 
     # Load model
-    model_path = config['model_path']
+    model_path = 'output/' + config['name'] + '/' + config['name'] + '_model.pt'
     model_class = config['model_class']
     model = eval('RecognitionModels.' + model_class)(model_path, train_classes, batch_size, top_k).to(device)
 
@@ -188,7 +188,6 @@ def testModel(model, dataset):
     plt.show()
 
 def saveModel(model, file_path):
-
     # if folder does not exist: make folder
     directory = '/'.join(file_path.split('/')[:-1])
     if not os.path.isdir(directory):

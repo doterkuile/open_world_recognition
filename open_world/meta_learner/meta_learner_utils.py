@@ -7,18 +7,24 @@ from tqdm import tqdm
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, max_trn_batch, probability_treshold):
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold):
     start_time = time.time()
 
     trn_losses = []
     tst_losses = []
-    trn_accs = []
-    tst_accs = []
-
+    trn_acc = []
+    tst_acc = []
+    trn_precision = []
+    tst_precision = []
+    trn_recall = []
+    tst_recall = []
+    trn_F1 = []
+    tst_F1 = []
 
     for i in range(epochs):
         trn_corr = 0
-        tst_corr = 0
+        y_pred =[]
+        y_true = []
 
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
@@ -33,18 +39,21 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             b += 1
 
             # Apply the model
-            y_pred = model(X0_train, X1_train)
-            trn_loss = criterion(y_pred, y_train)
+            y_out = model(X0_train, X1_train)
+            trn_loss = criterion(y_out, y_train)
 
             # Tally the number of correct predictions
-            predicted = y_pred.detach().clone().sigmoid()
+            predicted = y_out.detach().clone().sigmoid()
 
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
 
+
             batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
 
+            y_pred.extend(predicted.cpu())
+            y_true.extend(y_train.cpu())
             # Update parameters
             optimizer.zero_grad()
             model.reset_hidden()
@@ -57,20 +66,44 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
                 print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
                       f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
-        trn_acc = trn_corr.item() * 100 / (train_loader.batch_size * b)
+        # Training metrics
+        y_pred = np.array(y_pred)
+        y_true = np.array(y_true)
+
+        trn_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
+        trn_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
+        trn_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
+        trn_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
 
         trn_losses.append(trn_loss.item())
-        trn_accs.append(trn_acc)
+
+
 
         # Run the testing batches
-        tst_acc, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
+        y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
+
+        tst_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
+        tst_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
+        tst_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
+        tst_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
 
         tst_losses.append(tst_loss.item())
-        tst_accs.append(tst_acc)
+
+    trn_metrics = {'loss': trn_losses,
+                   'accuracy': trn_acc,
+                   'precision': trn_precision,
+                   'recall': trn_recall,
+                   'F1': trn_F1}
+    tst_metrics = {'loss': tst_losses,
+                   'accuracy': tst_acc,
+                   'precision': tst_precision,
+                   'recall': tst_recall,
+                   'F1': tst_F1}
+
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return (trn_losses,tst_losses, trn_accs, tst_accs)
+    return (trn_metrics, tst_metrics)
 
 
 def validate_model(loader, model, criterion, device,probability_threshold):
@@ -91,31 +124,30 @@ def validate_model(loader, model, criterion, device,probability_threshold):
             X1_test = X1_test.to(device)
             y_test = y_test.view(-1,1).to(device)
 
-            if b == (len(loader) - 1):
+            if b == (len(loader)-1):
                 break
 
             # Apply the model
             y_val = model(X0_test, X1_test)
             loss = criterion(y_val, y_test)
 
-            # Tally the number of correct predictions
 
             predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
-            y_pred.extend(predicted)
-            y_true.extend(y_test)
+            y_pred.extend(predicted.cpu())
+            y_true.extend(y_test.cpu())
             num_correct += (predicted == y_test).sum()
             num_samples += predicted.size(0)
             b += 1
 
-    y_pred = torch.stack(y_pred)
-    y_true = torch.stack(y_true)
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
     # Toggle model back to train
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-    return test_acc, loss
+    return y_pred, y_true, loss
 
 def extract_features(train_data, model, classes, memory_path, load_memory=False):
 

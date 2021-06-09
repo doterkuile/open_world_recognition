@@ -8,3 +8,5 @@
 !/logs/.gitignore
 /figures/*
 !/figures/.gitignore
+/output/*
+!/output/.gitignore
