@@ -23,7 +23,7 @@ def main():
 		print("Cuda device not available make sure CUDA has been installed")
 		return
 	else:
-		print(f'Running with {torch.cuda.device_count()} GPUs')
+		print(f"Running with {torch.cuda.device_count()} GPUs")
 	# Get config file argument
 
 	parser = argparse.ArgumentParser()

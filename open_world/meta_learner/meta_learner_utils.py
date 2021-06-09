@@ -67,11 +67,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
                       f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
         # Training metrics
-        y_pred = np.array(y_pred)
-        y_true = np.array(y_true)
+        y_pred = np.array(torch.cat(y_pred))
+        y_true = np.array(torch.cat(y_true))
 
         trn_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
         trn_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
+        print(sklearn.metrics.precision_score(y_true, y_pred))
         trn_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
         trn_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
 
@@ -84,6 +85,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         tst_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
         tst_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
+        print(sklearn.metrics.precision_score(y_true, y_pred))
+
         tst_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
         tst_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
 
@@ -141,8 +144,8 @@ def validate_model(loader, model, criterion, device,probability_threshold):
             num_samples += predicted.size(0)
             b += 1
 
-    y_pred = np.array(y_pred)
-    y_true = np.array(y_true)
+    y_pred = np.array(torch.cat(y_pred))
+    y_true = np.array(torch.cat(y_true))
     # Toggle model back to train
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
