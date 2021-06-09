@@ -38,7 +38,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
 
 
-    pos_weight = torch.tensor([(top_n - 1)/top_n]).to(device)
+    pos_weight = torch.tensor([(1)/top_n]).to(device)
 
     ## Classes
     # Load dataset
