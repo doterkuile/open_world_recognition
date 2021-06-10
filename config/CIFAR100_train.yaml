@@ -1,3 +1,6 @@
+
+name: 'd0000'
+
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset

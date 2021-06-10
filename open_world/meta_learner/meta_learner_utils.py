@@ -1,4 +1,4 @@
-import sklearn
+from sklearn import metrics
 import numpy as np
 import torch
 import time
@@ -70,11 +70,10 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         y_pred = np.array(torch.cat(y_pred))
         y_true = np.array(torch.cat(y_true))
 
-        trn_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
-        trn_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
-        print(sklearn.metrics.precision_score(y_true, y_pred))
-        trn_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
-        trn_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
+        trn_acc.append(metrics.accuracy_score(y_true,y_pred))
+        trn_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+        trn_recall.append(metrics.recall_score(y_true, y_pred))
+        trn_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
         trn_losses.append(trn_loss.item())
 
@@ -83,12 +82,10 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         # Run the testing batches
         y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
 
-        tst_acc.append(sklearn.metrics.accuracy_score(y_true,y_pred))
-        tst_precision.append(sklearn.metrics.precision_score(y_true, y_pred))
-        print(sklearn.metrics.precision_score(y_true, y_pred))
-
-        tst_recall.append(sklearn.metrics.recall_score(y_true, y_pred))
-        tst_F1.append(sklearn.metrics.f1_score(y_true, y_pred))
+        tst_acc.append(metrics.accuracy_score(y_true,y_pred))
+        tst_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+        tst_recall.append(metrics.recall_score(y_true, y_pred))
+        tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
         tst_losses.append(tst_loss.item())
 
@@ -152,7 +149,7 @@ def validate_model(loader, model, criterion, device,probability_threshold):
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
     return y_pred, y_true, loss
 
-def extract_features(train_data, model, classes, memory_path, load_memory=False):
+def extract_features(data, model, classes, memory_path, load_memory=False):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
@@ -165,7 +162,7 @@ def extract_features(train_data, model, classes, memory_path, load_memory=False)
     else:
         with torch.no_grad():
             # Create dict of samples per class
-            for sample, label in train_data:
+            for sample, label in data:
                 class_samples[label].append(sample)
 
             # Extract features of sample and mean feature vector per class
@@ -222,8 +219,8 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         sim_idx[sim_idx >= ix] += 1
 
         # Get the top classes from the sorted similarities
-        sim_idx = sim_idx[:, -top_n:] # -> For each of the train_per_cls samples of a class. Get the top_n
-                                      # similar classes
+        sim_idx = sim_idx[:, -top_n:] # -> For each of the train_per_cls samples of a class.
+                                      # Get the top_n similar classes
 
         # Loop over the k most similar classes based on the previous cosine similarity
         for kx in range(-top_n, 0):
@@ -247,7 +244,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
             tmp_X1.append(tmp_X1_batch)
             tmp_Y.append(np.full((train_samples_per_cls, 1), 0))
 
-        # put sim in the last dim
+        # put same class in the last dim
         sim = sklearn.metrics.pairwise.cosine_similarity(
             data_rep[cls_offset:cls_offset + train_samples_per_cls])  # Similarity between same class
         # Remove most similar sample as this is the same sample as input sample

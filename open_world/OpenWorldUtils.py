@@ -46,6 +46,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     dataset_class = config['dataset_class']
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls)
 
+
     # Load model
     model_path = 'output/' + config['name'] + '/' + config['name'] + '_model.pt'
     model_class = config['model_class']
