@@ -19,10 +19,13 @@ import abc
 class MetaDataset(data_utils.Dataset):
 
 
-    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train=True):
+    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train=True, same_class_reverse=False,
+                 same_class_extend_entries=False):
 
         self.n_cls = n_cls
         self.n_smpl = n_smpl
+        self.same_class_reverse = same_class_reverse
+        self.same_class_extend_entries = same_class_extend_entries
         self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '.npz'
         self.top_n = top_n
         self.top_k = top_k
@@ -72,7 +75,11 @@ class MetaDataset(data_utils.Dataset):
     def load_train_idx(self, data_path):
         data = np.load(data_path)
         self.train_X0 = np.repeat(data['train_X0'], self.top_n, axis=0)
-        self.train_X1 = data['train_X1'][:, -self.top_n:, -self.top_k:].reshape(-1, self.top_k)
+        # Get indices non-similar classes
+        train_X1_nonsim = data['train_X1'][:, -(self.top_n-1):, -self.top_k:].reshape(-1, self.top_k)
+
+        if self.same_class_reverse:
+            train_X1_sim = data['train_X1'][:, -1, :self.top_k].reshape(-1,self.top_k)
         self.train_Y = data['train_Y'][:, -self.top_n:].reshape(-1, )
 
     def load_valid_idx(self, data_path):
@@ -123,7 +130,8 @@ class MNISTDataset(ObjectDatasetBase):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path, top_n=9, top_k=5, n_cls=100, n_smpl=80, train=True):
+    def __init__(self, dataset_path, top_n=9, top_k=5, n_cls=100, n_smpl=80, enable_training=True,
+                 same_class_reverse=False, same_class_extend_entries=False):
         super().__init__(dataset_path)
 
         mean_pixel = [x / 255.0 for x in [125.3, 123.0, 113.9]]

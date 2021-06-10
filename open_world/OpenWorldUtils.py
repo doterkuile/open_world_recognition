@@ -31,20 +31,25 @@ def parseConfigFile(config_file, device, multiple_gpu):
     top_k = config['top_k']
     top_n = config['top_n']
     train_classes = config['train_classes']
+    test_classes = config['test_classes']
     train_samples_per_cls = config['train_samples_per_cls']
+
+    ## Dataset preparation parameters:
+    same_class_reverse = config['same_class_reverse']
+    same_class_extend_entries = config['same_class_extend_entries']
+
 
     weights = np.ones(batch_size-1) * 1/top_n
     weights = np.append(weights, (top_n - 1)/top_n)
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
-
-
     pos_weight = torch.tensor([(top_n - 1)/top_n]).to(device)
 
     ## Classes
     # Load dataset
     dataset_path = config['dataset_path']
     dataset_class = config['dataset_class']
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls)
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
+                                                      ,enable_training,  same_class_reverse, same_class_extend_entries)
 
 
     # Load model

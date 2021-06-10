@@ -54,7 +54,7 @@ def main():
     class_set = classes
 
     num_train = config['train_classes']  # Classes used for training
-    num_valid = len(classes) - num_train  # Classes used for validation
+    num_valid = config['test_classes'] # Classes used for validation
 
     randomize_samples = True
 
@@ -69,7 +69,7 @@ def main():
                                                                       randomize_samples)
 
 
-    memory_path = config['dataset_path'] + '/memory_' + str(num_train) + '_' + str(train_samples_per_cls) + '.npz'
+    memory_path = config['dataset_path'] + '/memory_' + str(num_train) + '_' + str(train_samples_per_cls) + '_' + str(top_n) + '.npz'
     print(f'Save results to {memory_path}')
     np.savez(memory_path,
              train_rep=data_rep, labels_rep=labels_rep,  # including all validation examples.

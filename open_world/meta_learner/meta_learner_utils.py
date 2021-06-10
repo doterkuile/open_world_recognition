@@ -187,7 +187,8 @@ def extract_features(data, model, classes, memory_path, load_memory=False):
     return train_rep, train_cls_rep, labels_rep
 
 
-def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n, randomize_samples=True):
+def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n,
+                             randomize_samples=True, same_class_reverse=False, balance_same_class_entries=False):
 
     X0, X1, Y = [], [], []
     base_cls_offset = classes.index(class_set[0])  # -> gives index of first class of interest
@@ -209,7 +210,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         # cosine similarity between train_per_class number of the class of interest and the mean feature vector of
         # the rest of the classes
         # Finds the most similar classes based on the mean value
-        sim = sklearn.metrics.pairwise.cosine_similarity(data_rep[cls_offset:cls_offset + train_samples_per_cls],
+        sim = metrics.pairwise.cosine_similarity(data_rep[cls_offset:cls_offset + train_samples_per_cls],
                                                          data_cls_rep[rest_cls_idx])
         # Get indices of a sorted array
         sim_idx = sim.argsort(axis=1)
@@ -230,7 +231,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
                 cls1 = sim_idx[jx, kx]
                 cls1_offset = np.where(labels_rep == cls1)[0].min()
                 # Find cosine similarity between the two offsets? Gives an array with size [1, train_per_cls]
-                sim1 = sklearn.metrics.pairwise.cosine_similarity(data_rep[cls_offset + jx:cls_offset + jx + 1],
+                sim1 = metrics.pairwise.cosine_similarity(data_rep[cls_offset + jx:cls_offset + jx + 1],
                                                                   data_rep[cls1_offset:cls1_offset + train_samples_per_cls])
                 # Sort indices and find most similar samples. Remove least similar example to make array of same
                 # length as similarity of same class samples
@@ -245,7 +246,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
             tmp_Y.append(np.full((train_samples_per_cls, 1), 0))
 
         # put same class in the last dim
-        sim = sklearn.metrics.pairwise.cosine_similarity(
+        sim = metrics.pairwise.cosine_similarity(
             data_rep[cls_offset:cls_offset + train_samples_per_cls])  # Similarity between same class
         # Remove most similar sample as this is the same sample as input sample
         sim_idx = sim.argsort(axis=1)[:, :-1] + cls_offset  # add the offset to obtain the real offset in memory.
