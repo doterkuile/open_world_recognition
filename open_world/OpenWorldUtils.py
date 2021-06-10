@@ -39,10 +39,11 @@ def parseConfigFile(config_file, device, multiple_gpu):
     same_class_extend_entries = config['same_class_extend_entries']
 
 
-    weights = np.ones(batch_size-1) * 1/top_n
-    weights = np.append(weights, (top_n - 1)/top_n)
+    # top_n classes + 1 (same class)
+    weights = np.ones(batch_size-1) * 1/(top_n+1)
+    weights = np.append(weights, (top_n)/(top_n+1))
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
-    pos_weight = torch.tensor([(top_n - 1)/top_n]).to(device)
+    pos_weight = torch.tensor([(top_n)/(top_n+1)]).to(device)
 
     ## Classes
     # Load dataset

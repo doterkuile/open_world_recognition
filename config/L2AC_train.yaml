@@ -18,7 +18,7 @@ epochs: 200
 
 ## L2AC parameters
 top_k: 5
-top_n: 10
+top_n: 9
 train_classes: 20
 test_classes: 20
 train_samples_per_cls: 500

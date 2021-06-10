@@ -26,7 +26,7 @@ class MetaDataset(data_utils.Dataset):
         self.n_smpl = n_smpl
         self.same_class_reverse = same_class_reverse
         self.same_class_extend_entries = same_class_extend_entries
-        self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '.npz'
+        self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '_' + str(top_n) + '.npz'
         self.top_n = top_n
         self.top_k = top_k
         self.train = train
@@ -74,13 +74,22 @@ class MetaDataset(data_utils.Dataset):
 
     def load_train_idx(self, data_path):
         data = np.load(data_path)
-        self.train_X0 = np.repeat(data['train_X0'], self.top_n, axis=0)
-        # Get indices non-similar classes
-        train_X1_nonsim = data['train_X1'][:, -(self.top_n-1):, -self.top_k:].reshape(-1, self.top_k)
+        self.train_X0 = np.repeat(data['train_X0'], self.top_n+1, axis=0)
+        # Get indices non-similar classes (the above top_n in the second dim)
+        self.train_X1 = data['train_X1'][:, :self.top_n, -self.top_k:]
 
+        # Get indices of the same class samples
         if self.same_class_reverse:
-            train_X1_sim = data['train_X1'][:, -1, :self.top_k].reshape(-1,self.top_k)
-        self.train_Y = data['train_Y'][:, -self.top_n:].reshape(-1, )
+            train_X1_sim = data['train_X1'][:, -1, :self.top_k].reshape(-1, 1, self.top_k)
+
+        else:
+            train_X1_sim = data['train_X1'][:, -1, -self.top_k:].reshape(-1, 1, self.top_k)
+
+        # Add same class to the non-similar classes
+        self.train_X1 = np.concatenate([self.train_X1, train_X1_sim], axis=1).reshape(-1, self.top_k)
+
+        # Get the labels (n+1 to account for the extra same class samples)
+        self.train_Y = data['train_Y'][:, -(self.top_n+1):].reshape(-1, )
 
     def load_valid_idx(self, data_path):
         data = np.load(data_path)
