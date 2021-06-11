@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/config/CIFAR100_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/CIFAR100_train.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/L2AC_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_world/OpenWorldUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/OpenWorldUtils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JupyterTrust" id="cc513287-f355-452b-b846-dc1e8c266bee" />
+  <component name="ProjectId" id="1svmSheGEVzSuj1rDtWnsV1UT8X" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.project" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/open_world/meta_learner" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.train_l2ac">
+    <configuration name="evaluation_metrics" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/open_world/meta_learner/evaluation_metrics.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="extract_features" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/extract_features.py" />
+      <option name="PARAMETERS" value="CIFAR100_features.yaml" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="setup_train_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/setup_train_data.py" />
+      <option name="PARAMETERS" value="CIFAR100_train.yaml" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_metadataset" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_metadataset.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="train_l2ac" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1 " />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/pytorchenv/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_l2ac.py" />
+      <option name="PARAMETERS" value="L2AC_train.yaml" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.evaluation_metrics" />
+      <item itemvalue="Python.extract_features" />
+      <item itemvalue="Python.setup_train_data" />
+      <item itemvalue="Python.test" />
+      <item itemvalue="Python.test_metadataset" />
+      <item itemvalue="Python.train_l2ac" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="" />
+      <created>1621761439094</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1621761439094</updated>
+      <workItem from="1621761440491" duration="2429000" />
+      <workItem from="1621925779336" duration="8203000" />
+      <workItem from="1622033744871" duration="619000" />
+      <workItem from="1622034618996" duration="5018000" />
+      <workItem from="1622099663970" duration="11072000" />
+      <workItem from="1622118678388" duration="6137000" />
+      <workItem from="1622142990474" duration="5753000" />
+      <workItem from="1622184847735" duration="1613000" />
+      <workItem from="1622187078370" duration="18580000" />
+      <workItem from="1622377832409" duration="22000" />
+      <workItem from="1622378772177" duration="3413000" />
+      <workItem from="1622443707237" duration="11435000" />
+      <workItem from="1622468562331" duration="5291000" />
+      <workItem from="1622477567977" duration="2615000" />
+      <workItem from="1622548839927" duration="7368000" />
+      <workItem from="1622570091386" duration="1976000" />
+      <workItem from="1622632664591" duration="5125000" />
+      <workItem from="1622709447634" duration="5926000" />
+      <workItem from="1622790221673" duration="16109000" />
+      <workItem from="1622900537427" duration="3720000" />
+      <workItem from="1623052557424" duration="4961000" />
+      <workItem from="1623137895700" duration="8751000" />
+      <workItem from="1623150095397" duration="6790000" />
+      <workItem from="1623182054474" duration="194000" />
+      <workItem from="1623225891792" duration="12658000" />
+      <workItem from="1623264535419" duration="7458000" />
+      <workItem from="1623273652993" duration="1613000" />
+      <workItem from="1623307791572" duration="768000" />
+      <workItem from="1623312070124" duration="6347000" />
+      <workItem from="1623319528299" duration="7069000" />
+      <workItem from="1623331831243" duration="609000" />
+      <workItem from="1623332595170" duration="854000" />
+      <workItem from="1623333497869" duration="718000" />
+      <workItem from="1623394079037" duration="11675000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="67" y="159" width="1084" height="786" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1623403356643">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state x="4270" y="193" width="1084" height="762" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933826350" />
+    <state x="2350" y="193" width="1084" height="786" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623243569494" />
+    <state x="487" y="181" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333447670" />
+    <state x="158" y="334" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1623152954746" />
+    <state x="67" y="159" width="1853" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.3773.1053@67.27.3773.1053" timestamp="1623403356643" />
+    <state x="167" y="125" width="1653" height="855" key="DiffContextDialog" timestamp="1623317468327">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="167" y="125" width="1653" height="855" key="DiffContextDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623317468327" />
+    <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl" timestamp="1623314200042">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="4595" y="306" width="424" height="484" key="FileChooserDialogImpl/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933824417" />
+    <state x="2675" y="306" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623243568460" />
+    <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623314200042" />
+    <state x="1920" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.3773.1053@67.27.3773.1053" timestamp="1622208515461" />
+    <state width="1807" height="403" key="GridCell.Tab.0.bottom" timestamp="1623404657744">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state width="1874" height="354" key="GridCell.Tab.0.bottom/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933848866" />
+    <state width="1874" height="443" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1807" height="505" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
+    <state width="1807" height="192" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
+    <state width="1807" height="403" key="GridCell.Tab.0.bottom/67.27.3773.1053@67.27.3773.1053" timestamp="1623404657744" />
+    <state width="1807" height="403" key="GridCell.Tab.0.center" timestamp="1623404657744">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state width="1874" height="354" key="GridCell.Tab.0.center/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933848866" />
+    <state width="1874" height="443" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1807" height="505" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
+    <state width="1807" height="192" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
+    <state width="1807" height="403" key="GridCell.Tab.0.center/67.27.3773.1053@67.27.3773.1053" timestamp="1623404657744" />
+    <state width="1807" height="403" key="GridCell.Tab.0.left" timestamp="1623404657743">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state width="1874" height="354" key="GridCell.Tab.0.left/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933848866" />
+    <state width="1874" height="443" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1807" height="505" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
+    <state width="1807" height="192" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618646" />
+    <state width="1807" height="403" key="GridCell.Tab.0.left/67.27.3773.1053@67.27.3773.1053" timestamp="1623404657743" />
+    <state width="1807" height="403" key="GridCell.Tab.0.right" timestamp="1623404657744">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state width="1874" height="354" key="GridCell.Tab.0.right/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1621933848866" />
+    <state width="1874" height="443" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1807" height="505" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
+    <state width="1807" height="192" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
+    <state width="1807" height="403" key="GridCell.Tab.0.right/67.27.3773.1053@67.27.3773.1053" timestamp="1623404657744" />
+    <state x="500" y="197" key="SettingsEditor" timestamp="1623333643687">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="2369" y="174" key="SettingsEditor/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1622802002877" />
+    <state x="500" y="197" key="SettingsEditor/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333643687" />
+    <state x="500" y="197" key="SettingsEditor/67.27.1853.1053@67.27.1853.1053" timestamp="1622713782657" />
+    <state width="1887" height="528" key="XDebugger.FullValuePopup" timestamp="1623396200671">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state width="960" height="541" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623243117136" />
+    <state width="927" height="528" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623147274416" />
+    <state width="927" height="528" key="XDebugger.FullValuePopup/67.27.1853.1053@67.27.1853.1053" timestamp="1622474265669" />
+    <state width="1887" height="528" key="XDebugger.FullValuePopup/67.27.3773.1053@67.27.3773.1053" timestamp="1623396200671" />
+    <state x="603" y="166" width="770" height="773" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1623268152496">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="603" y="166" width="770" height="773" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/67.27.1853.1053@67.27.1853.1053" timestamp="1623268152496" />
+    <state x="2661" y="454" width="438" height="170" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1622809526603">
+      <screen x="1920" y="0" width="1920" height="1080" />
+    </state>
+    <state x="2661" y="454" width="438" height="170" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1622809526603" />
+    <state x="177" y="27" width="1550" height="628" key="dock-window-1" timestamp="1622205225921">
+      <screen x="67" y="27" width="3773" height="1053" />
+    </state>
+    <state x="177" y="27" width="1550" height="628" key="dock-window-1/67.27.3773.1053@67.27.3773.1053" timestamp="1622205225921" />
+    <state x="668" y="258" width="672" height="662" key="search.everywhere.popup" timestamp="1623265811666">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="2543" y="237" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1621612119721" />
+    <state x="668" y="258" width="672" height="662" key="search.everywhere.popup/67.27.1853.1053@67.27.1853.1053" timestamp="1623265811666" />
+    <state x="1291" y="258" width="1321" height="662" key="search.everywhere.popup/67.27.3773.1053@67.27.3773.1053" timestamp="1622192111743" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/extract_features.py</url>
+          <line>52</line>
+          <option name="timeStamp" value="83" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
+          <line>265</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/extract_features.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="204" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/evaluation_metrics.py</url>
+          <line>45</line>
+          <option name="timeStamp" value="282" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
+          <line>251</line>
+          <option name="timeStamp" value="298" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/ObjectDatasets.py</url>
+          <line>91</line>
+          <option name="timeStamp" value="313" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/ObjectDatasets.py</url>
+          <line>88</line>
+          <option name="timeStamp" value="314" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/ObjectDatasets.py</url>
+          <line>105</line>
+          <option name="timeStamp" value="316" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
+          <line>233</line>
+          <option name="timeStamp" value="317" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/open_world_recognition$evaluation_metrics.coverage" NAME="evaluation_metrics Coverage Results" MODIFIED="1623265671832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$extract_features.coverage" NAME="extract_features Coverage Results" MODIFIED="1623319560938" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$loadMNIST.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621612580894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$train_l2ac.coverage" NAME="train_l2ac Coverage Results" MODIFIED="1623404657728" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world$main.coverage" NAME="main Coverage Results" MODIFIED="1619799660891" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1620285685210" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$meta_learner.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621775117300" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$test.coverage" NAME="test Coverage Results" MODIFIED="1622208908365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$setup_train_data.coverage" NAME="setup_train_data Coverage Results" MODIFIED="1623403260386" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$test_metadataset.coverage" NAME="test_metadataset Coverage Results" MODIFIED="1622190750578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
