@@ -65,7 +65,7 @@ def main():
 
     print(f'Rank validation samples with {num_valid} classes, {train_samples_per_cls} samples per class')
     valid_X0, valid_X1, valid_Y = meta_utils.rank_samples_from_memory(class_set[-num_valid:], data_rep, data_cls_rep,
-                                                                      labels_rep, classes, train_samples_per_cls, top_n,
+                                                                      labels_rep, classes, train_samples_per_cls, 1,
                                                                       randomize_samples)
 
 

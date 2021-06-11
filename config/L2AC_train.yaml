@@ -1,5 +1,5 @@
 ## Experiment
-name: '0000'
+name: '0003'
 
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
@@ -14,7 +14,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256  
-epochs: 200
+epochs: 40
 
 ## L2AC parameters
 top_k: 5
@@ -25,7 +25,7 @@ train_samples_per_cls: 500
 probability_threshold: 0.5
 
 ## Dataset preparation parameters
-same_class_reverse: True
+same_class_reverse: False
 same_class_extend_entries: False
 
 

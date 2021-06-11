@@ -61,10 +61,9 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             optimizer.step()
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
-            # Print interim results
-            if b % round(len(train_loader)/4, 0) == 0:
-                print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
-                      f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+        # Print epoch results
+        print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
+              f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
         # Training metrics
         y_pred = np.array(torch.cat(y_pred))
@@ -88,6 +87,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
         tst_losses.append(tst_loss.item())
+
 
     trn_metrics = {'loss': trn_losses,
                    'accuracy': trn_acc,
