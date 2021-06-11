@@ -32,6 +32,16 @@ conda activate $conda_env
 module load cuda/10.0
 module load cudnn/10.0-7.6.0.64
 
+file=config/$config_file
+var1=name
+var2=top_n
 
-python $python_script $config_file
+for n in {1..10}
+do
+	echo "$n"
+	sed -i "s/$var2:.*/$var2: $n/" $file
+	python $python_script $config_file
+
+done
+
 conda deactivate

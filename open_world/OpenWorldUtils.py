@@ -54,7 +54,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
 
 
     # Load model
-    model_path = 'output/' + config['name'] + '/' + config['name'] + '_model.pt'
+    model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
     model = eval('RecognitionModels.' + model_class)(model_path, train_classes, batch_size, top_k).to(device)
 
