@@ -50,3 +50,4 @@ do
 	python $python_script $config_file
 
 done
+conda deactivate

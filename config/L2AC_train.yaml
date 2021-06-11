@@ -1,5 +1,5 @@
 ## Experiment
-name: 0007
+name: '0007'
 
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
