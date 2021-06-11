@@ -27,7 +27,6 @@ class MetaDataset(data_utils.Dataset):
         self.same_class_reverse = same_class_reverse
         self.same_class_extend_entries = same_class_extend_entries
         self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '_' + str(top_n) + '.npz'
-        print(self.data_path)
         self.top_n = top_n
         self.top_k = top_k
         self.train = train

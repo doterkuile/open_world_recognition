@@ -14,8 +14,8 @@ for ((i=0;i<$len; i++))
 do
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
-	sed -i "s/$var2:.*/$var2: ${array_2[$i]}/" $file
-	sed -i "s/$var1:.*/$var1: '${array_1[$i]}'/"  $file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
+	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
 	python $python_script $config_file
 
 done
