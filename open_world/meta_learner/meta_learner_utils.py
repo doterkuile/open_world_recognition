@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import time
 from tqdm import tqdm
+from sklearn import metrics
 
 
 
@@ -12,13 +13,21 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
     trn_losses = []
     tst_losses = []
-    trn_accs = []
-    tst_accs = []
+    trn_acc = []
+    tst_acc = []
+    trn_precision = []
+    tst_precision = []
+    trn_recall = []
+    tst_recall = []
+    trn_F1 = []
+    tst_F1 = []
 
 
     for i in range(epochs):
         trn_corr = 0
         tst_corr = 0
+        y_pred = []
+        y_true = []
 
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
@@ -33,17 +42,20 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             b += 1
 
             # Apply the model
-            y_pred = model(X0_train, X1_train)
-            trn_loss = criterion(y_pred, y_train)
+            y_out = model(X0_train, X1_train)
+            trn_loss = criterion(y_out, y_train)
 
             # Tally the number of correct predictions
-            predicted = y_pred.detach().clone().sigmoid()
+            predicted = y_out.detach().clone().sigmoid()
 
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
 
             batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
+
+            y_pred.extend(predicted.cpu())
+            y_true.extend(y_train.cpu())
 
             # Update parameters
             optimizer.zero_grad()
@@ -53,24 +65,45 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
             # Print interim results
-            if b % round(len(train_loader)/4, 0) == 0:
-                print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
-                      f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+        print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
+              f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
-        trn_acc = trn_corr.item() * 100 / (train_loader.batch_size * b)
+        # Training metrics
+        y_pred = np.array(torch.cat(y_pred))
+        y_true = np.array(torch.cat(y_true))
+
+        trn_acc.append(metrics.accuracy_score(y_true,y_pred))
+        trn_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+        trn_recall.append(metrics.recall_score(y_true, y_pred))
+        trn_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
         trn_losses.append(trn_loss.item())
-        trn_accs.append(trn_acc)
 
         # Run the testing batches
-        tst_acc, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
+        y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
+
+        tst_acc.append(metrics.accuracy_score(y_true, y_pred))
+        tst_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+        tst_recall.append(metrics.recall_score(y_true, y_pred))
+        tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
         tst_losses.append(tst_loss.item())
-        tst_accs.append(tst_acc)
+
+
+    trn_metrics = {'loss': trn_losses,
+                   'accuracy': trn_acc,
+                   'precision': trn_precision,
+                   'recall': trn_recall,
+                   'F1': trn_F1}
+    tst_metrics = {'loss': tst_losses,
+                   'accuracy': tst_acc,
+                   'precision': tst_precision,
+                   'recall': tst_recall,
+                   'F1': tst_F1}
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return (trn_losses,tst_losses, trn_accs, tst_accs)
+    return (trn_metrics, tst_metrics)
 
 
 def validate_model(loader, model, criterion, device,probability_threshold):
@@ -115,7 +148,7 @@ def validate_model(loader, model, criterion, device,probability_threshold):
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-    return test_acc, loss
+    return y_pred, y_true, loss
 
 def extract_features(train_data, model, classes, memory_path, load_memory=False):
 

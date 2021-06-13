@@ -35,16 +35,30 @@ def main():
 	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
 		config_file, device, multiple_gpu)
 
-	train_classes = config['train_classes']
-	train_samples_per_cls = config['train_samples_per_cls']
-	max_trn_batch = config['max_trn_batch']
-	probability_treshold = config['probability_threshold']
-	exp_name='no_name'
+	## Create new entry folder for results of experiment
+	exp_name = 'no_name'
 	try:
-		exp_name = config['name']
+		exp_name = str(config['name'])
 	except KeyError:
 		print(f'No exp name was given, continuing with no_name')
 
+	exp_folder = 'output/' + exp_name
+
+	if not os.path.exists(exp_folder):
+		os.makedirs(exp_folder)
+	figure_path = exp_folder + '/' + exp_name
+	results_path = exp_folder + '/' + exp_name + '_results.npz'
+	model_path = exp_folder + '/' + exp_name + '_model.pt'
+	config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
+
+	# Save config file in the exp directory
+	shutil.copyfile('config/' + config_file, config_save_path)
+
+
+	# Get hyperparameters
+	train_classes = config['train_classes']
+	train_samples_per_cls = config['train_samples_per_cls']
+	probability_treshold = config['probability_threshold']
 
 
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
@@ -54,17 +68,37 @@ def main():
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	figure_path = config['figures_path'] + exp_name
-	(train_loss, test_loss, train_accs, test_accs) = meta_utils.trainMetaModel(model, test_loader, train_loader, epochs,
-																			   criterion, optimizer, device, max_trn_batch, probability_treshold)
-	plot_utils.plot_losses(train_loss, test_loss, figure_path)
-	plot_utils.plot_accuracy(train_accs, test_accs, figure_path)
 
-	if not os.path.exists(config['training_history_path']):
-		os.makedirs(config['training_history_path'])
-	results_path = config['training_history_path'] + '_' + exp_name + '_results.npz'
-	np.savez(results_path, train_loss=train_loss, test_loss=test_loss, train_accs=train_accs, test_accs=test_accs)
+	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
+																	criterion, optimizer, device, probability_treshold)
 
-	return
+	# Train metrics
+	trn_loss = trn_metrics['loss']
+	trn_acc = trn_metrics['accuracy']
+	trn_precision = trn_metrics['precision']
+	trn_recall = trn_metrics['recall']
+	trn_F1 = trn_metrics['F1']
+
+	# Test metrics
+	tst_loss = tst_metrics['loss']
+	tst_acc = tst_metrics['accuracy']
+	tst_precision = tst_metrics['precision']
+	tst_recall = tst_metrics['recall']
+	tst_F1 = tst_metrics['F1']
+
+
+	# Plot metrics
+	plot_utils.plot_losses(trn_loss, tst_loss, figure_path)
+	plot_utils.plot_accuracy(trn_acc, tst_acc, figure_path)
+	plot_utils.plot_precision(trn_precision, tst_precision, figure_path)
+	plot_utils.plot_recall(trn_recall, tst_recall, figure_path)
+	plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
+
+	OpenWorldUtils.saveModel(model, model_path)
+
+	np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
+			 train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
+			 test_recall=tst_recall, train_F1=trn_F1, test_F1=tst_F1)
 
 
 
