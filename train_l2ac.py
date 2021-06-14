@@ -9,6 +9,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 import argparse
 import os
+import shutil
 
 
 def main():
@@ -67,9 +68,9 @@ def main():
 											  train_classes, train_samples_per_cls, train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	figure_path = config['figures_path'] + exp_name
 
-	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
+
+	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, test_loader, train_loader, epochs,
 																	criterion, optimizer, device, probability_treshold)
 
 	# Train metrics

@@ -8,7 +8,7 @@ from sklearn import metrics
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, max_trn_batch, probability_treshold):
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold):
     start_time = time.time()
 
     trn_losses = []
@@ -136,21 +136,21 @@ def validate_model(loader, model, criterion, device,probability_threshold):
             predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
-            y_pred.extend(predicted)
-            y_true.extend(y_test)
+            y_pred.extend(predicted.cpu())
+            y_true.extend(y_test.cpu())
             num_correct += (predicted == y_test).sum()
             num_samples += predicted.size(0)
             b += 1
 
-    y_pred = torch.stack(y_pred)
-    y_true = torch.stack(y_true)
+    y_pred = np.array(torch.cat(y_pred))
+    y_true = np.array(torch.cat(y_true))
     # Toggle model back to train
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
     return y_pred, y_true, loss
 
-def extract_features(train_data, model, classes, memory_path, load_memory=False):
+def extract_features(data, model, classes, memory_path, load_memory=False):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
@@ -163,7 +163,7 @@ def extract_features(train_data, model, classes, memory_path, load_memory=False)
     else:
         with torch.no_grad():
             # Create dict of samples per class
-            for sample, label in train_data:
+            for sample, label in data:
                 class_samples[label].append(sample)
 
             # Extract features of sample and mean feature vector per class
