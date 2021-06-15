@@ -83,6 +83,9 @@ def main():
 	trn_precision = trn_metrics['precision']
 	trn_recall = trn_metrics['recall']
 	trn_F1 = trn_metrics['F1']
+	trn_mean_pred = trn_metrics['mean_pred']
+	trn_mean_true = trn_metrics['mean_true']
+
 
 	# Test metrics
 	tst_loss = tst_metrics['loss']
@@ -90,6 +93,8 @@ def main():
 	tst_precision = tst_metrics['precision']
 	tst_recall = tst_metrics['recall']
 	tst_F1 = tst_metrics['F1']
+	tst_mean_pred = tst_metrics['mean_pred']
+	tst_mean_true = tst_metrics['mean_true']
 
 
 	# Plot metrics
@@ -98,6 +103,7 @@ def main():
 	plot_utils.plot_precision(trn_precision, tst_precision, figure_path)
 	plot_utils.plot_recall(trn_recall, tst_recall, figure_path)
 	plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
+	plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
 	OpenWorldUtils.saveModel(model, model_path)
 

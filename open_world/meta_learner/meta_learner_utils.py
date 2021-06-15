@@ -20,6 +20,10 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     tst_recall = []
     trn_F1 = []
     tst_F1 = []
+    trn_mean_pred = []
+    trn_mean_true = []
+    tst_mean_pred = []
+    tst_mean_true = []
 
     for i in range(epochs):
         trn_corr = 0
@@ -74,6 +78,9 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_recall.append(metrics.recall_score(y_true, y_pred))
         trn_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
+        trn_mean_pred.append(y_pred.mean())
+        trn_mean_true.append(y_true.mean())
+
         trn_losses.append(trn_loss.item())
 
 
@@ -86,6 +93,9 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_recall.append(metrics.recall_score(y_true, y_pred))
         tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
+        tst_mean_pred.append(y_pred.mean())
+        tst_mean_true.append(y_true.mean())
+
         tst_losses.append(tst_loss.item())
 
 
@@ -93,12 +103,17 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
                    'accuracy': trn_acc,
                    'precision': trn_precision,
                    'recall': trn_recall,
-                   'F1': trn_F1}
+                   'F1': trn_F1,
+                   'mean_pred': trn_mean_pred,
+                   'mean_true': trn_mean_true}
+
     tst_metrics = {'loss': tst_losses,
                    'accuracy': tst_acc,
                    'precision': tst_precision,
                    'recall': tst_recall,
-                   'F1': tst_F1}
+                   'F1': tst_F1,
+                   'mean_pred': tst_mean_pred,
+                   'mean_true': tst_mean_true}
 
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed

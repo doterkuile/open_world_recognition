@@ -65,3 +65,18 @@ def plot_F1(train_F1, test_F1, figure_path):
     plt.legend()
     fig.savefig(figure_path + '_F1')
     return
+
+
+
+def plot_mean_prediction(trn_pred, trn_true, tst_pred, tst_true, figure_path):
+    fig = plt.figure()
+    plt.plot(trn_pred, label='Training predicted mean', alpha=1, color='blue')
+    plt.plot(trn_true, label='Training true mean', alpha=0.4, color='blue')
+    plt.plot(tst_pred, label='Validation predicted mean', alpha=1, color='orange')
+    plt.plot(tst_true, label='Validation true mean', alpha=0.4, color='orange')
+    plt.ylabel('Mean value')
+    plt.xlabel('Epochs')
+    plt.title('Mean prediction score')
+    plt.legend()
+    fig.savefig(figure_path + '_mean_pred')
+    return
