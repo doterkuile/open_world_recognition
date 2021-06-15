@@ -31,7 +31,11 @@ class MetaDataset(data_utils.Dataset):
         self.top_k = top_k
         self.train = train
         self.memory, self.true_labels = self.load_memory(self.data_path)
-        self.load_train_idx(self.data_path)
+        if same_class_extend_entries:
+            self.load_balanced_train_idx(self.data_path)
+        else:
+            self.load_train_idx(self.data_path)
+
         self.load_valid_idx(self.data_path)
         self.classes = [i for i in range(100)]
 
@@ -72,8 +76,26 @@ class MetaDataset(data_utils.Dataset):
             labels = np.zeros(features.shape[0])
         return features, labels
 
+    def load_balanced_train_idx(self, data_path):
+        data = np.load(data_path)
+
+        y_train = data['train_Y'][:, -(self.top_n+1):]
+        y_extra = np.ones([len(y_train), self.top_n-1, ])
+        self.train_Y = np.concatenate([y_train, y_extra], axis=1).reshape(-1, )
+
+        x1 = data['train_X1'][:, :self.top_n, -self.top_k:]
+        x1_extra= data['train_X1'][:, -1, -self.top_n*self.top_k:].reshape(x1.shape[0],-1,self.top_k)
+        x1_test = x1_extra
+        self.train_X1 = np.concatenate([x1, x1_extra], axis=1).reshape(-1,self.top_k)
+
+        self.train_X0 = np.repeat(data['train_X0'], 2 *self.top_n, axis=0)
+
+        return
+
     def load_train_idx(self, data_path):
         data = np.load(data_path)
+        
+
         self.train_X0 = np.repeat(data['train_X0'], self.top_n+1, axis=0)
         # Get indices non-similar classes (the above top_n in the second dim)
         self.train_X1 = data['train_X1'][:, :self.top_n, -self.top_k:]
@@ -243,3 +265,26 @@ class CatDogDataset(ObjectDatasetBase):
         im = inv_normalize(self.test_data[x][0])
         im = np.transpose(im.numpy(), (1, 2, 0))
         return im
+
+
+
+def main():
+
+
+    data_path = "datasets/CIFAR100"
+    top_n = 9
+    top_k = 10
+    n_cls=80
+    n_smpl=500
+    train=True
+    same_class_reverse=False
+    same_class_extend_entries=True
+
+
+    dataset = MetaDataset(data_path, top_n, top_k, n_cls, n_smpl, train, same_class_reverse,
+             same_class_extend_entries)
+
+
+
+if __name__ == "__main__":
+    main()
