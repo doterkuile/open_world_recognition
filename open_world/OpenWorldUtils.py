@@ -28,8 +28,8 @@ def parseConfigFile(config_file, device, multiple_gpu):
     epochs = config['epochs']
 
     ## L2AC Parameters
-    top_k = config['top_k']
-    top_n = config['top_n']
+    top_k = int(config['top_k'])
+    top_n = int(config['top_n'])
     train_classes = config['train_classes']
     test_classes = config['test_classes']
     train_samples_per_cls = config['train_samples_per_cls']
@@ -37,7 +37,6 @@ def parseConfigFile(config_file, device, multiple_gpu):
     ## Dataset preparation parameters:
     same_class_reverse = config['same_class_reverse']
     same_class_extend_entries = config['same_class_extend_entries']
-
 
     # top_n classes + 1 (same class)
     weights = np.ones(batch_size-1) * 1/(top_n+1)

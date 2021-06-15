@@ -17,12 +17,12 @@
 
 
 
-module use /opt/insy/modulefiles
+# module use /opt/insy/modulefiles
 
-module purge
-module load cuda/10.0
-module load cudnn/10.0-7.6.0.64
-module load miniconda
+# module purge
+# module load cuda/10.0
+# module load cudnn/10.0-7.6.0.64
+# module load miniconda
 
 # configuration variables
 python_script=train_l2ac.py
@@ -33,11 +33,11 @@ conda_env=l2acenv
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(0029, 0030, 0031, 0032)
+array_1=(0029 0030 0031 0032)
 var_2=top_n
-array_2=(9, 9, 9, 9)
+array_2=(9 9 9 9)
 var_3=top_k
-array_3=(5, 10, 20, 50)
+array_3=(5 10 20 50)
 len=${#array_1[@]}
 
 
@@ -45,7 +45,7 @@ len=${#array_1[@]}
 var_4=epochs
 value_4=5
 
-conda activate $conda_env
+# conda activate $conda_env
 
 
 for ((i=0;i<$len; i++))
@@ -69,4 +69,4 @@ do
 
 done
 
-conda deactivate
+# conda deactivate
