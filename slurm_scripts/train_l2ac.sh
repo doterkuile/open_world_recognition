@@ -17,12 +17,12 @@
 
 
 
-# module use /opt/insy/modulefiles
+module use /opt/insy/modulefiles
 
-# module purge
-# module load cuda/10.0
-# module load cudnn/10.0-7.6.0.64
-# module load miniconda
+module purge
+module load cuda/10.0
+module load cudnn/10.0-7.6.0.64
+module load miniconda
 
 # configuration variables
 python_script=train_l2ac.py
@@ -45,7 +45,7 @@ len=${#array_1[@]}
 var_4=epochs
 value_4=5
 
-# conda activate $conda_env
+conda activate $conda_env
 
 
 for ((i=0;i<$len; i++))
@@ -69,4 +69,4 @@ do
 
 done
 
-# conda deactivate
+conda deactivate
