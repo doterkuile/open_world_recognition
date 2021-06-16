@@ -8,6 +8,8 @@ import torchvision.models.resnet as resnet
 from torchvision.utils import make_grid
 import torch.utils.model_zoo as model_zoo
 import os
+from open_world import OpenWorldUtils
+from open_world import ObjectDatasets
 
 from torchvision.models import resnet50
 import numpy as np
@@ -108,6 +110,8 @@ class ResNet50(models.ResNet):
 class ResNet50Features(models.ResNet):
     def __init__(self, model_path, num_classes, batch_size, top_k):
         super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
+        # super().__init__()
+
         if not os.path.isfile(model_path):
             model = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
             torch.save(model.state_dict(), model_path)
@@ -289,7 +293,20 @@ class L2AC_extended_similarity(torch.nn.Module):
 
 
 def main():
-    pass
+    model = resnet50(pretrained=True, num_classes=1000)
+    for param in model.parameters():
+        param.requires_grad = False
+    model.fc = nn.Linear(2048, 100)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    # dataset_path =
+    # dataset = ObjectDatasets.CIFAR100Dataset(dataset_path)
+    # train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+
+    # OpenWorldUtils.OpentrainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
+
+    return
 
 
 if __name__ == "__main__":
