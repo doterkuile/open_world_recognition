@@ -1,22 +1,37 @@
+## Experiment
+name: '0037'
+
 ## Paths and classes
 dataset_path: 'datasets/amazon'
 dataset_class: MetaDataset
-model_path: 'networks/CIFAR100/L2AC.pt'
+model_path: 'networks/amazon/L2AC.pt'
 model_class: L2AC
-training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
-figures_path: 'figures/CIFAR100_'
+training_history_path: 'networks/amazon/encoder/L2AC_model_history'
+figures_path: 'figures/amazon_'
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
-
 optimizer: Adam
 learning_rate: 0.0001
-batch_size: 10
-epochs: 50
+batch_size: 256
+epochs: 200
 
 
 ## L2AC parameters
 top_k: 5
-top_n: 10
-train_classes: 80
-samples_per_class: 100
+top_n: 9
+train_classes: 900
+test_classes: 100
+train_samples_per_cls: 100
+probability_threshold: 0.5
+
+## Dataset preparation parameters
+same_class_reverse: False
+same_class_extend_entries: False
+
+
+
+## Training/loading parameters
+load_memory: False
+enable_training: True
+save_images: True

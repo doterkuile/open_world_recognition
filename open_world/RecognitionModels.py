@@ -127,8 +127,11 @@ class L2AC(torch.nn.Module):
 
     def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
         super(L2AC, self).__init__()
-        self.feature_size = 2048
-        self.input_size = 2048
+        # self.feature_size = 2048
+        # self.input_size = 2048
+
+        self.feature_size = 512
+        self.input_size = 512
         self.batch_size = batch_size
         self.hidden_size = 1
         self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)

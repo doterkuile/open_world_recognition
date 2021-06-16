@@ -21,9 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/L2AC_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/L2AC_amazon_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_amazon_train.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -211,7 +210,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_l2ac.py" />
-      <option name="PARAMETERS" value="L2AC_train.yaml" />
+      <option name="PARAMETERS" value="L2AC_amazon_train.yaml" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -273,6 +272,7 @@
       <workItem from="1623394079037" duration="13480000" />
       <workItem from="1623742166376" duration="25000" />
       <workItem from="1623742193084" duration="9454000" />
+      <workItem from="1623827644922" duration="1202000" />
     </task>
     <servers />
   </component>
@@ -292,11 +292,11 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="4270" y="193" width="1084" height="812" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1623762497711">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state x="2350" y="193" width="1084" height="812" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1623827982181">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="4270" y="193" width="1084" height="812" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623762497711" />
-    <state x="2350" y="193" width="1084" height="786" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623243569494" />
+    <state x="2350" y="193" width="1084" height="786" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623827982181" />
     <state x="487" y="181" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333447670" />
     <state x="158" y="334" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1623152954746" />
     <state x="67" y="159" width="1853" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.3773.1053@67.27.3773.1053" timestamp="1623403356643" />
@@ -311,35 +311,35 @@
     <state x="2675" y="306" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623243568460" />
     <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623314200042" />
     <state x="1920" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.3773.1053@67.27.3773.1053" timestamp="1622208515461" />
-    <state width="1874" height="415" key="GridCell.Tab.0.bottom" timestamp="1623771503438">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state width="1874" height="427" key="GridCell.Tab.0.bottom" timestamp="1623828172844">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="415" key="GridCell.Tab.0.bottom/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623771503438" />
-    <state width="1874" height="443" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1874" height="427" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623828172844" />
     <state width="1807" height="505" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
     <state width="1807" height="192" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
     <state width="1807" height="403" key="GridCell.Tab.0.bottom/67.27.3773.1053@67.27.3773.1053" timestamp="1623423018830" />
-    <state width="1874" height="415" key="GridCell.Tab.0.center" timestamp="1623771503438">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state width="1874" height="427" key="GridCell.Tab.0.center" timestamp="1623828172844">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="415" key="GridCell.Tab.0.center/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623771503438" />
-    <state width="1874" height="443" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1874" height="427" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623828172844" />
     <state width="1807" height="505" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
     <state width="1807" height="192" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
     <state width="1807" height="403" key="GridCell.Tab.0.center/67.27.3773.1053@67.27.3773.1053" timestamp="1623423018829" />
-    <state width="1874" height="415" key="GridCell.Tab.0.left" timestamp="1623771503437">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state width="1874" height="427" key="GridCell.Tab.0.left" timestamp="1623828172843">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="415" key="GridCell.Tab.0.left/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623771503437" />
-    <state width="1874" height="443" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1874" height="427" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623828172843" />
     <state width="1807" height="505" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
     <state width="1807" height="192" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618646" />
     <state width="1807" height="403" key="GridCell.Tab.0.left/67.27.3773.1053@67.27.3773.1053" timestamp="1623423018829" />
-    <state width="1874" height="415" key="GridCell.Tab.0.right" timestamp="1623771503438">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state width="1874" height="427" key="GridCell.Tab.0.right" timestamp="1623828172844">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="415" key="GridCell.Tab.0.right/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623771503438" />
-    <state width="1874" height="443" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623245004730" />
+    <state width="1874" height="427" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623828172844" />
     <state width="1807" height="505" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333996493" />
     <state width="1807" height="192" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1623394618647" />
     <state width="1807" height="403" key="GridCell.Tab.0.right/67.27.3773.1053@67.27.3773.1053" timestamp="1623423018829" />
@@ -370,11 +370,11 @@
       <screen x="67" y="27" width="3773" height="1053" />
     </state>
     <state x="177" y="27" width="1550" height="628" key="dock-window-1/67.27.3773.1053@67.27.3773.1053" timestamp="1622205225921" />
-    <state x="4463" y="237" width="697" height="679" key="search.everywhere.popup" timestamp="1623752640391">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state x="2543" y="237" width="672" height="678" key="search.everywhere.popup" timestamp="1623828119069">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="4463" y="237" width="697" height="679" key="search.everywhere.popup/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623752640391" />
-    <state x="2543" y="237" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1621612119721" />
+    <state x="2543" y="237" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1623828119069" />
     <state x="668" y="258" width="672" height="662" key="search.everywhere.popup/67.27.1853.1053@67.27.1853.1053" timestamp="1623265811666" />
     <state x="1291" y="258" width="1321" height="662" key="search.everywhere.popup/67.27.3773.1053@67.27.3773.1053" timestamp="1622192111743" />
   </component>
@@ -413,27 +413,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>166</line>
+          <line>169</line>
           <option name="timeStamp" value="331" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>141</line>
-          <option name="timeStamp" value="332" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>153</line>
-          <option name="timeStamp" value="334" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>220</line>
+          <line>223</line>
           <option name="timeStamp" value="340" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>214</line>
+          <line>217</line>
           <option name="timeStamp" value="341" />
         </line-breakpoint>
       </breakpoints>
@@ -444,7 +434,7 @@
     <SUITE FILE_PATH="coverage/open_world_recognition$extract_features.coverage" NAME="extract_features Coverage Results" MODIFIED="1623319560938" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$loadMNIST.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621612580894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
     <SUITE FILE_PATH="coverage/open_world_recognition$plot_utils.coverage" NAME="plot_utils Coverage Results" MODIFIED="1623741846697" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/open_world_recognition$train_l2ac.coverage" NAME="train_l2ac Coverage Results" MODIFIED="1623771503400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$train_l2ac.coverage" NAME="train_l2ac Coverage Results" MODIFIED="1623828172646" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world$main.coverage" NAME="main Coverage Results" MODIFIED="1619799660891" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
     <SUITE FILE_PATH="coverage/open_world_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1620285685210" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
     <SUITE FILE_PATH="coverage/open_world_recognition$meta_learner.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621775117300" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
