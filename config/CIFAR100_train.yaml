@@ -1,10 +1,10 @@
 ## Experiment
-name: 'd0000'
+name: 'encoder'
 
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
-model_path: 'networks/CIFAR100/encoder/resnet50_features.pt'
+model_path: 'networks/CIFAR100/encoder/resnet50.pt'
 model_class: ResNet50Features
 training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
 figures_path: 'figures/CIFAR100_'

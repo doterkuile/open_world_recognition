@@ -181,15 +181,20 @@ class CIFAR100Dataset(ObjectDatasetBase):
         std_pixel = [x / 255.0 for x in [63.0, 62.1, 66.7]]
 
         self.transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean_pixel, std=std_pixel)
+                # transforms.Resize(256),
+                # transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                # transforms.Normalize(mean=mean_pixel, std=std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
+            # transforms.Resize(256),
+            # transforms.CenterCrop(224),
             transforms.ToTensor(),
-            transforms.Normalize(mean=mean_pixel, std=std_pixel)
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+
         ])
 
         self.train_data = datasets.CIFAR100(root='datasets', train=True, download=True, transform=self.transform_train)
@@ -233,10 +238,10 @@ class CatDogDataset(ObjectDatasetBase):
     def __init__(self, dataset_path):
         super().__init__(dataset_path)
         self.train_transform = transforms.Compose([
-            transforms.RandomRotation(10),  # rotate +/- 10 degrees
-            transforms.RandomHorizontalFlip(),  # reverse 50% of images
-            transforms.Resize(224),  # resize shortest side to 224 pixels
-            transforms.CenterCrop(224),  # crop longest side to 224 pixels at center
+            # transforms.RandomRotation(10),  # rotate +/- 10 degrees
+            # transforms.RandomHorizontalFlip(),  # reverse 50% of images
+            # transforms.Resize(224),  # resize shortest side to 224 pixels
+            # transforms.CenterCrop(224),  # crop longest side to 224 pixels at center
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406],
                                  [0.229, 0.224, 0.225])

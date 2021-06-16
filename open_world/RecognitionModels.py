@@ -7,6 +7,7 @@ from torchvision import datasets, transforms, models
 import torchvision.models.resnet as resnet
 from torchvision.utils import make_grid
 import torch.utils.model_zoo as model_zoo
+import os
 
 from torchvision.models import resnet50
 import numpy as np
@@ -107,7 +108,12 @@ class ResNet50(models.ResNet):
 class ResNet50Features(models.ResNet):
     def __init__(self, model_path, num_classes, batch_size, top_k):
         super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
-        self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
+        if not os.path.isfile(model_path):
+            model = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
+            torch.save(model.state_dict(), model_path)
+
+        self.load_state_dict(torch.load(model_path))
+        
         for param in self.parameters():
             param.requires_grad = False
         self.fc = Identity()
@@ -282,3 +288,9 @@ class L2AC_extended_similarity(torch.nn.Module):
                        torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
 
 
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
