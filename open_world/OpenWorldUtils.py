@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import yaml
 import os
 
-# from open_world import ObjectDatasets
-# from open_world import RecognitionModels
+from open_world import ObjectDatasets
+from open_world import RecognitionModels
 import torch.nn as nn
 
 

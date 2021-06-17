@@ -291,6 +291,48 @@ class L2AC_extended_similarity(torch.nn.Module):
         self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
                        torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
 
+class L2AC_smaller_fc(torch.nn.Module):
+
+    def __init__(self, model_path, num_classes, batch_size=10, top_k=5):
+        super(L2AC_smaller_fc, self).__init__()
+        self.feature_size = 2048
+        self.input_size = 512
+
+        self.batch_size = batch_size
+        self.hidden_size = 1
+        self.fc_reduce = nn.Linear(self.feature_size, self.input_size)
+        self.fc1 = nn.Linear(2 * self.input_size, self.input_size)
+        self.fc2 = nn.Linear(self.input_size, 1)
+        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
+        self.reset_hidden()
+
+    def forward(self, x0, x1):
+        self.reset_hidden()
+        x0 = x0.repeat_interleave(x1.shape[1], dim=1)
+        x0 = F.relu(self.fc_reduce(x0))
+        x1 = F.relu(self.fc_reduce(x1))
+        x = self.similarity_function(x0, x1)
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.5)
+        x = self.fc2(x)
+        x = x.sigmoid()
+        x, cell_state = self.lstm(x.view(x.shape[0], -1, x.shape[1]), self.hidden)
+        x = self.fc3(x.reshape(x.shape[0], -1))
+
+        return x
+
+    def similarity_function(self, x0, x1):
+        x_abssub = x0.sub(x1)
+        x_abssub.abs_()
+        x_add = x0.add(x1)
+        x0 = torch.cat((x_abssub, x_add), dim=2)
+        return x0
+
+    def reset_hidden(self):
+        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+
 
 def main():
     model = resnet50(pretrained=True, num_classes=1000)
@@ -307,6 +349,9 @@ def main():
     # OpenWorldUtils.OpentrainModel(model, train_loader, test_loader, epochs, criterion, optimizer)
 
     return
+
+
+
 
 
 if __name__ == "__main__":

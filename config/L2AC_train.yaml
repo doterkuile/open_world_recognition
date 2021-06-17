@@ -5,7 +5,7 @@ name: '0031'
 dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
-model_class: L2AC
+model_class: L2AC_smaller_fc
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
 
@@ -17,7 +17,7 @@ batch_size: 256
 epochs: 200
 
 ## L2AC parameters
-top_k: 20
+top_k: 5
 top_n: 9
 train_classes: 20
 test_classes: 20
