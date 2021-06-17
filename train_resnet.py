@@ -57,7 +57,7 @@ def main():
 	model.fc = nn.Linear(2048, 100).to(device)
 
 	batch_size = 50
-	epochs = 10
+	epochs = 200
 	criterion = nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -89,8 +89,8 @@ def main():
 	tst_mean_pred = tst_metrics['mean_pred']
 	tst_mean_true = tst_metrics['mean_true']
 
-	figure_path = 'figures/RESNET/'
-	results_path = 'figures/RESNET'
+	figure_path = 'figures/RESNET/resnet_'
+	results_path = 'figures/RESNET/result.npz'
 	# Plot metrics
 	plot_utils.plot_losses(trn_loss, tst_loss, figure_path)
 	plot_utils.plot_accuracy(trn_acc, tst_acc, figure_path)
