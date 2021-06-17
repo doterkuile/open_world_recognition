@@ -56,8 +56,8 @@ def main():
 
 	model.fc = nn.Linear(2048, 100).to(device)
 
-	batch_size = 256
-	epochs = 2
+	batch_size = 50
+	epochs = 10
 	criterion = nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
