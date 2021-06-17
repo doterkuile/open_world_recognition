@@ -1,11 +1,11 @@
 ## Experiment
-name: '0031'
+name: '0000'
 
 ## Paths and classes
 dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
-model_class: L2AC_smaller_fc
+model_class: L2AC
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
 
@@ -14,7 +14,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 200
+epochs: 20
 
 ## L2AC parameters
 top_k: 5

@@ -10,20 +10,34 @@ from tqdm import tqdm
 def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold):
     start_time = time.time()
 
-    trn_losses = []
-    tst_losses = []
-    trn_acc = []
-    tst_acc = []
-    trn_precision = []
-    tst_precision = []
-    trn_recall = []
-    tst_recall = []
-    trn_F1 = []
-    tst_F1 = []
-    trn_mean_pred = []
-    trn_mean_true = []
-    tst_mean_pred = []
-    tst_mean_true = []
+
+    trn_metrics_dict = {'loss': [],
+                    'accuracy': [],
+                    'precision': [],
+                    'recall': [],
+                    'F1': [],
+                    'mean_pred': [],
+                    'mean_true': []}
+
+    tst_metrics_dict = {'loss': [],
+                    'accuracy': [],
+                    'precision': [],
+                    'recall': [],
+                    'F1': [],
+                    'mean_pred': [],
+                    'mean_true': []}
+    
+    trn_similarity_scores = {'final_same_cls': [],
+                        'intermediate_same_cls': [],
+                        'final_diff_cls': [],
+                        'intermediate_diff_cls': [],
+                        }   
+    tst_similarity_scores = {'final_same_cls': [],
+                        'intermediate_same_cls': [],
+                        'final_diff_cls': [],
+                        'intermediate_diff_cls': [],
+                        }   
+
 
     for i in range(epochs):
         trn_corr = 0
@@ -44,6 +58,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             # Apply the model
             y_out = model(X0_train, X1_train)
+
             trn_loss = criterion(y_out, y_train)
 
             # Tally the number of correct predictions
@@ -72,53 +87,23 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         # Training metrics
         y_pred = np.array(torch.cat(y_pred))
         y_true = np.array(torch.cat(y_true))
-
-        trn_acc.append(metrics.accuracy_score(y_true,y_pred))
-        trn_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
-        trn_recall.append(metrics.recall_score(y_true, y_pred))
-        trn_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
-
-        trn_mean_pred.append(y_pred.mean())
-        trn_mean_true.append(y_true.mean())
-
-        trn_losses.append(trn_loss.item())
-
-
-
+        calculate_metrics(trn_metrics_dict, y_pred, y_true, trn_loss)
+        
         # Run the testing batches
         y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
-
-        tst_acc.append(metrics.accuracy_score(y_true,y_pred))
-        tst_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
-        tst_recall.append(metrics.recall_score(y_true, y_pred))
-        tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
-
-        tst_mean_pred.append(y_pred.mean())
-        tst_mean_true.append(y_true.mean())
-
-        tst_losses.append(tst_loss.item())
+        
+        y_pred = np.array(torch.cat(y_pred))
+        y_true = np.array(torch.cat(y_true))
+        calculate_metrics(tst_metrics_dict, y_pred, y_true, tst_loss)
 
 
-    trn_metrics = {'loss': trn_losses,
-                   'accuracy': trn_acc,
-                   'precision': trn_precision,
-                   'recall': trn_recall,
-                   'F1': trn_F1,
-                   'mean_pred': trn_mean_pred,
-                   'mean_true': trn_mean_true}
-
-    tst_metrics = {'loss': tst_losses,
-                   'accuracy': tst_acc,
-                   'precision': tst_precision,
-                   'recall': tst_recall,
-                   'F1': tst_F1,
-                   'mean_pred': tst_mean_pred,
-                   'mean_true': tst_mean_true}
+        validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+        validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
 
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return (trn_metrics, tst_metrics)
+    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores
 
 
 def validate_model(loader, model, criterion, device,probability_threshold):
@@ -144,6 +129,7 @@ def validate_model(loader, model, criterion, device,probability_threshold):
 
             # Apply the model
             y_val = model(X0_test, X1_test)
+
             loss = criterion(y_val, y_test)
 
 
@@ -156,13 +142,72 @@ def validate_model(loader, model, criterion, device,probability_threshold):
             num_samples += predicted.size(0)
             b += 1
 
-    y_pred = np.array(torch.cat(y_pred))
-    y_true = np.array(torch.cat(y_true))
+
     # Toggle model back to train
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
     return y_pred, y_true, loss
+
+
+def validate_similarity_scores(similarity_dict, model, data_loader, device):
+
+
+    # Set model to eval
+    model.eval()
+    with torch.no_grad():
+        for b, ([X0, X1], y_true, [X0_labels, X1_labels]) in enumerate(data_loader):
+            break
+        X0 = X0.to(device)
+        X1 = X1.to(device)
+
+
+        X0_extend = X0.repeat_interleave(X1.shape[1], dim=1)
+
+        # Get final similarity score output for same identical sample
+        y_out_same = model(X0, X0_extend).sigmoid()
+        final_same_cls = y_out_same.mean()
+
+        # Get intermediate similarity score for same identical sample
+        y_out_same = model.similarity_function(X0, X0_extend)
+        intermediate_same_cls = y_out_same.mean()
+
+        # make sure to select only x1 samples of a different class
+        idx_diff_class = (y_true == 0).nonzero().squeeze()
+
+
+        # Get final similarity score output for different class sample
+        y_out_diff = model(X0, X1).sigmoid()
+        y_out_diff = y_out_diff[idx_diff_class].squeeze()
+        final_diff_cls = y_out_diff.mean()
+
+        # Get intermediate similarity score for different class sample
+        y_out_diff = model.similarity_function(X0, X1)
+        y_out_diff = y_out_diff[idx_diff_class].squeeze()
+        intermediate_diff_cls = y_out_diff.mean()
+        
+    similarity_dict['final_same_cls'].append(final_same_cls.item())
+    similarity_dict['intermediate_same_cls'].append(intermediate_same_cls.item())
+    similarity_dict['final_diff_cls'].append(final_diff_cls.item())
+    similarity_dict['intermediate_diff_cls'].append(intermediate_diff_cls.item())
+    model.train()
+    return
+
+def calculate_metrics(metrics_dict, y_pred, y_true, loss):
+
+
+    metrics_dict['accuracy'].append(metrics.accuracy_score(y_true, y_pred))
+    metrics_dict['precision'].append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+    metrics_dict['recall'].append(metrics.recall_score(y_true, y_pred))
+    metrics_dict['F1'].append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
+
+    metrics_dict['mean_pred'].append(y_pred.mean())
+    metrics_dict['mean_true'].append(y_true.mean())
+
+    metrics_dict['loss'].append(loss.item())
+    
+    return
+
 
 def extract_features(data, model, classes, memory_path, load_memory=False):
 
@@ -200,6 +245,10 @@ def extract_features(data, model, classes, memory_path, load_memory=False):
 
 
     return train_rep, train_cls_rep, labels_rep
+
+
+
+
 
 
 def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n,

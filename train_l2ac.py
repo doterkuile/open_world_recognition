@@ -52,6 +52,7 @@ def main():
 		os.makedirs(exp_folder)
 	figure_path = exp_folder + '/' + exp_name
 	results_path = exp_folder + '/' + exp_name + '_results.npz'
+	sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
 	model_path = exp_folder + '/' + exp_name + '_model.pt'
 	config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
 
@@ -68,13 +69,16 @@ def main():
 
 
 
+
+
 	train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	test_dataset = ObjectDatasets.MetaDataset(config['dataset_path'], config['top_n'], config['top_k'],
 											  train_classes, train_samples_per_cls, train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	(trn_metrics, tst_metrics) = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
+
+	trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
 																			   criterion, optimizer, device, probability_treshold)
 
 	# Train metrics
@@ -105,11 +109,39 @@ def main():
 	plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
 	plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
+
+	# Plot similarities
+	trn_final_same_cls = trn_similarity_scores['final_same_cls']
+	trn_intermediate_same_cls = trn_similarity_scores['intermediate_same_cls']
+	trn_final_diff_cls = trn_similarity_scores['final_diff_cls']
+	trn_intermediate_diff_cls = trn_similarity_scores['intermediate_diff_cls']
+	tst_final_same_cls = tst_similarity_scores['final_same_cls']
+	tst_intermediate_same_cls = tst_similarity_scores['intermediate_same_cls']
+	tst_final_diff_cls = tst_similarity_scores['final_diff_cls']
+	tst_intermediate_diff_cls = tst_similarity_scores['intermediate_diff_cls']
+
+	plot_utils.plot_intermediate_similarity(trn_intermediate_same_cls,trn_intermediate_diff_cls, tst_intermediate_same_cls, tst_intermediate_diff_cls, figure_path)
+	plot_utils.plot_final_similarity(trn_final_same_cls,trn_final_diff_cls, tst_final_same_cls, tst_final_diff_cls, figure_path)
+
+
+
 	OpenWorldUtils.saveModel(model, model_path)
 
 	np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
 			 train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
 			 test_recall=tst_recall, train_F1=trn_F1, test_F1=tst_F1)
+
+	np.savez(sim_path,
+			 trn_final_same_cls=trn_similarity_scores['final_same_cls'],
+			 trn_intermediate_same_cls=trn_similarity_scores['intermediate_same_cls'],
+			 trn_final_diff_cls=trn_similarity_scores['final_diff_cls'],
+			 trn_intermediate_diff_cls=trn_similarity_scores['intermediate_diff_cls'],
+			 tst_final_same_cls=tst_similarity_scores['final_same_cls'],
+			 tst_intermediate_same_cls=tst_similarity_scores['intermediate_same_cls'],
+			 tst_final_diff_cls=tst_similarity_scores['final_diff_cls'],
+			 tst_intermediate_diff_cls=tst_similarity_scores['intermediate_diff_cls'],
+			 )
+
 
 	return
 

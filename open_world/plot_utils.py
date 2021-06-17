@@ -80,3 +80,33 @@ def plot_mean_prediction(trn_pred, trn_true, tst_pred, tst_true, figure_path):
     plt.legend()
     fig.savefig(figure_path + '_mean_pred')
     return
+
+
+def plot_intermediate_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls, figure_path):
+
+
+    fig = plt.figure()
+    plt.plot(trn_same_cls, label='Training same class', alpha=1, color='blue')
+    plt.plot(trn_diff_cls, label='Training diff class', alpha=0.4, color='blue')
+    plt.plot(tst_same_cls, label='Validation same class', alpha=1, color='orange')
+    plt.plot(tst_diff_cls, label='Validation diff class', alpha=0.4, color='orange')
+    plt.ylabel('Similarity score')
+    plt.xlabel('Epochs')
+    plt.title('Intermediate similarity_score')
+    plt.legend()
+    fig.savefig(figure_path + '_intermediate_similarity')
+    return
+
+
+def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls, figure_path):
+    fig = plt.figure()
+    plt.plot(trn_same_cls, label='Training same class', alpha=1, color='blue')
+    plt.plot(trn_diff_cls, label='Training diff class', alpha=0.4, color='blue')
+    plt.plot(tst_same_cls, label='Validation same class', alpha=1, color='orange')
+    plt.plot(tst_diff_cls, label='Validation diff class', alpha=0.4, color='orange')
+    plt.ylabel('Similarity score')
+    plt.xlabel('Epochs')
+    plt.title('Final similarity_score')
+    plt.legend()
+    fig.savefig(figure_path + '_final_similarity')
+    return
