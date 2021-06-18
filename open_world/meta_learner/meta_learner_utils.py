@@ -75,7 +75,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             y_true.extend(y_train.cpu())
             # Update parameters
             optimizer.zero_grad()
-            model.reset_hidden()
             trn_loss.backward()
             optimizer.step()
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)

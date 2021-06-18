@@ -147,10 +147,9 @@ class L2AC(torch.nn.Module):
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
-        self.reset_hidden()
 
     def forward(self,x0, x1):
-        self.reset_hidden()
+        self.reset_hidden(x0.shape[0])
 
         x = self.similarity_function(x0, x1)
 
@@ -171,9 +170,9 @@ class L2AC(torch.nn.Module):
         x = x.sigmoid()
         return x
 
-    def reset_hidden(self):
-        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
 class L2AC_cosine(torch.nn.Module):
 
@@ -188,10 +187,9 @@ class L2AC_cosine(torch.nn.Module):
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
-        self.reset_hidden()
 
     def forward(self,x0, x1):
-        self.reset_hidden()
+        self.reset_hidden(x0.shape[0])
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x = torch.cosine_similarity(x0, x1, dim=2).reshape(x0.shape[0],-1,1)
         x = x.sigmoid()
@@ -199,9 +197,9 @@ class L2AC_cosine(torch.nn.Module):
         x = self.fc3(x.reshape(x.shape[0], -1))
         return x
 
-    def reset_hidden(self):
-        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
 
 class L2AC_no_lstm(torch.nn.Module):
@@ -247,7 +245,7 @@ class L2AC_no_lstm(torch.nn.Module):
         x0 = torch.cat((x_abssub, x_add), dim=2)
         return x0
 
-    def reset_hidden(self):
+    def reset_hidden(self, batch_size):
         pass
 
 
@@ -270,10 +268,9 @@ class L2AC_extended_similarity(torch.nn.Module):
         self.fc5 = nn.Linear(128, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc6 = nn.Linear(2 * self.hidden_size, 1)
-        self.reset_hidden()
 
     def forward(self,x0, x1):
-        self.reset_hidden()
+        self.reset_hidden(x0.shape[0])
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
@@ -298,9 +295,9 @@ class L2AC_extended_similarity(torch.nn.Module):
         x0 = torch.cat((x_abssub, x_add), dim=2)
         return x0
 
-    def reset_hidden(self):
-        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
 class L2AC_smaller_fc(torch.nn.Module):
 
@@ -318,10 +315,9 @@ class L2AC_smaller_fc(torch.nn.Module):
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
-        self.reset_hidden()
 
     def forward(self, x0, x1):
-        self.reset_hidden()
+        self.reset_hidden(x0.shape[0])
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x0 = F.relu(self.fc_reduce(x0))
         x1 = F.relu(self.fc_reduce(x1))
@@ -342,9 +338,9 @@ class L2AC_smaller_fc(torch.nn.Module):
         x0 = torch.cat((x_abssub, x_add), dim=2)
         return x0
 
-    def reset_hidden(self):
-        self.hidden = (torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, self.batch_size, self.hidden_size).to('cuda'))
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
 
 def main():

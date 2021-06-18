@@ -65,6 +65,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     if multiple_gpu:
         print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
         model = nn.DataParallel(model)
+        batch_size = batch_size * torch.cuda.device_count()
 
     if not enable_training:
         print('Load model ' + model_path)
