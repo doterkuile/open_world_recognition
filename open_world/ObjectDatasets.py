@@ -185,7 +185,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
                 # transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                # transforms.Normalize(mean=mean_pixel, std=std_pixel),
+                transforms.Normalize(mean=mean_pixel, std=std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
@@ -193,7 +193,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
             # transforms.CenterCrop(224),
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Normalize(mean=mean_pixel, std=std_pixel),
 
         ])
 

@@ -97,13 +97,13 @@ class CATDOGNetwork(nn.Module):
 
 
 class ResNet50(models.ResNet):
-    def __init__(self, model_path, num_classes):
+    def __init__(self, model_path, train_classes, batch_size, top_k):
 
         super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
         self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
         for param in self.parameters():
             param.requires_grad = False
-        self.fc = nn.Linear(512 , num_classes)
+        self.fc = nn.Linear(2048 , train_classes)
         self.model_path = model_path
 
 

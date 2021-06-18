@@ -33,42 +33,24 @@ def main():
 	else:
 		print(f"Running with {torch.cuda.device_count()} GPUs")
 	# Get config file argument
-	transform_train = transforms.Compose([
-		# transforms.Resize(256),
-		# transforms.CenterCrop(224),
-		transforms.ToTensor(),
-		transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-		# transforms.Normalize(mean=mean_pixel, std=std_pixel),
-	])
+	parser = argparse.ArgumentParser()
+	parser.add_argument("config_file")
+	args = parser.parse_args()
+	config_file = args.config_file
 
-	transform_test = transforms.Compose([
-		# transforms.Resize(256),
-		# transforms.CenterCrop(224),
-		transforms.ToTensor(),
-		transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-		# transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+	# Parse config file
+	(dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
+		config_file, device, multiple_gpu)
 
-	])
-	dataset_path = 'datasets/CIFAR100'
-	model = resnet50(pretrained=True).to(device)
-	for param in model.parameters():
-		param.requires_grad = False
+	dataset_path = config['dataset_path']
+	train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=dataset.transform_train)
+	test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=dataset.transform_test)
 
-	model.fc = nn.Linear(2048, 100).to(device)
-
-	batch_size = 50
-	epochs = 200
-	criterion = nn.CrossEntropyLoss()
-	optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-
-	train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=transform_train)
-	test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=transform_test)
 	test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 	train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-	trn_metrics, tst_metrics = trainMetaModel(model, train_loader,test_loader,epochs, criterion,optimizer,device)
+	trn_metrics, tst_metrics = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
 
 	# Train metrics
 	trn_loss = trn_metrics['loss']
@@ -150,7 +132,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 			# Tally the number of correct predictions
 			predicted = torch.max(y_out.data, 1)[1]
 
-			batch_corr = (predicted == y_train.squeeze(1)).sum()
+			batch_corr = (predicted == y_train.squeeze()).sum()
 			trn_corr += batch_corr
 
 			y_pred.extend(predicted.cpu())
