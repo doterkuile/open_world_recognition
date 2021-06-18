@@ -142,6 +142,7 @@ class L2AC(torch.nn.Module):
 
         self.batch_size = batch_size
         self.hidden_size = 1
+        self.dropout = nn.Dropout(p=0.5)
         self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
@@ -165,7 +166,7 @@ class L2AC(torch.nn.Module):
         x_add = x.add(x1)
         x = torch.cat((x_abssub, x_add), dim=2)
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout(x)
         x = self.fc2(x)
         x = x.sigmoid()
         return x
@@ -182,6 +183,7 @@ class L2AC_cosine(torch.nn.Module):
         self.input_size = 2048
         self.batch_size = batch_size
         self.hidden_size = 1
+        self.dropout = nn.Dropout(p=0.5)
         self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
@@ -211,6 +213,9 @@ class L2AC_no_lstm(torch.nn.Module):
         self.batch_size = batch_size
         self.top_k = top_k
         self.hidden_size = 1
+        self.dropout_0_5 = nn.Dropout(p=0.5)
+        self.dropout_0_25 = nn.Dropout(p=0.25)
+        self.dropout_0_1 = nn.Dropout(p=0.1)
         self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
         self.fc2 = nn.Linear(self.input_size, 1)
         self.fc3 = nn.Linear(self.top_k, 256)
@@ -222,15 +227,15 @@ class L2AC_no_lstm(torch.nn.Module):
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout_0_5(x)
         x = self.fc2(x)
         x = x.sigmoid()
         x = F.relu(self.fc3(x.reshape(x.shape[0],-1)))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout_0_5(x)
         x = F.relu(self.fc4(x))
-        x = F.dropout(x, p=0.25)
+        x = self.dropout_0_25(x)
         x = F.relu(self.fc5(x))
-        x = F.dropout(x, p=0.1)
+        x = self.dropout_0_1(x)
         x = self.fc6(x.reshape(x.shape[0], -1))
 
         return x
@@ -254,6 +259,10 @@ class L2AC_extended_similarity(torch.nn.Module):
         self.input_size = 2048
         self.batch_size = batch_size
         self.hidden_size = 1
+        self.dropout_0_5 = nn.Dropout(p=0.5)
+        self.dropout_0_25 = nn.Dropout(p=0.25)
+        self.dropout_0_1 = nn.Dropout(p=0.1)
+
         self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
         self.fc2 = nn.Linear(self.input_size, 1024)
         self.fc3 = nn.Linear(1024, 512)
@@ -268,13 +277,13 @@ class L2AC_extended_similarity(torch.nn.Module):
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout_0_5(x)
         x = F.relu(self.fc2(x))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout_0_5(x)
         x = F.relu(self.fc3(x))
-        x = F.dropout(x, p=0.25)
+        x = self.dropout_0_25(x)
         x = F.relu(self.fc4(x))
-        x = F.dropout(x, p=0.1)
+        x = self.dropout_0_1(x)
         x = F.relu(self.fc5(x))
         x = x.sigmoid()
         x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
@@ -302,6 +311,8 @@ class L2AC_smaller_fc(torch.nn.Module):
 
         self.batch_size = batch_size
         self.hidden_size = 1
+        self.dropout = nn.Dropout(p=0.5)
+
         self.fc_reduce = nn.Linear(self.feature_size, self.input_size)
         self.fc1 = nn.Linear(2 * self.input_size, self.input_size)
         self.fc2 = nn.Linear(self.input_size, 1)
@@ -316,7 +327,7 @@ class L2AC_smaller_fc(torch.nn.Module):
         x1 = F.relu(self.fc_reduce(x1))
         x = self.similarity_function(x0, x1)
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5)
+        x = self.dropout(x)
         x = self.fc2(x)
         x = x.sigmoid()
         x, cell_state = self.lstm(x.view(x.shape[0], -1, x.shape[1]), self.hidden)

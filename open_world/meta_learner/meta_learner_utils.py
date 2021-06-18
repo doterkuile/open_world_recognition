@@ -106,7 +106,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores
 
 
-def validate_model(loader, model, criterion, device,probability_threshold):
+def validate_model(loader, model, criterion, device, probability_threshold):
     num_correct = 0
     num_samples = 0
 
@@ -155,6 +155,7 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
 
     # Set model to eval
     model.eval()
+
     with torch.no_grad():
         for b, ([X0, X1], y_true, [X0_labels, X1_labels]) in enumerate(data_loader):
             break
@@ -190,6 +191,8 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
     similarity_dict['intermediate_same_cls'].append(intermediate_same_cls.item())
     similarity_dict['final_diff_cls'].append(final_diff_cls.item())
     similarity_dict['intermediate_diff_cls'].append(intermediate_diff_cls.item())
+
+
     model.train()
     return
 
