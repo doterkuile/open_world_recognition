@@ -33,19 +33,18 @@ conda_env=l2acenv
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(0037)
+array_1=(0033 0034 0035 0036 0040)
 var_2=top_n
-array_2=(9)
+array_2=(4 4 4 4 4)
 var_3=model_class
-array_3=(L2AC)
-#array_3=(L2AC L2AC_cosine L2AC_no_lstm L2AC_extended_similarity)
+array_3=(L2AC L2AC_cosine L2AC_no_lstm L2AC_extended_similarity L2AC_smaller_fc)
 len=${#array_1[@]}
 
 
 
 
 var_4=epochs
-value_4=200
+value_4=2
 
 conda activate $conda_env
 
