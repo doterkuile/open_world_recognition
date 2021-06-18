@@ -137,7 +137,8 @@ class L2AC(torch.nn.Module):
 
     def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
         super(L2AC, self).__init__()
-        self.feature_size = 2048
+        # self.feature_size = 2048
+        self.feature_size = 512
         self.input_size = 2048
 
         self.batch_size = batch_size
@@ -153,7 +154,7 @@ class L2AC(torch.nn.Module):
 
         x = self.similarity_function(x0, x1)
 
-        x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
+        x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
         return x

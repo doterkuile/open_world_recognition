@@ -42,7 +42,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     weights = np.ones(batch_size-1) * 1/(top_n+1)
     weights = np.append(weights, (top_n)/(top_n+1))
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
-    pos_weight = torch.tensor([(top_n)/(top_n+1)]).to(device)
+    pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
 
     ## Classes
     # Load dataset
@@ -70,8 +70,8 @@ def parseConfigFile(config_file, device, multiple_gpu):
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    # criterion = eval('nn.' + config['criterion'])(pos_weight)
-    criterion = eval('nn.' + config['criterion'])()
+    criterion = eval('nn.' + config['criterion'])(pos_weight)
+    # criterion = eval('nn.' + config['criterion'])()
 
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 

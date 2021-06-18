@@ -1,8 +1,11 @@
 from sklearn import metrics
 import numpy as np
 import torch
+import torch.nn as nn
 import time
 from tqdm import tqdm
+import math
+
 
 
 
@@ -47,6 +50,9 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
 
+
+            optimizer.zero_grad()
+
             X0_train = X0_train.to(device)
             X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
@@ -74,7 +80,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             y_pred.extend(predicted.cpu())
             y_true.extend(y_train.cpu())
             # Update parameters
-            optimizer.zero_grad()
             trn_loss.backward()
             optimizer.step()
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
@@ -131,7 +136,6 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
             loss = criterion(y_val, y_test)
 
-
             predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
@@ -147,6 +151,13 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
     return y_pred, y_true, loss
+
+
+def test_bce(y_pred, y_true):
+    sig = lambda x: 1/ (1 + math.exp( -x))
+    bce_loss = - (y_true * math.log(sig(y_pred)) + (1- y_true) * math.log(1 - sig(y_pred)))
+
+    return bce_loss
 
 
 def validate_similarity_scores(similarity_dict, model, data_loader, device):
@@ -174,16 +185,27 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
 
         # make sure to select only x1 samples of a different class
         idx_diff_class = (y_true == 0).nonzero().squeeze()
+        idx_same_class = (y_true == 1).nonzero().squeeze()
 
 
         # Get final similarity score output for different class sample
-        y_out_diff = model(X0, X1).sigmoid()
-        y_out_diff = y_out_diff[idx_diff_class].squeeze()
+        y_out = model(X0, X1).sigmoid()
+
+        y_out_same = y_out[idx_same_class].squeeze()
+        final_same_cls = y_out_same.mean()
+
+        y_out_diff = y_out[idx_diff_class].squeeze()
         final_diff_cls = y_out_diff.mean()
 
+
+
         # Get intermediate similarity score for different class sample
-        y_out_diff = model.similarity_function(X0, X1)
-        y_out_diff = y_out_diff[idx_diff_class].squeeze()
+        y_out = model.similarity_function(X0, X1)
+
+        y_out_same = y_out[idx_same_class].squeeze()
+        intermediate_same_cls = y_out_same.mean()
+
+        y_out_diff = y_out[idx_diff_class].squeeze()
         intermediate_diff_cls = y_out_diff.mean()
         
     similarity_dict['final_same_cls'].append(final_same_cls.item())

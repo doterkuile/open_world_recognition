@@ -94,6 +94,8 @@ def main():
         config_evaluate = yaml.load(file, Loader=yaml.FullLoader)
 
     exp_name = config_evaluate['name']
+    batch_size = config_evaluate['batch_size']
+
     exp_folder = 'output/' + exp_name
     train_config_file = exp_folder + '/' + exp_name + '_config.yaml'
 
@@ -109,11 +111,11 @@ def main():
     train_classes = config['train_classes']
     train_samples_per_cls = config['train_samples_per_cls']
     probability_treshold = config['probability_threshold']
-    batch_size = config['batch_size']
+    criterion = eval('nn.' + config['criterion'])()
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
     trn_similarity_scores = {'final_same_cls': [],
                              'intermediate_same_cls': [],
@@ -126,7 +128,10 @@ def main():
                              'intermediate_diff_cls': [],
                              }
 
-    meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+    # meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+    # meta_utils.validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
+    criterion = nn.BCEWithLogitsLoss(reduction='none')
+    y_pred, y_true, tst_loss = meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
 
     #
     # plot_utils.plot_intermediate_similarity(trn_intermediate_same_cls, trn_intermediate_diff_cls,
