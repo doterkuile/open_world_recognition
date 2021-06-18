@@ -169,7 +169,7 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         final_same_cls = y_out_same.mean()
 
         # Get intermediate similarity score for same identical sample
-        y_out_same = model.similarity_function(X0, X0_extend)
+        y_out_same = model.module.similarity_function(X0, X0_extend)
         intermediate_same_cls = y_out_same.mean()
 
         # make sure to select only x1 samples of a different class
@@ -182,7 +182,7 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         final_diff_cls = y_out_diff.mean()
 
         # Get intermediate similarity score for different class sample
-        y_out_diff = model.similarity_function(X0, X1)
+        y_out_diff = model.module.similarity_function(X0, X1)
         y_out_diff = y_out_diff[idx_diff_class].squeeze()
         intermediate_diff_cls = y_out_diff.mean()
         

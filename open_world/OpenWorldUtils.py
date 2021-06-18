@@ -62,11 +62,10 @@ def parseConfigFile(config_file, device, multiple_gpu):
     model = eval('RecognitionModels.' + model_class)(model_path, train_classes, batch_size, top_k).to(device)
 
     # If multiple gpu's available
-    if multiple_gpu:
-        print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
-        model = nn.DataParallel(model)
-        batch_size = batch_size * torch.cuda.device_count()
-
+    # if multiple_gpu:
+    #     print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
+    #     batch_size = batch_size * torch.cuda.device_count()
+    # model = nn.parallel.DistributedDataParallel(model)
     if not enable_training:
         print('Load model ' + model_path)
         loadModel(model, model_path)
