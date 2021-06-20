@@ -52,6 +52,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
                                                       ,enable_training,  same_class_reverse, same_class_extend_entries)
 
+    features_size = len(dataset.memory[0])
 
     # Load model
     if config['name'] == 'encoder':
@@ -59,7 +60,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     else:
         model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, train_classes, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(model_path, train_classes,features_size, batch_size, top_k).to(device)
 
     # If multiple gpu's available
     # if multiple_gpu:

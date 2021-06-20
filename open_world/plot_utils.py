@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
 
 def plot_losses(train_losses, test_losses, figure_path):
 
@@ -110,3 +113,56 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     plt.legend()
     fig.savefig(figure_path + '_final_similarity')
     return
+
+
+def plot_prob_density(trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_path):
+
+
+    # make sure to select only x1 samples of a different class
+    trn_idx_diff_class = (y_trn == 0).nonzero()[0].squeeze()
+    trn_idx_same_class = (y_trn == 1).nonzero()[0].squeeze()
+
+    if len(trn_sim_score.shape) == 2:
+        trn_sim_score_same = trn_sim_score[trn_idx_same_class,:].reshape(-1)
+        trn_sim_score_diff = trn_sim_score[trn_idx_diff_class,:].reshape(-1)
+    else:
+        trn_sim_score_same = trn_sim_score[trn_idx_same_class]
+        trn_sim_score_diff = trn_sim_score[trn_idx_diff_class]
+    trn_label = np.full((len(trn_sim_score_same)), 'trn_same')
+    trn_label2 = np.full((len(trn_sim_score_diff)), 'trn_diff')
+
+    tst_idx_diff_class = (y_tst == 0).nonzero()[0].squeeze()
+    tst_idx_same_class = (y_tst == 1).nonzero()[0].squeeze()
+
+    if len(trn_sim_score.shape) == 2:
+        tst_sim_score_same = tst_sim_score[tst_idx_same_class,:].reshape(-1)
+        tst_sim_score_diff = tst_sim_score[tst_idx_diff_class,:].reshape(-1)
+    else:
+        tst_sim_score_same = tst_sim_score[tst_idx_same_class]
+        tst_sim_score_diff = tst_sim_score[tst_idx_diff_class]
+
+    tst_label = np.full((len(tst_sim_score_same)), 'tst_same')
+    tst_label2 = np.full((len(tst_sim_score_diff)), 'tst_diff')
+
+    scores_combined = np.concatenate([trn_sim_score_same, trn_sim_score_diff, tst_sim_score_same, tst_sim_score_diff], axis=0)
+    labels_combined = np.concatenate([trn_label, trn_label2, tst_label, tst_label2], axis=0)
+    # scores = pd.DataFrame(scores_combined, columns=['score'])
+    score_dict = {'score': scores_combined,
+                   'class': labels_combined}
+
+    scores = pd.DataFrame.from_dict(score_dict)
+    scores['score'] = scores['score'].astype(float)
+    scores['class'] = scores['class'].astype(str)
+
+
+    fig = plt.figure()
+    sns.kdeplot(
+        data=scores, x="score", hue="class",
+        fill=True, common_norm=False, palette="muted",
+        alpha=0.8, linewidth=0, multiple='layer'
+    )
+
+    # giving title to the plot
+    plt.title(title)
+
+    fig.savefig(figure_path)

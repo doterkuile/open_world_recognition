@@ -5,6 +5,7 @@ import torch.nn as nn
 import time
 from tqdm import tqdm
 import math
+from open_world import plot_utils
 
 
 
@@ -46,6 +47,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_corr = 0
         y_pred =[]
         y_true = []
+        sim_scores = []
 
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
@@ -63,7 +65,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             b += 1
 
             # Apply the model
-            y_out = model(X0_train, X1_train)
+            y_out, sim_score = model(X0_train, X1_train)
 
             trn_loss = criterion(y_out, y_train)
 
@@ -79,6 +81,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             y_pred.extend(predicted.cpu())
             y_true.extend(y_train.cpu())
+            sim_scores.extend(sim_score.cpu())
             # Update parameters
             trn_loss.backward()
             optimizer.step()
@@ -91,13 +94,18 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         # Training metrics
         y_pred = np.array(torch.cat(y_pred))
         y_true = np.array(torch.cat(y_true))
+        sim_scores = np.array(torch.cat(sim_scores,dim=1).detach()).transpose(1,0)
         calculate_metrics(trn_metrics_dict, y_pred, y_true, trn_loss)
-        
+
+        plot_utils.plot_prob_density(y_pred, sim_scores, y_true)
         # Run the testing batches
-        y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device, probability_treshold)
+        y_pred, y_true, tst_loss, sim_scores = validate_model(test_loader, model, criterion, device, probability_treshold)
         
         y_pred = np.array(torch.cat(y_pred))
         y_true = np.array(torch.cat(y_true))
+        sim_scores = np.array(torch.cat(sim_scores,dim=1).detach()).transpose(1,0)
+
+
         calculate_metrics(tst_metrics_dict, y_pred, y_true, tst_loss)
 
 
@@ -119,6 +127,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
     y_true = []
     y_pred = []
+    sim_scores = []
 
 
     with torch.no_grad():
@@ -132,32 +141,30 @@ def validate_model(loader, model, criterion, device, probability_threshold):
                 break
 
             # Apply the model
-            y_val = model(X0_test, X1_test)
+            y_val, sim_score = model(X0_test, X1_test)
+
+
 
             loss = criterion(y_val, y_test)
 
             predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
+
             y_pred.extend(predicted.cpu())
             y_true.extend(y_test.cpu())
+            sim_scores.extend(sim_score.cpu())
+
             num_correct += (predicted == y_test).sum()
             num_samples += predicted.size(0)
             b += 1
-
 
     # Toggle model back to train
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-    return y_pred, y_true, loss
+    return y_pred, y_true, loss, sim_scores
 
-
-def test_bce(y_pred, y_true):
-    sig = lambda x: 1/ (1 + math.exp( -x))
-    bce_loss = - (y_true * math.log(sig(y_pred)) + (1- y_true) * math.log(1 - sig(y_pred)))
-
-    return bce_loss
 
 
 def validate_similarity_scores(similarity_dict, model, data_loader, device):
@@ -176,12 +183,11 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         X0_extend = X0.repeat_interleave(X1.shape[1], dim=1)
 
         # Get final similarity score output for same identical sample
-        y_out_same = model(X0, X0_extend).sigmoid()
-        final_same_cls = y_out_same.mean()
+        y_out_same, sim_score = model(X0, X0_extend)
+        final_same_cls = y_out_same.sigmoid().mean()
 
         # Get intermediate similarity score for same identical sample
-        y_out_same = model.similarity_function(X0, X0_extend)
-        intermediate_same_cls = y_out_same.mean()
+        intermediate_same_cls = sim_score.mean()
 
         # make sure to select only x1 samples of a different class
         idx_diff_class = (y_true == 0).nonzero().squeeze()
@@ -189,30 +195,29 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
 
 
         # Get final similarity score output for different class sample
-        y_out = model(X0, X1).sigmoid()
+        y_out, sim_score = model(X0, X1)
 
-        y_out_same = y_out[idx_same_class].squeeze()
-        final_same_cls = y_out_same.mean()
+        y_out_diff = sim_score[idx_diff_class].squeeze()
+        intermediate_diff_cls = y_out_diff.mean()
 
         y_out_diff = y_out[idx_diff_class].squeeze()
         final_diff_cls = y_out_diff.mean()
 
 
-
         # Get intermediate similarity score for different class sample
-        y_out = model.similarity_function(X0, X1)
-
-        y_out_same = y_out[idx_same_class].squeeze()
+        y_out_same = sim_score[idx_same_class].squeeze()
         intermediate_same_cls = y_out_same.mean()
 
-        y_out_diff = y_out[idx_diff_class].squeeze()
-        intermediate_diff_cls = y_out_diff.mean()
+        y_out_same = y_out[idx_same_class].squeeze().sigmoid()
+        final_same_cls = y_out_same.mean()
+
+
+
         
     similarity_dict['final_same_cls'].append(final_same_cls.item())
     similarity_dict['intermediate_same_cls'].append(intermediate_same_cls.item())
     similarity_dict['final_diff_cls'].append(final_diff_cls.item())
     similarity_dict['intermediate_diff_cls'].append(intermediate_diff_cls.item())
-
 
     model.train()
     return

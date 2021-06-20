@@ -12,6 +12,8 @@ from open_world import OpenWorldUtils
 from open_world import ObjectDatasets
 
 from torchvision.models import resnet50
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
 from sklearn import metrics
@@ -135,12 +137,11 @@ class Identity(torch.nn.Module):
 
 class L2AC(torch.nn.Module):
 
-    def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
+    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super(L2AC, self).__init__()
-        # self.feature_size = 2048
-        self.feature_size = 512
+        self.feature_size = feature_size
+        # self.feature_size = 512
         self.input_size = 2048
-
         self.batch_size = batch_size
         self.hidden_size = 1
         self.dropout = nn.Dropout(p=0.5)
@@ -148,6 +149,11 @@ class L2AC(torch.nn.Module):
         self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
+
+        # Create hook for similarity function
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
+        # self.similarity_hook = sel
 
     def forward(self,x0, x1):
         self.reset_hidden(x0.shape[0])
@@ -157,7 +163,12 @@ class L2AC(torch.nn.Module):
         x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
-        return x
+        return x, self.selected_out['fc2']
+
+    def sim_func_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.sigmoid()
+        return hook
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
@@ -177,9 +188,9 @@ class L2AC(torch.nn.Module):
 
 class L2AC_cosine(torch.nn.Module):
 
-    def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
+    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
         super(L2AC_cosine, self).__init__()
-        self.feature_size = 2048
+        self.feature_size = feature_size
         self.input_size = 2048
         self.batch_size = batch_size
         self.hidden_size = 1
@@ -189,14 +200,15 @@ class L2AC_cosine(torch.nn.Module):
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
 
+
     def forward(self,x0, x1):
         self.reset_hidden(x0.shape[0])
 
-        x = self.similarity_function(x0, x1)
+        x_sim = self.similarity_function(x0, x1)
 
-        x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
+        x, cell_state = self.lstm(x_sim.view(x_sim.shape[0],-1, x_sim.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
-        return x
+        return x, x_sim
 
     def reset_hidden(self, batch_size):
         self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
@@ -212,9 +224,9 @@ class L2AC_cosine(torch.nn.Module):
 
 class L2AC_no_lstm(torch.nn.Module):
 
-    def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
+    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
         super(L2AC_no_lstm, self).__init__()
-        self.feature_size = 2048
+        self.feature_size = feature_size
         self.input_size = 2048
         self.batch_size = batch_size
         self.top_k = top_k
@@ -229,6 +241,10 @@ class L2AC_no_lstm(torch.nn.Module):
         self.fc5 = nn.Linear(256, 64)
         self.fc6 = nn.Linear(64, 1)
 
+        # Create hook for similarity function
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
+
     def forward(self,x0, x1):
         x = self.similarity_function(x0, x1)
 
@@ -240,7 +256,12 @@ class L2AC_no_lstm(torch.nn.Module):
         x = self.dropout_0_1(x)
         x = self.fc6(x.reshape(x.shape[0], -1))
 
-        return x
+        return x, self.selected_out['fc2']
+
+    def sim_func_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.sigmoid()
+        return hook
 
     def similarity_function(self, x0, x1):
 
@@ -261,9 +282,9 @@ class L2AC_no_lstm(torch.nn.Module):
 
 class L2AC_extended_similarity(torch.nn.Module):
 
-    def __init__(self, model_path, num_classes,  batch_size=10, top_k=5):
+    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
         super(L2AC_extended_similarity, self).__init__()
-        self.feature_size = 2048
+        self.feature_size = feature_size
         self.input_size = 2048
         self.batch_size = batch_size
         self.hidden_size = 1
@@ -279,6 +300,10 @@ class L2AC_extended_similarity(torch.nn.Module):
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc6 = nn.Linear(2 * self.hidden_size, 1)
 
+        # Create hook for similarity function
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self, 'fc5').register_forward_hook(self.sim_func_hook('fc5'))
+
     def forward(self,x0, x1):
         self.reset_hidden(x0.shape[0])
 
@@ -286,7 +311,12 @@ class L2AC_extended_similarity(torch.nn.Module):
         x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc6(x.reshape(x.shape[0], -1))
 
-        return x
+        return x, self.selected_out['fc2']
+
+    def sim_func_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.sigmoid()
+        return hook
 
     def similarity_function(self, x0, x1):
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
@@ -313,9 +343,9 @@ class L2AC_extended_similarity(torch.nn.Module):
 
 class L2AC_smaller_fc(torch.nn.Module):
 
-    def __init__(self, model_path, num_classes, batch_size=10, top_k=5):
+    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super(L2AC_smaller_fc, self).__init__()
-        self.feature_size = 2048
+        self.feature_size = feature_size
         self.input_size = 512
 
         self.batch_size = batch_size
@@ -328,6 +358,10 @@ class L2AC_smaller_fc(torch.nn.Module):
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc3 = nn.Linear(2 * self.hidden_size, 1)
 
+        # Create hook for similarity function
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
+
     def forward(self, x0, x1):
         self.reset_hidden(x0.shape[0])
 
@@ -336,7 +370,12 @@ class L2AC_smaller_fc(torch.nn.Module):
         x, cell_state = self.lstm(x.view(x.shape[0], -1, x.shape[1]), self.hidden)
         x = self.fc3(x.reshape(x.shape[0], -1))
 
-        return x
+        return x, self.selected_out['fc2']
+
+    def sim_func_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.sigmoid()
+        return hook
 
     def similarity_function(self, x0, x1):
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)

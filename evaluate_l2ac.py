@@ -13,6 +13,7 @@ import shutil
 import torch.nn as nn
 from open_world import OpenWorldUtils
 import open_world.meta_learner.meta_learner_utils as meta_utils
+import time
 
 
 
@@ -55,10 +56,12 @@ def parseConfigFile(config_file, device, multiple_gpu):
                                                             , False, same_class_reverse, same_class_extend_entries)
 
     # Load model
+    features_size = len(train_dataset.memory[0])
+
 
     model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, train_classes, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(model_path, train_classes,features_size, batch_size, top_k).to(device)
 
     # If multiple gpu's available
     if multiple_gpu:
@@ -98,6 +101,7 @@ def main():
 
     exp_folder = 'output/' + exp_name
     train_config_file = exp_folder + '/' + exp_name + '_config.yaml'
+    figure_path = exp_folder + '/' + exp_name
 
     # Overwrite terminal argument if necessary
     # config_file = 'config/L2AC_train.yaml'
@@ -128,10 +132,32 @@ def main():
                              'intermediate_diff_cls': [],
                              }
 
-    # meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+    meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
     # meta_utils.validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
-    y_pred, y_true, tst_loss = meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
+    trn_y_pred, trn_y_true, trn_loss, trn_sim_scores = meta_utils.validate_model(train_loader, model, criterion, device, probability_treshold)
+    tst_y_pred, tst_y_true, tst_loss, tst_sim_scores = meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
+
+    trn_y_pred = np.array(torch.cat(trn_y_pred))
+    trn_y_true = np.array(torch.cat(trn_y_true))
+    trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=1).detach()).transpose(1, 0)
+
+    tst_y_pred = np.array(torch.cat(tst_y_pred))
+    tst_y_true = np.array(torch.cat(tst_y_true))
+    tst_sim_scores = np.array(torch.cat(tst_sim_scores, dim=1).detach()).transpose(1, 0)
+
+    start = time.time()
+
+    title = 'Intermediate similarity_score'
+    plot_utils.plot_prob_density(trn_sim_scores, trn_y_true,tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
+
+    print("Trn scores took " + str(time.time() - start) + 's')
+    start = time.time()
+
+    title = 'Final similarity_score'
+    plot_utils.plot_prob_density(trn_y_pred, trn_y_true,tst_y_pred, tst_y_true, title, figure_path + '_final_sim_pbd')
+
+    print("Tst scores took " + str(time.time() - start) + 's')
 
     #
     # plot_utils.plot_intermediate_similarity(trn_intermediate_same_cls, trn_intermediate_diff_cls,
