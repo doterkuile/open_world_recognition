@@ -128,8 +128,8 @@ def plot_prob_density(trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_
     else:
         trn_sim_score_same = trn_sim_score[trn_idx_same_class]
         trn_sim_score_diff = trn_sim_score[trn_idx_diff_class]
-    trn_label = np.full((len(trn_sim_score_same)), 'trn_same')
-    trn_label2 = np.full((len(trn_sim_score_diff)), 'trn_diff')
+    trn_label = np.full((len(trn_sim_score_same)), 'trn same')
+    trn_label2 = np.full((len(trn_sim_score_diff)), 'trn diff')
 
     tst_idx_diff_class = (y_tst == 0).nonzero()[0].squeeze()
     tst_idx_same_class = (y_tst == 1).nonzero()[0].squeeze()
@@ -141,28 +141,49 @@ def plot_prob_density(trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_
         tst_sim_score_same = tst_sim_score[tst_idx_same_class]
         tst_sim_score_diff = tst_sim_score[tst_idx_diff_class]
 
-    tst_label = np.full((len(tst_sim_score_same)), 'tst_same')
-    tst_label2 = np.full((len(tst_sim_score_diff)), 'tst_diff')
+    tst_label = np.full((len(tst_sim_score_same)), 'tst same')
+    tst_label2 = np.full((len(tst_sim_score_diff)), 'tst diff')
 
-    scores_combined = np.concatenate([trn_sim_score_same, trn_sim_score_diff, tst_sim_score_same, tst_sim_score_diff], axis=0)
-    labels_combined = np.concatenate([trn_label, trn_label2, tst_label, tst_label2], axis=0)
+    same_scores_combined = np.concatenate([trn_sim_score_same, tst_sim_score_same], axis=0)
+    same_labels_combined = np.concatenate([trn_label, tst_label], axis=0)
     # scores = pd.DataFrame(scores_combined, columns=['score'])
-    score_dict = {'score': scores_combined,
-                   'class': labels_combined}
+    same_score_dict = {'score': same_scores_combined,
+                   'class': same_labels_combined}
 
-    scores = pd.DataFrame.from_dict(score_dict)
-    scores['score'] = scores['score'].astype(float)
-    scores['class'] = scores['class'].astype(str)
+    same_scores = pd.DataFrame.from_dict(same_score_dict)
+    same_scores['score'] = same_scores['score'].astype(float)
+    same_scores['class'] = same_scores['class'].astype(str)
 
+    diff_scores_combined = np.concatenate([trn_sim_score_diff, tst_sim_score_diff], axis=0)
+    diff_labels_combined = np.concatenate([trn_label2, tst_label2], axis=0)
+    # scores = pd.DataFrame(scores_combined, columns=['score'])
+    diff_score_dict = {'score': diff_scores_combined,
+                   'class': diff_labels_combined}
 
-    fig = plt.figure()
-    sns.kdeplot(
-        data=scores, x="score", hue="class",
-        fill=True, common_norm=False, palette="muted",
-        alpha=0.8, linewidth=0, multiple='layer'
-    )
+    diff_scores = pd.DataFrame.from_dict(diff_score_dict)
+    diff_scores['score'] = diff_scores['score'].astype(float)
+    diff_scores['class'] = diff_scores['class'].astype(str)
+
+    fig, (ax1, ax2) = plt.subplots(2,1,figsize=(15,10))
+
 
     # giving title to the plot
-    plt.title(title)
+    fig.suptitle(title, fontsize=24)
+
+    sns.kdeplot(ax=ax1,
+        data=same_scores, x="score", hue="class",
+        fill=True, common_norm=False, palette="muted",
+        alpha=0.5, linewidth=0, multiple='layer'
+    )
+
+    sns.kdeplot(ax=ax2,
+        data=diff_scores, x="score", hue="class",
+        fill=True, common_norm=False, palette="muted",
+        alpha=0.5, linewidth=0, multiple='layer'
+    )
+    # sns.histplot(ax=ax1, data=same_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
+    # sns.histplot(ax=ax2, data=diff_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
+    #
+
 
     fig.savefig(figure_path)

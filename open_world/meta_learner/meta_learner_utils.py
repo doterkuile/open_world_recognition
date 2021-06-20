@@ -99,9 +99,10 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         plot_utils.plot_prob_density(y_pred, sim_scores, y_true)
         # Run the testing batches
-        y_pred, y_true, tst_loss, sim_scores = validate_model(test_loader, model, criterion, device, probability_treshold)
+        y_pred, y_true, tst_loss, sim_scores, y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
         
         y_pred = np.array(torch.cat(y_pred))
+        y_pred_raw = np.array(torch.cat(y_pred_raw))
         y_true = np.array(torch.cat(y_true))
         sim_scores = np.array(torch.cat(sim_scores,dim=1).detach()).transpose(1,0)
 
@@ -127,6 +128,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
     y_true = []
     y_pred = []
+    y_pred_raw = []
     sim_scores = []
 
 
@@ -152,6 +154,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
             predicted[predicted > probability_threshold] = 1
 
             y_pred.extend(predicted.cpu())
+            y_pred_raw.extend(y_val.sigmoid().cpu())
             y_true.extend(y_test.cpu())
             sim_scores.extend(sim_score.cpu())
 
@@ -163,7 +166,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-    return y_pred, y_true, loss, sim_scores
+    return y_pred, y_true, loss, sim_scores, y_pred_raw
 
 
 
