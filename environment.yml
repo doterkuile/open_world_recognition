@@ -4,6 +4,7 @@ channels:
   - pytorch
   - nvidia
   - conda-forge
+  - coecms
 dependencies:
   - numpy=1.20.2
   - pandas
@@ -19,5 +20,8 @@ dependencies:
   - torchvision=0.2.2
   - pyyaml
   - tqdm=4.59.0 
+  - ipython=7.18.1
+  - celluloid=0.2.0
+  
 #  - cudatoolkit=11.1
   

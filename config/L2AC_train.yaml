@@ -14,8 +14,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 50
-
+epochs: 30
 ## L2AC parameters
 top_k: 5
 top_n: 2
@@ -34,3 +33,4 @@ same_class_extend_entries: False
 load_memory: False
 enable_training: True
 save_images: True
+create_similarity_gif: False

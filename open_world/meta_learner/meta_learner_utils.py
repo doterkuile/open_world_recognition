@@ -6,12 +6,16 @@ import time
 from tqdm import tqdm
 import math
 from open_world import plot_utils
+from IPython.display import HTML
+from celluloid import Camera
+import matplotlib.pyplot as plt
 
 
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold):
+
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold, gif_path=None):
     start_time = time.time()
 
 
@@ -40,14 +44,20 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
                         'intermediate_same_cls': [],
                         'final_diff_cls': [],
                         'intermediate_diff_cls': [],
-                        }   
+                        }
 
+    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
+    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
+
+    camera_sim = Camera(fig_sim)
+    camera_final = Camera(fig_final)
 
     for i in range(epochs):
         trn_corr = 0
-        y_pred =[]
-        y_true = []
-        sim_scores = []
+        trn_y_pred =[]
+        trn_y_pred_raw = []
+        trn_y_true = []
+        trn_sim_scores = []
 
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
@@ -79,9 +89,10 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
 
-            y_pred.extend(predicted.cpu())
-            y_true.extend(y_train.cpu())
-            sim_scores.extend(sim_score.cpu())
+            trn_y_pred.extend(predicted.cpu())
+            trn_y_true.extend(y_train.cpu())
+            trn_y_pred_raw.extend(y_out.cpu())
+            trn_sim_scores.extend(sim_score.cpu())
             # Update parameters
             trn_loss.backward()
             optimizer.step()
@@ -92,22 +103,40 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
               f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
         # Training metrics
-        y_pred = np.array(torch.cat(y_pred))
-        y_true = np.array(torch.cat(y_true))
-        sim_scores = np.array(torch.cat(sim_scores,dim=1).detach()).transpose(1,0)
-        calculate_metrics(trn_metrics_dict, y_pred, y_true, trn_loss)
+        trn_y_pred = np.array(torch.cat(trn_y_pred))
+        trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw).detach())
+        trn_y_true = np.array(torch.cat(trn_y_true))
+        trn_sim_scores = np.array(torch.cat(trn_sim_scores,dim=1).detach()).transpose(1,0)
+        calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
 
-        plot_utils.plot_prob_density(y_pred, sim_scores, y_true)
+
+
         # Run the testing batches
-        y_pred, y_true, tst_loss, sim_scores, y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
+        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
+
+
         
-        y_pred = np.array(torch.cat(y_pred))
-        y_pred_raw = np.array(torch.cat(y_pred_raw))
-        y_true = np.array(torch.cat(y_true))
-        sim_scores = np.array(torch.cat(sim_scores,dim=1).detach()).transpose(1,0)
+        tst_y_pred = np.array(torch.cat(tst_y_pred))
+        tst_y_pred_raw = np.array(torch.cat(tst_y_pred_raw))
+        tst_y_true = np.array(torch.cat(tst_y_true))
+        tst_sim_scores = np.array(torch.cat(tst_sim_scores,dim=1).detach()).transpose(1,0)
 
 
-        calculate_metrics(tst_metrics_dict, y_pred, y_true, tst_loss)
+        if gif_path is not None:
+            title = f'Intermediate similarity score\n Epoch = {i+1}'
+            # Make gif of similarity function score
+            plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
+                                         title)
+            camera_sim.snap()
+
+
+            title = f'Final similarity score\n Epoch = {i}'
+            # Make gif of similarity function score
+            plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
+                                         title)
+            camera_final.snap()
+
+        calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
 
         validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
@@ -115,6 +144,16 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
+
+    if gif_path is not None:
+
+        anim_sim = camera_sim.animate()
+        anim_final = camera_final.animate()
+        anim_sim.save(gif_path + '_intermediate_similarity.gif')
+        anim_final.save(gif_path + '_final_similarity.gif')
+
+
+
 
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores
 

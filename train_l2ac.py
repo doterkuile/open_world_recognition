@@ -10,6 +10,9 @@ from torch.utils.data import DataLoader
 import argparse
 import os
 import shutil
+import matplotlib.pyplot as plt
+
+
 
 
 def main():
@@ -66,7 +69,7 @@ def main():
 	train_classes = config['train_classes']
 	train_samples_per_cls = config['train_samples_per_cls']
 	probability_treshold = config['probability_threshold']
-
+	create_similarity_gif = config['create_similarity_gif']
 
 
 
@@ -77,9 +80,13 @@ def main():
 											  train_classes, train_samples_per_cls, train=False)
 	test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
+	gif_path = None
+
+	if create_similarity_gif:
+		gif_path = exp_folder + '/' + exp_name
 
 	trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores = meta_utils.trainMetaModel(model, train_loader, test_loader, epochs,
-																			   criterion, optimizer, device, probability_treshold)
+																			   criterion, optimizer, device, probability_treshold, gif_path)
 
 	# Train metrics
 	trn_loss = trn_metrics['loss']
@@ -123,6 +130,37 @@ def main():
 	plot_utils.plot_intermediate_similarity(trn_intermediate_same_cls,trn_intermediate_diff_cls, tst_intermediate_same_cls, tst_intermediate_diff_cls, figure_path)
 	plot_utils.plot_final_similarity(trn_final_same_cls,trn_final_diff_cls, tst_final_same_cls, tst_final_diff_cls, figure_path)
 
+	trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(train_loader, model,
+																								 criterion, device,
+																								 probability_treshold)
+	tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(test_loader, model,
+																								 criterion, device,
+																								 probability_treshold)
+
+	trn_y_pred = np.array(torch.cat(trn_y_pred))
+	trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw))
+	trn_y_true = np.array(torch.cat(trn_y_true))
+
+	trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=1).detach()).transpose(1, 0)
+
+	tst_y_pred = np.array(torch.cat(tst_y_pred))
+	tst_y_pred_raw = np.array(torch.cat(tst_y_pred_raw))
+	tst_y_true = np.array(torch.cat(tst_y_true))
+	tst_sim_scores = np.array(torch.cat(tst_sim_scores, dim=1).detach()).transpose(1, 0)
+
+	fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
+	fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
+
+
+
+	title = 'Intermediate similarity score'
+	plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title,
+								 figure_path + '_intermediate_similarity')
+
+
+	title = 'Final similarity score'
+	plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true, title,
+								 figure_path + '_final_similarity')
 
 
 	OpenWorldUtils.saveModel(model, model_path)

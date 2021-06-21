@@ -115,8 +115,11 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     return
 
 
-def plot_prob_density(trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_path):
+def plot_prob_density(fig, axs, trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_path=None):
 
+    if len(axs) != 2:
+        print('Axes not correct, no prob density plotted')
+        return
 
     # make sure to select only x1 samples of a different class
     trn_idx_diff_class = (y_trn == 0).nonzero()[0].squeeze()
@@ -164,26 +167,26 @@ def plot_prob_density(trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_
     diff_scores['score'] = diff_scores['score'].astype(float)
     diff_scores['class'] = diff_scores['class'].astype(str)
 
-    fig, (ax1, ax2) = plt.subplots(2,1,figsize=(15,10))
-
+    # fig, (ax1, ax2) = plt.subplots(2,1,figsize=(15,10))
 
     # giving title to the plot
     fig.suptitle(title, fontsize=24)
 
-    sns.kdeplot(ax=ax1,
+    sns.kdeplot(ax=axs[0],
         data=same_scores, x="score", hue="class",
         fill=True, common_norm=False, palette="muted",
         alpha=0.5, linewidth=0, multiple='layer'
     )
 
-    sns.kdeplot(ax=ax2,
+    sns.kdeplot(ax=axs[1],
         data=diff_scores, x="score", hue="class",
         fill=True, common_norm=False, palette="muted",
         alpha=0.5, linewidth=0, multiple='layer'
     )
-    # sns.histplot(ax=ax1, data=same_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
-    # sns.histplot(ax=ax2, data=diff_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
+    # sns.histplot(ax=axs[0], data=same_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
+    # sns.histplot(ax=axs[1], data=diff_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
     #
 
 
-    fig.savefig(figure_path)
+    if figure_path is not None:
+        fig.savefig(figure_path)

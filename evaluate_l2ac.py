@@ -132,7 +132,7 @@ def main():
                              'intermediate_diff_cls': [],
                              }
 
-    meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+    # meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
     # meta_utils.validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
     trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw= meta_utils.validate_model(train_loader, model, criterion, device, probability_treshold)
@@ -152,7 +152,7 @@ def main():
     start = time.time()
 
     title = 'Intermediate similarity score'
-    plot_utils.plot_prob_density(trn_sim_scores, trn_y_true,tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
+    plot_utils.plot_prob_density(trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
 
     print("Trn scores took " + str(time.time() - start) + 's')
     start = time.time()
