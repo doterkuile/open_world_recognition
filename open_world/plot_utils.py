@@ -172,17 +172,19 @@ def plot_prob_density(fig, axs, trn_sim_score, y_trn, tst_sim_score, y_tst, titl
     # giving title to the plot
     fig.suptitle(title, fontsize=24)
 
-    sns.kdeplot(ax=axs[0],
-        data=same_scores, x="score", hue="class",
-        fill=True, common_norm=False, palette="muted",
-        alpha=0.5, linewidth=0, multiple='layer'
-    )
-
-    sns.kdeplot(ax=axs[1],
-        data=diff_scores, x="score", hue="class",
-        fill=True, common_norm=False, palette="muted",
-        alpha=0.5, linewidth=0, multiple='layer'
-    )
+    # sns.kdeplot(ax=axs[0],
+    #     data=same_scores, x="score", hue="class",
+    #     fill=True, common_norm=False, palette="muted",
+    #     alpha=0.5, linewidth=0, multiple='layer'
+    # )
+    #
+    # sns.kdeplot(ax=axs[1],
+    #     data=diff_scores, x="score", hue="class",
+    #     fill=True, common_norm=False, palette="muted",
+    #     alpha=0.5, linewidth=0, multiple='layer'
+    # )
+    sns.histplot(ax=axs[0], data=same_scores, x='score', hue='class', stat='probability', kde=False, common_norm=False, element='bars', binrange=(0,1), binwidth=0.005)
+    sns.histplot(ax=axs[1], data=diff_scores, x='score', hue='class', stat='probability', kde=False, common_norm=False, element='bars', binrange=(0,1), binwidth=0.005)
     # sns.histplot(ax=axs[0], data=same_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
     # sns.histplot(ax=axs[1], data=diff_scores, x="score", hue="class",alpha=0.5, stat='probability',kde=True, binwidth=0.001)
     #

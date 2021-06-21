@@ -60,7 +60,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_sim_scores = []
 
         # Run the training batches
-        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
+        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=len(train_loader)):
 
 
             optimizer.zero_grad()
@@ -70,7 +70,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             y_train = y_train.view(-1, 1).to(device)
 
             # Limit the number of batches
-            if b == (len(train_loader) - 1):
+            if b == (len(train_loader)):
                 break
             b += 1
 
@@ -147,8 +147,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
     if gif_path is not None:
 
-        anim_sim = camera_sim.animate()
-        anim_final = camera_final.animate()
+        anim_sim = camera_sim.animate(repeat=False, interval=300)
+        anim_final = camera_final.animate(repeat=False, interval=300)
         anim_sim.save(gif_path + '_intermediate_similarity.gif')
         anim_final.save(gif_path + '_final_similarity.gif')
 
@@ -178,7 +178,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
             X1_test = X1_test.to(device)
             y_test = y_test.view(-1,1).to(device)
 
-            if b == (len(loader)-1):
+            if b == (len(loader)):
                 break
 
             # Apply the model
@@ -302,7 +302,7 @@ def extract_features(data, model, classes, memory_path, load_memory=False):
                 class_samples[cls] = torch.stack(class_samples[cls])
 
                 # calculate features
-                cls_rep = model(class_samples[cls].cuda())
+                out, cls_rep = model(class_samples[cls].cuda())
                 train_rep.append(cls_rep)
                 labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 

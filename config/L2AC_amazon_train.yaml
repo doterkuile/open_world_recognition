@@ -6,6 +6,8 @@ dataset_path: 'datasets/amazon'
 dataset_class: MetaDataset
 model_path: 'networks/amazon/L2AC.pt'
 model_class: L2AC
+encoder: AmazonEncoder
+feature_layer: layer
 training_history_path: 'networks/amazon/encoder/L2AC_model_history'
 figures_path: 'figures/amazon_'
 
@@ -14,7 +16,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 200
+epochs: 1
 
 
 ## L2AC parameters

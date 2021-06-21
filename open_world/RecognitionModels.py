@@ -110,21 +110,31 @@ class ResNet50(models.ResNet):
 
 
 class ResNet50Features(models.ResNet):
-    def __init__(self, model_path, num_classes, batch_size, top_k):
+    def __init__(self, model_path, feature_layer):
         super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
-        # super().__init__()
 
-        if not os.path.isfile(model_path):
-            model = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
-            torch.save(model.state_dict(), model_path)
+        self.pretrained = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
+        torch.save(self.pretrained.state_dict(), model_path)
 
-        self.load_state_dict(torch.load(model_path))
-        
-        for param in self.parameters():
+        for param in self.pretrained.parameters():
             param.requires_grad = False
-        self.fc = Identity()
 
         self.model_path = model_path
+        self.feature_layer = feature_layer
+
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self.pretrained, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+
+    def feature_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+        return hook
+
+    def forward(self, x):
+        x = self.pretrained(x)
+
+        return x, self.selected_out[self.feature_layer]
+
 
 
 class Identity(torch.nn.Module):

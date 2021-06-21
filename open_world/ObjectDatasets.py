@@ -26,7 +26,7 @@ class MetaDataset(data_utils.Dataset):
         self.n_smpl = n_smpl
         self.same_class_reverse = same_class_reverse
         self.same_class_extend_entries = same_class_extend_entries
-        self.data_path = data_path + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '_' + str(top_n) + '.npz'
+        self.data_path = data_path
         self.top_n = top_n
         self.top_k = top_k
         self.train = train
@@ -173,24 +173,19 @@ class MNISTDataset(ObjectDatasetBase):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path, top_n=9, top_k=5, n_cls=100, n_smpl=80, enable_training=True,
-                 same_class_reverse=False, same_class_extend_entries=False):
+    def __init__(self, dataset_path):
         super().__init__(dataset_path)
 
         mean_pixel = [x / 255.0 for x in [125.3, 123.0, 113.9]]
         std_pixel = [x / 255.0 for x in [63.0, 62.1, 66.7]]
 
         self.transform_train = transforms.Compose([
-                # transforms.Resize(256),
-                # transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 transforms.Normalize(mean=mean_pixel, std=std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
-            # transforms.Resize(256),
-            # transforms.CenterCrop(224),
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Normalize(mean=mean_pixel, std=std_pixel),

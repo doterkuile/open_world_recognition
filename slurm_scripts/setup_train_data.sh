@@ -36,12 +36,35 @@ file=config/$config_file
 var1=name
 var2=top_n
 
-for n in {1..10}
-do
-	echo "$n"
-	sed -i "s/$var2:.*/$var2: $n/" $file
-	python $python_script $config_file
+# Loop variables
+file=config/$config_file
+var_1=top_n	
+array_1=(1 2 9 9)
+var_2=train_classes
+array_2=(20 20 20 80)
+var_3=test_classes
+array_3=(20 20 20 80)
+len=${#array_1[@]}
 
+
+# conda activate $conda_env
+
+
+for ((i=0;i<$len; i++))
+
+do
+
+	echo "$var_1 = ${array_1[$i]}"
+	echo "$var_2 = ${array_2[$i]}"
+        echo "$var_3 = ${array_3[$i]}"
+
+	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
+	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
+
+
+	python $python_script $config_file
 done
+
 
 conda deactivate
