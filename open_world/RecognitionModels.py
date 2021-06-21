@@ -311,7 +311,7 @@ class L2AC_extended_similarity(torch.nn.Module):
         x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
         x = self.fc6(x.reshape(x.shape[0], -1))
 
-        return x, self.selected_out['fc2']
+        return x, self.selected_out['fc5']
 
     def sim_func_hook(self, layer_name):
         def hook(module, input, output):
