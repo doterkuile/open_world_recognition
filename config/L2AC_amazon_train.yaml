@@ -35,3 +35,4 @@ same_class_extend_entries: False
 load_memory: False
 enable_training: True
 save_images: True
+create_similarity_gif: True
