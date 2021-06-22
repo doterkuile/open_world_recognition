@@ -11,9 +11,12 @@ import argparse
 import os
 import shutil
 import matplotlib.pyplot as plt
+import time
 
 
 def main():
+
+    start_time = time.time()
     # set random seed
     torch.manual_seed(42)
 
@@ -163,7 +166,7 @@ def main():
              tst_final_diff_cls=tst_similarity_scores['final_diff_cls'],
              tst_intermediate_diff_cls=tst_similarity_scores['intermediate_diff_cls'],
              )
-
+    print(f'\nTotal duration: {time.time() - start_time:.0f} seconds')
     return
 
 
