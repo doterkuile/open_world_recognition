@@ -284,6 +284,7 @@ def extract_features(data, model, classes, memory_path, load_memory=False):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
+    model.eval()
 
     if load_memory:
         train_rep = np.load(memory_path)['data_rep']

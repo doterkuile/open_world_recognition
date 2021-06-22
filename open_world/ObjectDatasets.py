@@ -176,19 +176,22 @@ class CIFAR100Dataset(ObjectDatasetBase):
     def __init__(self, dataset_path):
         super().__init__(dataset_path)
 
-        mean_pixel = [x / 255.0 for x in [125.3, 123.0, 113.9]]
-        std_pixel = [x / 255.0 for x in [63.0, 62.1, 66.7]]
+        self.trn_mean_pixel = [x / 255.0 for x in [129.3, 124.1,  112.4]]
+        self.trn_std_pixel = [x / 255.0 for x in [68.2, 65.4, 70.4]]
+
+        self.tst_mean_pixel = [x / 255.0 for x in [129.7, 124.3, 112.7]]
+        self.tst_std_pixel = [x / 255.0 for x in [68.4, 65.6, 70.7]]
 
         self.transform_train = transforms.Compose([
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                transforms.Normalize(mean=mean_pixel, std=std_pixel),
+                transforms.Normalize(mean=self.mean_pixel, std=self.std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Normalize(mean=mean_pixel, std=std_pixel),
+            transforms.Normalize(mean=self.mean_pixel, std=self.std_pixel),
 
         ])
 
@@ -199,14 +202,19 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
     def getImage(self, x):
 
-        # inv_normalize = transforms.Normalize(
-        #     mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225],
-        #     std=[1 / 0.229, 1 / 0.224, 1 / 0.225]
-        # )
-        # im = inv_normalize(self.test_data[x][0])
-        im =self.test_data[x][0]
+        inv_normalize = transforms.Normalize(
+            mean=[-self.mean_pixel[0] / self.std_pixel[0], -self.mean_pixel[1] / self.std_pixel[1], -self.mean_pixel[1] / self.std_pixel[1]],
+            std=[1 / self.std_pixel[0], 1 / self.std_pixel[1], 1 / self.std_pixel[2]]
+        )
+        im = inv_normalize(self.test_data[x][0])
+        # im =self.test_data[x][0]
+        label = self.test_data[x][1]
         im = np.transpose(im.numpy(), (1, 2, 0))
-        return im
+        plt.imshow(np.transpose(im, (0, 1, 2)))
+        plt.title(self.test_data.classes[label])
+        plt.show()
+
+        return im, label
 
 
 

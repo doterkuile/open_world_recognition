@@ -131,14 +131,14 @@ def main():
     tst_y_true = np.array(torch.cat(tst_y_true))
     tst_sim_scores = np.array(torch.cat(tst_sim_scores, dim=1).detach()).transpose(1, 0)
 
-    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
-    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
 
     title = 'Intermediate similarity score'
+    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
     plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title,
                                  figure_path + '_intermediate_similarity')
 
     title = 'Final similarity score'
+    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
     plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true, title,
                                  figure_path + '_final_similarity')
 
