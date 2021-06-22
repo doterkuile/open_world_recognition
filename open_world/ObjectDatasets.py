@@ -185,13 +185,13 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.transform_train = transforms.Compose([
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                transforms.Normalize(mean=self.mean_pixel, std=self.std_pixel),
+                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Normalize(mean=self.mean_pixel, std=self.std_pixel),
+            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
 
@@ -203,15 +203,15 @@ class CIFAR100Dataset(ObjectDatasetBase):
     def getImage(self, x):
 
         inv_normalize = transforms.Normalize(
-            mean=[-self.mean_pixel[0] / self.std_pixel[0], -self.mean_pixel[1] / self.std_pixel[1], -self.mean_pixel[1] / self.std_pixel[1]],
-            std=[1 / self.std_pixel[0], 1 / self.std_pixel[1], 1 / self.std_pixel[2]]
+            mean=[-self.trn_mean_pixel[0] / self.trn_std_pixel[0], -self.trn_mean_pixel[1] / self.trn_std_pixel[1], -self.trn_mean_pixel[1] / self.trn_std_pixel[1]],
+            std=[1 / self.trn_std_pixel[0], 1 / self.trn_std_pixel[1], 1 / self.trn_std_pixel[2]]
         )
         im = inv_normalize(self.test_data[x][0])
         # im =self.test_data[x][0]
         label = self.test_data[x][1]
         im = np.transpose(im.numpy(), (1, 2, 0))
         plt.imshow(np.transpose(im, (0, 1, 2)))
-        plt.title(self.test_data.classes[label])
+        plt.title(self.train_data.classes[label])
         plt.show()
 
         return im, label
