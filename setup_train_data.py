@@ -23,14 +23,10 @@ def main():
     else:
         print(f'Running with {torch.cuda.device_count()} GPUs')
 
-    # Get config file argument
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config_file")
-    args = parser.parse_args()
-    config_file = args.config_file
+
 
     # Parse config file
-    dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config = parseConfigFile(config_file, device, multiple_gpu)
+    dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config = parseConfigFile(device, multiple_gpu)
 
 
 
@@ -79,7 +75,14 @@ def main():
     return
 
 
-def parseConfigFile(config_file, device, multiple_gpu):
+def parseConfigFile(device, multiple_gpu):
+
+    # Get config file argument
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config_file")
+    args = parser.parse_args()
+    config_file = args.config_file
+
 
     with open('config/' + config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)

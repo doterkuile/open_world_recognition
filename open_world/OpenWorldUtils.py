@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import yaml
 import os
+import argparse
+import shutil
 
 from open_world import ObjectDatasets
 from open_world import RecognitionModels
@@ -12,29 +14,47 @@ import torch.nn as nn
 
 
 
-def parseConfigFile(config_file, device, multiple_gpu):
+def parseConfigFile(device, multiple_gpu):
 
+    # Parse input argument
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config_file")
+    args = parser.parse_args()
+    config_file = args.config_file
+
+    # Open yaml file
     with open('config/' + config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    ## Training/laoding parameters:
+    # Save yaml file in output folder
+    exp_name = str(config['name'])
+    exp_folder = 'output/' + exp_name
+    if not os.path.exists(exp_folder):
+        os.makedirs(exp_folder)
+
+    config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
+    shutil.copyfile('config/' + config_file, config_save_path)
+
+
+
+    # Training/laoding parameters:
     load_memory = config['load_memory']
     save_images = config['save_images']
     enable_training = config['enable_training']
 
-    ## Training hyperparameters
+    # Training hyperparameters
     batch_size = config['batch_size']
     learning_rate = config['learning_rate']
     epochs = config['epochs']
 
-    ## L2AC Parameters
+    # L2AC Parameters
     top_k = int(config['top_k'])
     top_n = int(config['top_n'])
     train_classes = config['train_classes']
     test_classes = config['test_classes']
     train_samples_per_cls = config['train_samples_per_cls']
 
-    ## Dataset preparation parameters:
+    # Dataset preparation parameters:
     same_class_reverse = config['same_class_reverse']
     same_class_extend_entries = config['same_class_extend_entries']
 
@@ -75,7 +95,6 @@ def parseConfigFile(config_file, device, multiple_gpu):
 
     criterion = eval('nn.' + config['criterion'])(pos_weight)
     # criterion = eval('nn.' + config['criterion'])()
-
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
     # nn.BCEWithLogitsLoss(weight=)
@@ -237,8 +256,6 @@ def plotLosses(trainig_file_path, n_training, n_test, figure_path):
     plt.legend();
     plt.show()
     fig.savefig(figure_path + 'accuracy')
-
-
 
     return
 

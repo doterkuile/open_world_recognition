@@ -30,22 +30,13 @@ def main():
         print(f"Running with {torch.cuda.device_count()} GPUs")
     # Get config file argument
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config_file")
-    args = parser.parse_args()
-    config_file = args.config_file
-
     # Parse config file
-    (dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
-        config_file, device, multiple_gpu)
+    (train_dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
+        device, multiple_gpu)
 
     ## Create new entry folder for results of experiment
-    exp_name = 'no_name'
-    try:
-        exp_name = str(config['name'])
-    except KeyError:
-        print(f'No exp name was given, continuing with no_name')
 
+    exp_name = str(config['name'])
     exp_folder = 'output/' + exp_name
 
     if not os.path.exists(exp_folder):
@@ -54,11 +45,7 @@ def main():
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
-    config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
-    dataset_path = dataset.data_path
-
-    # Save config file in the exp directory
-    shutil.copyfile('config/' + config_file, config_save_path)
+    dataset_path = train_dataset.data_path
 
     # Get hyperparameters
     train_classes = config['train_classes']
@@ -66,7 +53,7 @@ def main():
     probability_treshold = config['probability_threshold']
     create_similarity_gif = config['create_similarity_gif']
 
-    train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
                                               train_classes, train_samples_per_cls, train=False)

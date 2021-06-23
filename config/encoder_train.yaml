@@ -6,6 +6,8 @@ dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: ResNet50
+encoder: ResNet50Features
+feature_layer: layer4
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
 
@@ -14,12 +16,12 @@ criterion: CrossEntropyLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 200
+epochs: 50
 
 ## L2AC parameters
 top_k: 20
 top_n: 9
-train_classes: 20
+train_classes: 100
 test_classes: 20
 train_samples_per_cls: 500
 probability_threshold: 0.5

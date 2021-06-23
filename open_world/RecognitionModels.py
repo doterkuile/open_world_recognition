@@ -98,15 +98,21 @@ class CATDOGNetwork(nn.Module):
         return F.log_softmax(X, dim=1)
 
 
-class ResNet50(models.ResNet):
-    def __init__(self, model_path, train_classes, batch_size, top_k):
+class ResNet50(nn.Module):
+    def __init__(self, model_path, train_classes):
 
-        super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
-        self.load_state_dict(model_zoo.load_url(resnet.model_urls['resnet50']))
-        for param in self.parameters():
-            param.requires_grad = False
-        self.fc = nn.Linear(2048 , train_classes)
+        super().__init__()
+        self.resnet = models.resnet50(pretrained=False)
+        # self.load_state_dict(torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=False))
+        # for param in self.parameters():
+        #     param.requires_grad = False
+        self.resnet.fc = nn.Linear(2048, train_classes)
         self.model_path = model_path
+
+    def forward(self, x):
+        x = self.resnet(x)
+        return x
+
 
 
 class ResNet50Features(models.ResNet):
