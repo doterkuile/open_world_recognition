@@ -111,15 +111,20 @@ def main():
         tst_similarity_scores['final_diff_cls'],
         figure_path)
 
+    start = time.time()
     trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(
         train_loader, model,
         criterion, device,
         probability_treshold)
+    print(f'\nTrain data validate_model duration: {time.time() - start:.0f} seconds')
+
+    start = time.time()
 
     tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(
         test_loader, model,
         criterion, device,
         probability_treshold)
+    print(f'\nTest data validate_model duration: {time.time() - start:.0f} seconds')
 
     trn_y_pred = np.array(torch.cat(trn_y_pred))
     trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw))
@@ -131,16 +136,23 @@ def main():
     tst_y_true = np.array(torch.cat(tst_y_true))
     tst_sim_scores = np.array(torch.cat(tst_sim_scores, dim=1).detach()).transpose(1, 0)
 
+    print(f'\nTrain data validate_model duration: {time.time() - start:.0f} seconds')
 
+    start = time.time()
     title = 'Intermediate similarity score'
     fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
     plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title,
                                  figure_path + '_intermediate_similarity')
 
+    print(f'\nINtermediate similarity time: {time.time() - start:.0f} seconds')
+    start = time.time()
+
     title = 'Final similarity score'
     fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
     plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true, title,
                                  figure_path + '_final_similarity')
+    print(f'\nFinal similarity time: {time.time() - start:.0f} seconds')
+    start = time.time()
 
     OpenWorldUtils.saveModel(model, model_path)
 
@@ -166,6 +178,8 @@ def main():
              tst_final_diff_cls=tst_similarity_scores['final_diff_cls'],
              tst_intermediate_diff_cls=tst_similarity_scores['intermediate_diff_cls'],
              )
+    print(f'\nSave data duration: {time.time() - start:.0f} seconds')
+
     print(f'\nTotal duration: {time.time() - start_time:.0f} seconds')
     return
 

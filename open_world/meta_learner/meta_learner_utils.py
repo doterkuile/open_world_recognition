@@ -9,6 +9,8 @@ from open_world import plot_utils
 from IPython.display import HTML
 from celluloid import Camera
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 
 
@@ -122,14 +124,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_sim_scores = np.array(torch.cat(tst_sim_scores,dim=1).detach()).transpose(1,0)
 
 
-        if gif_path is not None:
+        if gif_path is not None and (i%math.ceil(epochs/10) == 0):
             title = f'Intermediate similarity score\n Epoch = {i+1}'
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
                                          title)
             camera_sim.snap()
-
-
             title = f'Final similarity score\n Epoch = {i}'
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
@@ -143,15 +143,17 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
 
 
-    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
     if gif_path is not None:
+        writer = animation.ImageMagickFileWriter(fps=4, bitrate=1800, )
+        start = time.time()
+        anim_sim = camera_sim.animate()
+        anim_final = camera_final.animate()
+        anim_sim.save(filename=gif_path + '_intermediate_similarity.gif', writer=writer)
+        anim_final.save(gif_path + '_final_similarity.gif', writer=writer)
+        print(f'\nGIF creation duration: {time.time() - start:.0f} seconds')  # print the time elapsed
 
-        anim_sim = camera_sim.animate(repeat=False, interval=300)
-        anim_final = camera_final.animate(repeat=False, interval=300)
-        anim_sim.save(gif_path + '_intermediate_similarity.gif')
-        anim_final.save(gif_path + '_final_similarity.gif')
-
+    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
 
 
