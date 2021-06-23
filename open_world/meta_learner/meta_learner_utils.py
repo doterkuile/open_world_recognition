@@ -95,6 +95,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             trn_y_true.extend(y_train.cpu())
             trn_y_pred_raw.extend(y_out.cpu())
             trn_sim_scores.extend(sim_score.cpu())
+
             # Update parameters
             trn_loss.backward()
             optimizer.step()
@@ -115,14 +116,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         # Run the testing batches
         tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
-
-
-        
-        tst_y_pred = np.array(torch.cat(tst_y_pred))
-        tst_y_pred_raw = np.array(torch.cat(tst_y_pred_raw))
-        tst_y_true = np.array(torch.cat(tst_y_true))
-        tst_sim_scores = np.array(torch.cat(tst_sim_scores,dim=1).detach()).transpose(1,0)
-
 
         if gif_path is not None and (i%math.ceil(epochs/10) == 0):
             title = f'Intermediate similarity score\n Epoch = {i+1}'
@@ -154,8 +147,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         print(f'\nGIF creation duration: {time.time() - start:.0f} seconds')  # print the time elapsed
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
-
-
 
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores
 
@@ -207,6 +198,12 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     model.train()
     test_acc = num_correct.item() * 100 / (num_samples)
     print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
+
+    y_pred = np.array(torch.cat(y_pred))
+    y_pred_raw = np.array(torch.cat(y_pred_raw))
+    y_true = np.array(torch.cat(y_true))
+    sim_scores = np.array(torch.cat(sim_scores, dim=1).detach()).transpose(1, 0)
+
     return y_pred, y_true, loss, sim_scores, y_pred_raw
 
 

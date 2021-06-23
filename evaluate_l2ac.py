@@ -141,16 +141,6 @@ def main():
     trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw= meta_utils.validate_model(train_loader, model, criterion, device, probability_treshold)
     tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw= meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
 
-    trn_y_pred = np.array(torch.cat(trn_y_pred))
-    trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw))
-    trn_y_true = np.array(torch.cat(trn_y_true))
-
-    trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=1).detach()).transpose(1, 0)
-
-    tst_y_pred = np.array(torch.cat(tst_y_pred))
-    tst_y_pred_raw = np.array(torch.cat(tst_y_pred_raw))
-    tst_y_true = np.array(torch.cat(tst_y_true))
-    tst_sim_scores = np.array(torch.cat(tst_sim_scores, dim=1).detach()).transpose(1, 0)
 
     start = time.time()
 

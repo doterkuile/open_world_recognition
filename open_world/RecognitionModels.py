@@ -412,6 +412,55 @@ class L2AC_smaller_fc(torch.nn.Module):
                        torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
 
+class L2AC_abssub(torch.nn.Module):
+
+    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
+        super(L2AC_abssub, self).__init__()
+        self.feature_size = feature_size
+        # self.feature_size = 512
+        self.input_size = 2048
+        self.batch_size = batch_size
+        self.hidden_size = 1
+        self.dropout = nn.Dropout(p=0.5)
+        self.fc1 = nn.Linear(self.feature_size, self.input_size)
+        self.fc2 = nn.Linear(self.input_size, 1)
+        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
+
+        # Create hook for similarity function
+        self.selected_out = OrderedDict()
+        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
+        # self.similarity_hook = sel
+
+    def forward(self,x0, x1):
+        self.reset_hidden(x0.shape[0])
+
+        x = self.similarity_function(x0, x1)
+
+        x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
+        x = self.fc3(x.reshape(x.shape[0], -1))
+
+        return x, self.selected_out['fc2']
+
+    def sim_func_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.sigmoid()
+        return hook
+
+    def similarity_function(self, x0, x1):
+        x = x0.repeat_interleave(x1.shape[1], dim=1)
+        x_abssub = x.sub(x1)
+        x_abssub.abs_()
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = x.sigmoid()
+        return x
+
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
+
 def main():
     model = resnet50(pretrained=True, num_classes=1000)
     for param in model.parameters():
