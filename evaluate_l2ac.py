@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import argparse
 import os
 import shutil
+import matplotlib.pyplot as plt
 import torch.nn as nn
 from open_world import OpenWorldUtils
 import open_world.meta_learner.meta_learner_utils as meta_utils
@@ -154,13 +155,16 @@ def main():
     start = time.time()
 
     title = 'Intermediate similarity score'
-    plot_utils.plot_prob_density(trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
+    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
+
+    plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
 
     print("Trn scores took " + str(time.time() - start) + 's')
     start = time.time()
 
     title = 'Final similarity score'
-    plot_utils.plot_prob_density(trn_y_pred_raw, trn_y_true,tst_y_pred_raw, tst_y_true, title, figure_path + '_final_sim_pbd')
+    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
+    plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true,tst_y_pred_raw, tst_y_true, title, figure_path + '_final_sim_pbd')
 
     print("Tst scores took " + str(time.time() - start) + 's')
 

@@ -39,7 +39,15 @@ def main():
      config) = parseConfigFile(
         device, multiple_gpu)
 
+    exp_name = str(config['name'])
+    exp_folder = 'output/' + exp_name
+    figure_path = exp_folder + '/' + exp_name
+    results_path = exp_folder + '/' + exp_name + '_results.npz'
+    sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
+    model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = config['dataset_path']
+
+
     train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
@@ -68,8 +76,8 @@ def main():
     tst_mean_pred = tst_metrics['mean_pred']
     tst_mean_true = tst_metrics['mean_true']
 
-    figure_path = 'figures/RESNET/resnet_'
-    results_path = 'figures/RESNET/result.npz'
+    # figure_path = 'figures/RESNET/resnet_'
+    # results_path = 'figures/RESNET/result.npz'
     # Plot metrics
     plot_utils.plot_losses(trn_loss, tst_loss, figure_path)
     plot_utils.plot_accuracy(trn_acc, tst_acc, figure_path)
@@ -78,7 +86,7 @@ def main():
     plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
     plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
-    # OpenWorldUtils.saveModel(model, model_path)
+    OpenWorldUtils.saveModel(model, model_path)
 
     np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
              train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
@@ -111,20 +119,20 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         # Run the training batches
         for b, (X0_train, y_train) in tqdm(enumerate(train_loader), total=int(len(train_loader.dataset)/train_loader.batch_size)):
+
+            optimizer.zero_grad()
             X0_train = X0_train.to(device)
-            # X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
 
             # Limit the number of batches
-            if b == (len(train_loader) - 2):
+            if b == (len(train_loader)):
                 break
             b += 1
 
             # Apply the model
             y_out = model(X0_train)
-            y_out = y_out.sigmoid()
-            y_out = F.log_softmax(y_out, dim=1)
             trn_loss = criterion(y_out, y_train.squeeze(1))
+            y_out = F.log_softmax(y_out, dim=1)
 
             # Tally the number of correct predictions
             predicted = torch.max(y_out.data, 1)[1]
@@ -135,7 +143,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             y_pred.extend(predicted.cpu())
             y_true.extend(y_train.cpu())
             # Update parameters
-            optimizer.zero_grad()
             trn_loss.backward()
             optimizer.step()
         # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
@@ -278,9 +285,7 @@ def parseConfigFile(device, multiple_gpu):
     model.fc = model.fc = torch.nn.Sequential(
     torch.nn.Linear(
         in_features=2048,
-        out_features=train_classes),
-        torch.nn.Sigmoid()
-        )
+        out_features=train_classes))
     model.to(device)
 
     if not enable_training:
