@@ -26,17 +26,21 @@ module load miniconda
 
 # configuration variables
 python_script=train_resnet.py
-config_file=L2AC_train.yaml
+config_file=encoder_train.yaml
 conda_env=l2acenv
 
+file=config/$config_file
 
 
 
 var_4=epochs
 value_4=200
 
+echo "$var_4 = ${value_4}"
+sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
+
 conda activate $conda_env
 
-python $python_script 
+python $python_script $config_file
 
 conda deactivate
