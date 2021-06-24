@@ -32,15 +32,45 @@ conda_env=l2acenv
 file=config/$config_file
 
 
+# Loop variables
+file=config/$config_file
+var_1=name	
+array_1=(e0001 e0002 e0001 e0001 e0040)
+var_2=model_class
+array_2=(resnet50 resnet50 resnet152 vgg11 vgg11)
+var_3=pretrained 
+array_3=(True False True True False)
+len=${#array_1[@]}
+
+
+
 
 var_4=epochs
-value_4=200
-
-echo "$var_4 = ${value_4}"
-sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
+value_4=5
 
 conda activate $conda_env
 
-python $python_script $config_file
+
+for ((i=0;i<$len; i++))
+
+do
+
+        echo "$var_4 = ${value_4}"
+        sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
+	
+
+	echo "$var_1 = ${array_1[$i]}"
+	echo "$var_2 = ${array_2[$i]}"
+        echo "$var_3 = ${array_3[$i]}"
+
+	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
+	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
+
+
+	python $python_script $config_file
+
+done
 
 conda deactivate
+
