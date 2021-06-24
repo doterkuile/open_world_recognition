@@ -5,7 +5,7 @@ name: '0004'
 dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
-model_class: L2AC_abssub
+model_class: L2AC_smaller_fc
 encoder: ResNet50Features
 feature_layer: layer4
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'

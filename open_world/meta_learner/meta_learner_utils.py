@@ -95,7 +95,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             trn_y_pred.extend(predicted.cpu())
             trn_y_true.extend(y_train.cpu())
-            trn_y_pred_raw.extend(y_out.cpu())
+            trn_y_pred_raw.extend(y_out.sigmoid().cpu())
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
