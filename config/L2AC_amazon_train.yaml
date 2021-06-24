@@ -31,8 +31,6 @@ probability_threshold: 0.5
 same_class_reverse: False
 same_class_extend_entries: False
 
-
-
 ## Training/loading parameters
 load_memory: False
 enable_training: True

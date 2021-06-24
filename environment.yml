@@ -22,6 +22,7 @@ dependencies:
   - tqdm=4.59.0 
   - ipython=7.18.1
   - celluloid=0.2.0
+  - imageio=2.9.0
   
 #  - cudatoolkit=11.1
   

@@ -38,9 +38,20 @@ def main():
 
     exp_name = str(config['name'])
     exp_folder = 'output/' + exp_name
+    create_similarity_gif = config['create_similarity_gif']
 
     if not os.path.exists(exp_folder):
         os.makedirs(exp_folder)
+
+
+    gif_path = None
+
+    if create_similarity_gif:
+        gif_path = exp_folder + '/' + exp_name
+
+    if not os.path.exists(gif_path):
+        os.makedirs(gif_path)
+
     figure_path = exp_folder + '/' + exp_name
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
@@ -51,7 +62,6 @@ def main():
     train_classes = config['train_classes']
     train_samples_per_cls = config['train_samples_per_cls']
     probability_treshold = config['probability_threshold']
-    create_similarity_gif = config['create_similarity_gif']
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
@@ -59,10 +69,7 @@ def main():
                                               train_classes, train_samples_per_cls, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    gif_path = None
 
-    if create_similarity_gif:
-        gif_path = exp_folder + '/' + exp_name
 
     trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores = meta_utils.trainMetaModel(model,
                                                                                                        train_loader,
