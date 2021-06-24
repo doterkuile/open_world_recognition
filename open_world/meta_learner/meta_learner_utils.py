@@ -60,6 +60,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_y_pred_raw = []
         trn_y_true = []
         trn_sim_scores = []
+        trn_loss = []
 
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=len(train_loader)):
@@ -79,7 +80,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # Apply the model
             y_out, sim_score = model(X0_train, X1_train)
 
-            trn_loss = criterion(y_out, y_train)
+            batch_loss = criterion(y_out, y_train)
 
             # Tally the number of correct predictions
             predicted = y_out.detach().clone().sigmoid()
@@ -97,9 +98,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
-            trn_loss.backward()
+            batch_loss.backward()
             optimizer.step()
+            trn_loss.append(batch_loss.cpu().item())
             # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
+
+        trn_loss = np.array(trn_loss).mean()
 
         # Print epoch results
         print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
@@ -162,6 +166,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     y_pred = []
     y_pred_raw = []
     sim_scores = []
+    tst_loss = []
 
 
     with torch.no_grad():
@@ -177,9 +182,8 @@ def validate_model(loader, model, criterion, device, probability_threshold):
             # Apply the model
             y_val, sim_score = model(X0_test, X1_test)
 
-
-
-            loss = criterion(y_val, y_test)
+            batch_loss = criterion(y_val, y_test)
+            tst_loss.append(batch_loss.cpu())
 
             predicted = y_val.sigmoid()
             predicted[predicted <= probability_threshold] = 0
@@ -204,7 +208,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     y_true = np.array(torch.cat(y_true))
     sim_scores = np.array(torch.cat(sim_scores, dim=1).detach()).transpose(1, 0)
 
-    return y_pred, y_true, loss, sim_scores, y_pred_raw
+    return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
 
 
 

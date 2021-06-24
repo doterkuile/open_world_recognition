@@ -112,8 +112,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     tst_mean_pred = []
     tst_mean_true = []
 
+
+    model.train()
+
     for i in range(epochs):
         trn_corr = 0
+        trn_loss = []
         y_pred = []
         y_true = []
 
@@ -131,7 +135,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             # Apply the model
             y_out = model(X0_train)
-            trn_loss = criterion(y_out, y_train.squeeze(1))
+            batch_loss = criterion(y_out, y_train.squeeze(1))
             y_out = F.log_softmax(y_out, dim=1)
 
             # Tally the number of correct predictions
@@ -143,10 +147,13 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             y_pred.extend(predicted.cpu())
             y_true.extend(y_train.cpu())
             # Update parameters
-            trn_loss.backward()
+            batch_loss.backward()
             optimizer.step()
+            trn_loss.append(batch_loss.cpu().item())
+
         # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
+        trn_loss = np.array(trn_loss).mean()
         # Print epoch results
         print(
             f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
@@ -155,6 +162,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         # Training metrics
         y_pred = np.array(torch.stack(y_pred))
         y_true = np.array(torch.stack(y_true))
+        # trn_losses = np.array(trn_losses).mean()
 
         trn_acc.append(metrics.accuracy_score(y_true, y_pred))
         trn_precision.append(metrics.precision_score(y_true=y_true, y_pred=y_pred, average='weighted', zero_division=0))
@@ -208,6 +216,7 @@ def validate_model(loader, model, criterion, device):
 
         y_true = []
         y_pred = []
+        losses = []
 
         with torch.no_grad():
             for b, (X0_test, y_test) in enumerate(loader):
@@ -221,6 +230,7 @@ def validate_model(loader, model, criterion, device):
                 # Apply the model
                 y_val = model(X0_test)
                 loss = criterion(y_val, y_test.squeeze(1))
+                losses.append(loss.cpu())
 
                 predicted = torch.max(y_val.data, 1)[1]
                 y_pred.extend(predicted.cpu())
@@ -229,13 +239,14 @@ def validate_model(loader, model, criterion, device):
                 num_samples += predicted.size(0)
                 b += 1
 
+        losses = np.array(torch.stack(losses)).mean()
         y_pred = np.array(torch.stack(y_pred))
         y_true = np.array(torch.stack(y_true))
         # Toggle model back to train
         model.train()
         test_acc = num_correct.item() * 100 / (num_samples)
-        print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
-        return y_pred, y_true, loss
+        print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%  test loss: {losses} ')
+        return y_pred, y_true, losses
 
 
 
@@ -269,8 +280,6 @@ def parseConfigFile(device, multiple_gpu):
     epochs = config['epochs']
 
     # L2AC Parameters
-    top_k = int(config['top_k'])
-    top_n = int(config['top_n'])
     train_classes = config['train_classes']
     dataset_class = config['dataset_class']
     dataset_path = config['dataset_path']
@@ -278,25 +287,41 @@ def parseConfigFile(device, multiple_gpu):
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
 
     # Load model
-    model_path = config['model_path']
     model_class = config['model_class']
+    pretrained = config['pretrained']
     # model = eval('RecognitionModels.' + model_class)(model_path, train_classes).to(device)
-    model = models.resnet50(pretrained=False).to(device)
-    model.fc = model.fc = torch.nn.Sequential(
-    torch.nn.Linear(
-        in_features=2048,
-        out_features=train_classes))
+    model = getModel(model_class, train_classes, pretrained)
+    # model = models.resnet152(pretrained=False).to(device)
+    # model.fc = model.fc = torch.nn.Sequential(
+    # torch.nn.Linear(
+    #     in_features=2048,
+    #     out_features=train_classes))
     model.to(device)
 
-    if not enable_training:
-        print('Load model ' + model_path)
-        OpenWorldUtils.loadModel(model, model_path)
-
-    criterion = eval('nn.' + config['criterion'])()
+    criterion = eval('nn.' + config['criterion'])(reduction='mean')
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 
+def getModel(model_class, train_classes, pretrained=False):
+
+    model = eval(f'models.{model_class.lower()}')(pretrained)
+
+    if pretrained:
+        for param in model.parameters():
+            param.requires_grad = False
+
+    (fc_final_name, fc_final_layer) = [module for module in model.named_modules() if not isinstance(module, nn.Sequential)][-1]
+    # model = torch.nn.Linear(in_features=fc_final.in_features, out_features=train_classes)
+    if fc_final_name == 'fc':
+        model.fc = torch.nn.Linear(in_features=fc_final_layer.in_features, out_features=train_classes)
+    elif fc_final_name == 'classifier.6':
+        model.classifier[-1] = torch.nn.Linear(in_features=fc_final_layer.in_features, out_features=train_classes)
+    else:
+        print(f'Model {model} with {fc_final_name} not recognized returning model without changing last layer')
+
+
+    return model
 
 if __name__ == "__main__":
     main()
