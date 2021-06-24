@@ -140,7 +140,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
 
 
-
     if gif_path is not None:
         writer = animation.ImageMagickFileWriter(fps=4, bitrate=1800, )
         start = time.time()
@@ -207,7 +206,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     y_pred_raw = np.array(torch.cat(y_pred_raw))
     y_true = np.array(torch.cat(y_true))
     sim_scores = np.array(torch.cat(sim_scores, dim=1).detach()).transpose(1, 0)
-
+    tst_loss = np.array(torch.stack(tst_loss)).mean()
     return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
 
 
