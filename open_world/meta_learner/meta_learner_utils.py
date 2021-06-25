@@ -63,6 +63,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_sim_scores = []
         trn_loss = []
 
+        model.train()
+
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=len(train_loader)):
 

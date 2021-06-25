@@ -46,10 +46,10 @@ def main():
     sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = config['dataset_path']
+    train_data, test_data = train_dataset.getData()
 
-
-    train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
-    test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
+    # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
+    # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
@@ -222,20 +222,20 @@ def validate_model(loader, model, criterion, device):
             for b, (X0_test, y_test) in enumerate(loader):
 
                 X0_test = X0_test.to(device)
-                y_test = y_test.view(-1, 1).to(device)
+                y_test = y_test.to(device)
 
                 if b == (len(loader) - 1):
                     break
 
                 # Apply the model
                 y_val = model(X0_test)
-                loss = criterion(y_val, y_test.squeeze(1))
+                loss = criterion(y_val, y_test)
                 losses.append(loss.cpu())
 
                 predicted = torch.max(y_val.data, 1)[1]
                 y_pred.extend(predicted.cpu())
                 y_true.extend(y_test.cpu())
-                num_correct += (predicted == y_test.squeeze(1)).sum()
+                num_correct += (predicted == y_test).sum()
                 num_samples += predicted.size(0)
                 b += 1
 
