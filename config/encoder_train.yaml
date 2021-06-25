@@ -4,6 +4,7 @@ name: 'e0001'
 ## Paths and classes
 dataset_path: 'datasets'
 dataset_class: CIFAR100Dataset
+image_resize: 64
 model_class: resnet50
 pretrained: False
 

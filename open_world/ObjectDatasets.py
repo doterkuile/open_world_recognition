@@ -173,7 +173,7 @@ class MNISTDataset(ObjectDatasetBase):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path):
+    def __init__(self, dataset_path, image_resize=64):
         super().__init__(dataset_path)
 
         self.trn_mean_pixel = [x / 255.0 for x in [129.3, 124.1,  112.4]]
@@ -183,12 +183,14 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.tst_std_pixel = [x / 255.0 for x in [68.4, 65.6, 70.7]]
 
         self.transform_train = transforms.Compose([
+                transforms.Resize(image_resize),
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
+            transforms.Resize(image_resize),
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),

@@ -97,8 +97,10 @@ def parseConfigFile(device, multiple_gpu):
     # Load dataset
     dataset_path = config['dataset_path']
     dataset_class = config['dataset_class']
+    image_resize = config['image_resize']
 
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
+
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, image_resize)
 
     # Load model
     model_path = config['model_path']

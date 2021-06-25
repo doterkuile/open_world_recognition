@@ -126,7 +126,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             optimizer.zero_grad()
             X0_train = X0_train.to(device)
-            y_train = y_train.view(-1, 1).to(device)
+            y_train = y_train.to(device)
 
             # Limit the number of batches
             if b == (len(train_loader)):
@@ -135,13 +135,13 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             # Apply the model
             y_out = model(X0_train)
-            batch_loss = criterion(y_out, y_train.squeeze(1))
+            batch_loss = criterion(y_out, y_train)
             y_out = F.log_softmax(y_out, dim=1)
 
             # Tally the number of correct predictions
             predicted = torch.max(y_out.data, 1)[1]
 
-            batch_corr = (predicted == y_train.squeeze()).sum()
+            batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
 
             y_pred.extend(predicted.cpu())
@@ -268,6 +268,8 @@ def parseConfigFile(device, multiple_gpu):
     if not os.path.exists(exp_folder):
         os.makedirs(exp_folder)
 
+    torch.nn.CrossEntropyLoss
+
     config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
     shutil.copyfile('config/' + config_file, config_save_path)
 
@@ -283,8 +285,10 @@ def parseConfigFile(device, multiple_gpu):
     train_classes = config['train_classes']
     dataset_class = config['dataset_class']
     dataset_path = config['dataset_path']
+    image_resize = config['image_resize']
 
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path)
+
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, image_resize)
 
     # Load model
     model_class = config['model_class']
@@ -297,6 +301,7 @@ def parseConfigFile(device, multiple_gpu):
     #     in_features=2048,
     #     out_features=train_classes))
     model.to(device)
+    models.AlexNet
 
     criterion = eval('nn.' + config['criterion'])(reduction='mean')
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
