@@ -23,11 +23,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/encoder_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/encoder_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_world/ObjectDatasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/ObjectDatasets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_resnet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -389,7 +385,7 @@
       <workItem from="1624521785434" duration="16794000" />
       <workItem from="1624607413696" duration="6476000" />
       <workItem from="1624624896934" duration="9602000" />
-      <workItem from="1624643921923" duration="3115000" />
+      <workItem from="1624643921923" duration="3188000" />
     </task>
     <servers />
   </component>
@@ -543,7 +539,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>515</line>
+          <line>516</line>
           <option name="timeStamp" value="366" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

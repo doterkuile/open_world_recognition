@@ -472,6 +472,7 @@ class L2AC_abssub(torch.nn.Module):
 
     def forward(self,x0, x1):
         self.reset_hidden(x0.shape[0])
+        
 
         x = self.similarity_function(x0, x1)
 
