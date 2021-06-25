@@ -22,7 +22,114 @@ import matplotlib.pyplot as plt
 
 import abc
 
-class ResNet50(nn.Module):
+
+class EncoderBase(nn.Module):
+
+    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=False):
+        super().__init__()
+        self.model_path = model_path
+        self.model_class = model_class
+        self.pretrained = pretrained
+        self.feature_layer = feature_layer
+        self.selected_out = OrderedDict()
+        self.model = self.getModel(pretrained)
+
+        if pretrained:
+            for param in self.model.parameters():
+                param.requires_grad = False
+
+        self.reset_final_layer(train_classes)
+        self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+
+        pass
+
+    @abc.abstractmethod
+    def reset_final_layer(self):
+        pass
+
+    @abc.abstractmethod
+    def getModel(self, pretrained):
+        pass
+
+    def feature_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+        return hook
+
+    def forward(self, x):
+
+        x = self.model(x)
+
+        return x, self.selected_out[self.feature_layer]
+
+class Resnet50(EncoderBase):
+
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+
+        self.hook = getattr(self.model, feature_layer)[5].register_forward_hook(self.feature_hook(feature_layer))
+
+
+    def getModel(self, pretrained):
+        model = models.resnet50(pretrained=pretrained)
+        return model
+
+    def reset_final_layer(self, output_classes):
+        self.model.fc = torch.nn.Linear(in_features=self.model.fc.in_features, out_features=output_classes)
+        return
+
+class Resnet152(EncoderBase):
+
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+        self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+
+
+    def getModel(self, pretrained):
+        model = models.resnet152(pretrained=pretrained)
+        return model
+
+    def reset_final_layer(self, output_classes):
+        self.model.fc = torch.nn.Linear(in_features=self.model.fc.in_features, out_features=output_classes)
+        return
+
+class AlexNet(EncoderBase):
+
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+
+        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+
+        self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+
+
+    def getModel(self, pretrained):
+        model = models.alexnet(pretrained=pretrained)
+        return model
+
+    def reset_final_layer(self, output_classes):
+        self.model.classifier[-1] = torch.nn.Linear(in_features=self.model.classifier[-1].in_features, out_features=output_classes)
+        return
+
+class EfficientNet(EncoderBase):
+
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+
+        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+
+        self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+
+
+    def getModel(self, pretrained):
+        model = models.e
+        return model
+
+    def reset_final_layer(self, output_classes):
+        self.model.classifier[-1] = torch.nn.Linear(in_features=self.model.classifier[-1].in_features, out_features=output_classes)
+        return
+
+
+
+class ResNet50old(nn.Module):
     def __init__(self, model_path, train_classes):
 
         super().__init__()
@@ -32,6 +139,13 @@ class ResNet50(nn.Module):
         #     param.requires_grad = False
         self.resnet.fc = nn.Linear(2048, train_classes)
         self.model_path = model_path
+        self.selected_out = OrderedDict()
+
+    def feature_hook(self, layer_name):
+        def hook(module, input, output):
+            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+        return hook
+
 
     def forward(self, x):
         x = self.resnet(x)

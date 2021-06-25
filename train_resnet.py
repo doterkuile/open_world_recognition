@@ -134,7 +134,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             b += 1
 
             # Apply the model
-            y_out = model(X0_train)
+            y_out, feature_layer = model(X0_train)
             batch_loss = criterion(y_out, y_train)
             y_out = F.log_softmax(y_out, dim=1)
 
@@ -228,7 +228,7 @@ def validate_model(loader, model, criterion, device):
                     break
 
                 # Apply the model
-                y_val = model(X0_test)
+                y_val, feature_layer = model(X0_test)
                 loss = criterion(y_val, y_test)
                 losses.append(loss.cpu())
 
@@ -286,22 +286,22 @@ def parseConfigFile(device, multiple_gpu):
     dataset_class = config['dataset_class']
     dataset_path = config['dataset_path']
     image_resize = config['image_resize']
-
+    feature_layer = config['feature_layer']
+    model_path = config['model_path']
 
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, image_resize)
 
     # Load model
     model_class = config['model_class']
     pretrained = config['pretrained']
-    # model = eval('RecognitionModels.' + model_class)(model_path, train_classes).to(device)
-    model = getModel(model_class, train_classes, pretrained)
+    model = eval('RecognitionModels.' + model_class)(model_class, model_path,train_classes, feature_layer, pretrained)
+    # model = getModel(model_class, train_classes, pretrained)
     # model = models.resnet152(pretrained=False).to(device)
     # model.fc = model.fc = torch.nn.Sequential(
     # torch.nn.Linear(
     #     in_features=2048,
     #     out_features=train_classes))
     model.to(device)
-    models.AlexNet
 
     criterion = eval('nn.' + config['criterion'])(reduction='mean')
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
