@@ -189,40 +189,82 @@ class Identity(torch.nn.Module):
     def forward(self, x):
         return x
 
-class L2AC(torch.nn.Module):
 
+class L2AC_base(torch.nn.Module):
     def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super(L2AC, self).__init__()
+        super().__init__()
+        self.has_lstm = True
         self.feature_size = feature_size
-        # self.feature_size = 512
         self.input_size = 2048
         self.batch_size = batch_size
         self.hidden_size = 1
-        self.dropout = nn.Dropout(p=0.5)
-        self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1)
-        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
+        self.top_k = top_k
+
+        self.matching_layer = self.setMatchingLayer()
+        self.aggregation_layer = self.setAggregationLayer()
 
         # Create hook for similarity function
         self.selected_out = OrderedDict()
-        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
-        # self.similarity_hook = sel
+        self.hook = getattr(self, 'matching_layer').register_forward_hook(self.sim_func_hook('matching_layer'))
 
-    def forward(self,x0, x1):
-        self.reset_hidden(x0.shape[0])
+        pass
 
-        x = self.similarity_function(x0, x1)
+    @abc.abstractmethod
+    def similarity_function(self):
+        pass
 
-        x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
-        x = self.fc3(x.reshape(x.shape[0], -1))
+    @abc.abstractmethod
+    def setMatchingLayer(self):
+        pass
 
-        return x, self.selected_out['fc2']
+    @abc.abstractmethod
+    def setAggregationLayer(self):
+        pass
+
+    def reset_hidden(self, batch_size):
+        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
+                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
     def sim_func_hook(self, layer_name):
         def hook(module, input, output):
-            self.selected_out[layer_name] = output.sigmoid()
+            self.selected_out[layer_name] = output
         return hook
+
+    def forward(self, x0, x1):
+        x = self.similarity_function(x0, x1)
+        x = self.matching_layer(x)
+        if self.has_lstm:
+
+            self.reset_hidden(x0.shape[0])
+            x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0], -1, x.shape[1]), self.hidden)
+
+        x = x.reshape(x.shape[0], -1)
+
+        x = self.aggregation_layer(x)
+        return x, self.selected_out['matching_layer']
+
+
+class L2AC(L2AC_base):
+
+    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
+
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1),
+                                       nn.Sigmoid(),
+                                       )
+        return matching_layer
+
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
+
+        return aggregation_layer
+
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
@@ -230,275 +272,213 @@ class L2AC(torch.nn.Module):
         x_abssub.abs_()
         x_add = x.add(x1)
         x = torch.cat((x_abssub, x_add), dim=2)
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        x = x.sigmoid()
         return x
 
-    def reset_hidden(self, batch_size):
-        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
-class L2AC_cosine(torch.nn.Module):
+class L2AC_cosine(L2AC_base):
 
     def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super(L2AC_cosine, self).__init__()
-        self.feature_size = feature_size
-        self.input_size = 2048
-        self.batch_size = batch_size
-        self.hidden_size = 1
-        self.dropout = nn.Dropout(p=0.5)
-        self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1)
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
 
+        return
 
-    def forward(self,x0, x1):
-        self.reset_hidden(x0.shape[0])
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Sigmoid()
+                                       )
+        return matching_layer
 
-        x_sim = self.similarity_function(x0, x1)
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
 
-        x, cell_state = self.lstm(x_sim.view(x_sim.shape[0],-1, x_sim.shape[1]), self.hidden)
-        x = self.fc3(x.reshape(x.shape[0], -1))
-        return x, x_sim
+        return aggregation_layer
 
-    def reset_hidden(self, batch_size):
-        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
     def similarity_function(self, x0, x1):
-
         x = x0.repeat_interleave(x1.shape[1], dim=1)
         x = torch.cosine_similarity(x, x1, dim=2).reshape(x.shape[0], -1, 1)
-        x = x.sigmoid()
-
         return x
 
-class L2AC_no_lstm(torch.nn.Module):
+
+class L2AC_no_lstm(L2AC_base):
 
     def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super(L2AC_no_lstm, self).__init__()
-        self.feature_size = feature_size
-        self.input_size = 2048
-        self.batch_size = batch_size
-        self.top_k = top_k
-        self.hidden_size = 1
-        self.dropout_0_5 = nn.Dropout(p=0.5)
-        self.dropout_0_25 = nn.Dropout(p=0.25)
-        self.dropout_0_1 = nn.Dropout(p=0.1)
-        self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1)
-        self.fc3 = nn.Linear(self.top_k, 256)
-        self.fc4 = nn.Linear(256, 256)
-        self.fc5 = nn.Linear(256, 64)
-        self.fc6 = nn.Linear(64, 1)
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
 
-        # Create hook for similarity function
-        self.selected_out = OrderedDict()
-        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
+        self.has_lstm = False
 
-    def forward(self,x0, x1):
-        x = self.similarity_function(x0, x1)
+        return
 
-        x = F.relu(self.fc3(x.reshape(x.shape[0],-1)))
-        x = self.dropout_0_5(x)
-        x = F.relu(self.fc4(x))
-        x = self.dropout_0_25(x)
-        x = F.relu(self.fc5(x))
-        x = self.dropout_0_1(x)
-        x = self.fc6(x.reshape(x.shape[0], -1))
 
-        return x, self.selected_out['fc2']
+    def setMatchingLayer(self):
 
-    def sim_func_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.sigmoid()
-        return hook
+        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1),
+                                       nn.Sigmoid(),
+                                       )
+        return matching_layer
+
+    def setAggregationLayer(self):
+
+        aggregation_layer = nn.Sequential(nn.Linear(self.top_k, 256),
+                                          nn.ReLU(),
+                                          nn.Dropout(p=0.5),
+                                          nn.Linear(256, 256),
+                                          nn.ReLU(),
+                                          nn.Dropout(p=0.25),
+                                          nn.Linear(256, 64),
+                                          nn.ReLU(),
+                                          nn.Dropout(p=0.1),
+                                          nn.Linear(64, 1))
+
+        return aggregation_layer
+
 
     def similarity_function(self, x0, x1):
-
         x = x0.repeat_interleave(x1.shape[1], dim=1)
         x_abssub = x.sub(x1)
         x_abssub.abs_()
-        x_add = x0.add(x1)
+        x_add = x.add(x1)
         x = torch.cat((x_abssub, x_add), dim=2)
-        x = F.relu(self.fc1(x))
-        x = self.dropout_0_5(x)
-        x = self.fc2(x)
-        x = x.sigmoid()
         return x
 
-    def reset_hidden(self, batch_size):
-        pass
 
-
-class L2AC_extended_similarity(torch.nn.Module):
+class L2AC_extended_similarity(L2AC_base):
 
     def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super(L2AC_extended_similarity, self).__init__()
-        self.feature_size = feature_size
-        self.input_size = 2048
-        self.batch_size = batch_size
-        self.hidden_size = 1
-        self.dropout_0_5 = nn.Dropout(p=0.5)
-        self.dropout_0_25 = nn.Dropout(p=0.25)
-        self.dropout_0_1 = nn.Dropout(p=0.1)
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
 
-        self.fc1 = nn.Linear(2 * self.feature_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1024)
-        self.fc3 = nn.Linear(1024, 512)
-        self.fc4 = nn.Linear(512, 128)
-        self.fc5 = nn.Linear(128, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc6 = nn.Linear(2 * self.hidden_size, 1)
 
-        # Create hook for similarity function
-        self.selected_out = OrderedDict()
-        self.hook = getattr(self, 'fc5').register_forward_hook(self.sim_func_hook('fc5'))
+        return
 
-    def forward(self,x0, x1):
-        self.reset_hidden(x0.shape[0])
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1024),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(1024, 512),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.25),
+                                       nn.Linear(512, 128),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.1),
+                                       nn.Linear(128, 1),
+                                       nn.Sigmoid())
+        return matching_layer
 
-        x = self.similarity_function(x0, x1)
-        x, cell_state = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
-        x = self.fc6(x.reshape(x.shape[0], -1))
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
 
-        return x, self.selected_out['fc5']
+        return aggregation_layer
 
-    def sim_func_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.sigmoid()
-        return hook
 
     def similarity_function(self, x0, x1):
-        x0 = x0.repeat_interleave(x1.shape[1], dim=1)
-        x_abssub = x0.sub(x1)
+        x = x0.repeat_interleave(x1.shape[1], dim=1)
+        x_abssub = x.sub(x1)
         x_abssub.abs_()
-        x_add = x0.add(x1)
+        x_add = x.add(x1)
         x = torch.cat((x_abssub, x_add), dim=2)
-
-        x = F.relu(self.fc1(x))
-        x = self.dropout_0_5(x)
-        x = F.relu(self.fc2(x))
-        x = self.dropout_0_5(x)
-        x = F.relu(self.fc3(x))
-        x = self.dropout_0_25(x)
-        x = F.relu(self.fc4(x))
-        x = self.dropout_0_1(x)
-        x = F.relu(self.fc5(x))
-        x = x.sigmoid()
         return x
 
-    def reset_hidden(self, batch_size):
-        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
-class L2AC_smaller_fc(torch.nn.Module):
+class L2AC_smaller_fc(L2AC_base):
 
     def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super(L2AC_smaller_fc, self).__init__()
-        self.feature_size = feature_size
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+        # Override default input size
         self.input_size = 512
+        self.matching_layer = self.setMatchingLayer()
+        self.hook = getattr(self, 'matching_layer').register_forward_hook(self.sim_func_hook('matching_layer'))
 
-        self.batch_size = batch_size
-        self.hidden_size = 1
-        self.dropout = nn.Dropout(p=0.5)
-
-        self.fc_reduce = nn.Linear(self.feature_size, self.input_size)
-        self.fc1 = nn.Linear(2 * self.input_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
+        self.fc_reduce = nn.Linear(self.feature_size, self.input_size)
 
-        # Create hook for similarity function
-        self.selected_out = OrderedDict()
-        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
 
-    def forward(self, x0, x1):
-        self.reset_hidden(x0.shape[0])
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Linear(2 * self.input_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1),
+                                       nn.Sigmoid(),
+                                       )
+        return matching_layer
 
-        x = self.similarity_function(x0, x1)
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
 
-        x, cell_state = self.lstm(x.view(x.shape[0], -1, x.shape[1]), self.hidden)
-        x = self.fc3(x.reshape(x.shape[0], -1))
+        return aggregation_layer
 
-        return x, self.selected_out['fc2']
-
-    def sim_func_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.sigmoid()
-        return hook
 
     def similarity_function(self, x0, x1):
+
         x0 = x0.repeat_interleave(x1.shape[1], dim=1)
-        x0 = F.relu(self.fc_reduce(x0))
+        x = F.relu(self.fc_reduce(x0))
         x1 = F.relu(self.fc_reduce(x1))
-        x_abssub = x0.sub(x1)
+        x_abssub = x.sub(x1)
         x_abssub.abs_()
-        x_add = x0.add(x1)
+        x_add = x.add(x1)
         x = torch.cat((x_abssub, x_add), dim=2)
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        x = x.sigmoid()
         return x
 
-    def reset_hidden(self, batch_size):
-        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
 
-
-class L2AC_abssub(torch.nn.Module):
+class L2AC_abssub(L2AC_base):
 
     def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super(L2AC_abssub, self).__init__()
-        self.feature_size = feature_size
-        # self.feature_size = 512
-        self.input_size = 2048
-        self.batch_size = batch_size
-        self.hidden_size = 1
-        self.dropout = nn.Dropout(p=0.5)
-        self.fc1 = nn.Linear(self.feature_size, self.input_size)
-        self.fc2 = nn.Linear(self.input_size, 1)
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        self.fc3 = nn.Linear(2 * self.hidden_size, 1)
 
-        # Create hook for similarity function
-        self.selected_out = OrderedDict()
-        self.hook = getattr(self, 'fc2').register_forward_hook(self.sim_func_hook('fc2'))
-        # self.similarity_hook = sel
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Linear(self.feature_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1),
+                                       nn.Sigmoid(),
+                                       )
+        return matching_layer
 
-    def forward(self,x0, x1):
-        self.reset_hidden(x0.shape[0])
-        
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
 
-        x = self.similarity_function(x0, x1)
-
-        x, (self.hidden, cell_state) = self.lstm(x.view(x.shape[0],-1, x.shape[1]), self.hidden)
-        x = self.fc3(x.reshape(x.shape[0], -1))
-
-        return x, self.selected_out['fc2']
-
-    def sim_func_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.sigmoid()
-        return hook
+        return aggregation_layer
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
         x_abssub = x.sub(x1)
-        x_abssub.abs_()
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        x = x.sigmoid()
+        x = x_abssub.abs()
         return x
 
-    def reset_hidden(self, batch_size):
-        self.hidden = (torch.zeros(2, batch_size, self.hidden_size).to('cuda'),
-                       torch.zeros(2, batch_size, self.hidden_size).to('cuda'))
+class L2AC_concat(L2AC_base):
+
+    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
+        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+        self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+
+    def setMatchingLayer(self):
+        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.ReLU(),
+                                       nn.Dropout(p=0.5),
+                                       nn.Linear(self.input_size, 1),
+                                       nn.Sigmoid(),
+                                       )
+        return matching_layer
+
+    def setAggregationLayer(self):
+        aggregation_layer = nn.Sequential(nn.Linear(2 * self.hidden_size, 1))
+
+        return aggregation_layer
+
+
+    def similarity_function(self, x0, x1):
+        x = x0.repeat_interleave(x1.shape[1], dim=1)
+        x = torch.cat((x, x1), dim=2)
+        return x
+
 
 def main():
     model = resnet50(pretrained=True, num_classes=1000)

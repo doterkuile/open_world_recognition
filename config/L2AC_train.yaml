@@ -5,7 +5,7 @@ name: '0004'
 dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
-model_class: L2AC_smaller_fc
+model_class: L2AC_concat
 encoder: ResNet50Features
 feature_layer: avgpool
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
@@ -20,7 +20,7 @@ epochs: 5
 
 ## L2AC parameters
 top_k: 5
-top_n: 2
+top_n: 4
 train_classes: 20
 test_classes: 20
 train_samples_per_cls: 500

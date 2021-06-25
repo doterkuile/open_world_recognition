@@ -245,7 +245,7 @@ def validate_model(loader, model, criterion, device):
         # Toggle model back to train
         model.train()
         test_acc = num_correct.item() * 100 / (num_samples)
-        print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%  test loss: {losses} ')
+        print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%  test loss: {losses:10.8f} ')
         return y_pred, y_true, losses
 
 

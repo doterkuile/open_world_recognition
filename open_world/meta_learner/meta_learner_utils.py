@@ -123,6 +123,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         # Run the testing batches
         tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
+        calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
         if gif_path is not None:
 
@@ -144,7 +145,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             fig_final_list.append(f'{gif_path}/final_{i}.png')
             plt.close(fig_final)
 
-        calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
 
         validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
@@ -220,14 +220,14 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
     # Toggle model back to train
     model.train()
+    tst_loss = np.array(torch.stack(tst_loss)).mean()
     test_acc = num_correct.item() * 100 / (num_samples)
-    print(f'test accuracy: {num_correct.item() * 100 / (num_samples):7.3f}%')
+    print(f'test accuracy: {test_acc:7.3f}%  test loss: {tst_loss:10.8f} ')
 
     y_pred = np.array(torch.cat(y_pred))
     y_pred_raw = np.array(torch.cat(y_pred_raw))
     y_true = np.array(torch.cat(y_true))
     sim_scores = np.array(torch.cat(sim_scores, dim=1).detach()).transpose(1, 0)
-    tst_loss = np.array(torch.stack(tst_loss)).mean()
     return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
 
 
