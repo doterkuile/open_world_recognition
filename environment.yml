@@ -23,6 +23,7 @@ dependencies:
   - ipython=7.18.1
   - celluloid=0.2.0
   - imageio=2.9.0
+  - efficientnet-pytorch=0.7.0
   
 #  - cudatoolkit=11.1
   

@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
+import efficientnet_pytorch as efficientnetPy
+
 
 import torchvision.models.resnet as resnet
 from torchvision.utils import make_grid
@@ -120,11 +122,12 @@ class EfficientNet(EncoderBase):
 
 
     def getModel(self, pretrained):
-        model = models.e
+        model = efficientnetPy.EfficientNet.from_pretrained('efficientnet-b7')
+
         return model
 
     def reset_final_layer(self, output_classes):
-        self.model.classifier[-1] = torch.nn.Linear(in_features=self.model.classifier[-1].in_features, out_features=output_classes)
+        self.model._fc = torch.nn.Linear(in_features=self.model._fc.in_features, out_features=output_classes)
         return
 
 

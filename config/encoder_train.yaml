@@ -5,8 +5,8 @@ name: 'e0001'
 dataset_path: 'datasets'
 dataset_class: CIFAR100Dataset
 image_resize: 64
-model_class: AlexNet
-feature_layer: avgpool
+model_class: EfficientNet
+feature_layer: _avg_pooling
 model_path: networks
 pretrained: False
 
