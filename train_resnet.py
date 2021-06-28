@@ -19,6 +19,7 @@ from torchvision.models import resnet50
 from torchvision import datasets, transforms, models
 import time
 from tqdm import tqdm
+import copy
 
 
 def main():
@@ -55,7 +56,9 @@ def main():
 
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    trn_metrics, tst_metrics = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
+    trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
+
+    model.load_state_dict(best_state['model'])
 
     # Train metrics
     trn_loss = trn_metrics['loss']
@@ -87,6 +90,7 @@ def main():
     plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
     OpenWorldUtils.saveModel(model, model_path)
+    torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
              train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
@@ -114,6 +118,13 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
 
     model.train()
+
+    best_model = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+    best_epoch = 0
+    best_state = {'model': best_model,
+                  'acc': best_acc,
+                  'epoch': best_epoch, }
 
     for i in range(epochs):
         trn_corr = 0
@@ -182,6 +193,14 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_recall.append(metrics.recall_score(y_true, y_pred, average='weighted'))
         tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, average='weighted', zero_division=0))
 
+        if tst_acc[-1] > tst_acc:
+            best_acc = tst_acc[-1]
+            best_epoch = i + 1
+            best_model = copy.deepcopy(model.state_dict())
+            best_state = {'model': best_model,
+                          'acc': best_acc,
+                          'epoch': best_epoch,}
+
         tst_mean_pred.append(y_pred.mean())
         tst_mean_true.append(y_true.mean())
 
@@ -205,7 +224,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return trn_metrics, tst_metrics
+    return trn_metrics, tst_metrics, best_state
 
 def validate_model(loader, model, criterion, device):
         num_correct = 0

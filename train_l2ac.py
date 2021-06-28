@@ -71,7 +71,7 @@ def main():
 
 
 
-    trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores = meta_utils.trainMetaModel(model,
+    trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMetaModel(model,
                                                                                                        train_loader,
                                                                                                        test_loader,
                                                                                                        epochs,
@@ -81,6 +81,7 @@ def main():
                                                                                                        probability_treshold,
                                                                                                        gif_path)
 
+    model.load_state_dict(best_state['model'])
 
     # Plot metrics
     plot_utils.plot_losses(trn_metrics['loss'], tst_metrics['loss'], figure_path)
@@ -137,6 +138,7 @@ def main():
     start = time.time()
 
     OpenWorldUtils.saveModel(model, model_path)
+    torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path,
              train_loss=trn_metrics['loss'],

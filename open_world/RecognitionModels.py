@@ -69,7 +69,7 @@ class Resnet50(EncoderBase):
     def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
         super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
 
-        self.hook = getattr(self.model, feature_layer)[5].register_forward_hook(self.feature_hook(feature_layer))
+        self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
 
     def getModel(self, pretrained):

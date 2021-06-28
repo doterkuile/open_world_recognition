@@ -24,16 +24,12 @@
   <component name="ChangeListManager">
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_world/ObjectDatasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/ObjectDatasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/L2AC_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/encoder_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/encoder_train.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/example_script.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/example_script.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_amazon.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_amazon.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac_long.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_l2ac_long.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_resnet.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_resnet.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_l2ac.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_l2ac.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_resnet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -398,7 +394,7 @@
       <workItem from="1624643921923" duration="10773000" />
       <workItem from="1624705349881" duration="1157000" />
       <workItem from="1624788500025" duration="627000" />
-      <workItem from="1624866253948" duration="2178000" />
+      <workItem from="1624866253948" duration="7083000" />
     </task>
     <servers />
   </component>
@@ -444,43 +440,43 @@
     <state x="2675" y="306" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624003094266" />
     <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623314200042" />
     <state x="1920" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.3773.1053@67.27.3773.1053" timestamp="1622208515461" />
-    <state width="1807" height="321" key="GridCell.Tab.0.bottom" timestamp="1624705872114">
-      <screen x="67" y="27" width="3773" height="1053" />
+    <state width="1874" height="331" key="GridCell.Tab.0.bottom" timestamp="1624876900032">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="381" key="GridCell.Tab.0.bottom/0.27.1920.1053/1920.0.1920.1080@0.27.1920.1053" timestamp="1623938530890" />
     <state width="1807" height="372" key="GridCell.Tab.0.bottom/1920.0.1920.1080/3840.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1623939348607" />
     <state width="1874" height="332" key="GridCell.Tab.0.bottom/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1624655968549" />
-    <state width="1874" height="394" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624438851381" />
+    <state width="1874" height="331" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624876900032" />
     <state width="1807" height="337" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1624545074485" />
     <state width="1807" height="341" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1624201095110" />
     <state width="1807" height="321" key="GridCell.Tab.0.bottom/67.27.3773.1053@67.27.3773.1053" timestamp="1624705872114" />
-    <state width="1807" height="321" key="GridCell.Tab.0.center" timestamp="1624705872114">
-      <screen x="67" y="27" width="3773" height="1053" />
+    <state width="1874" height="331" key="GridCell.Tab.0.center" timestamp="1624876900032">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="381" key="GridCell.Tab.0.center/0.27.1920.1053/1920.0.1920.1080@0.27.1920.1053" timestamp="1623938530890" />
     <state width="1807" height="372" key="GridCell.Tab.0.center/1920.0.1920.1080/3840.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1623939348606" />
     <state width="1874" height="332" key="GridCell.Tab.0.center/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1624655968549" />
-    <state width="1874" height="394" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624438851381" />
+    <state width="1874" height="331" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624876900032" />
     <state width="1807" height="337" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1624545074484" />
     <state width="1807" height="341" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1624201095110" />
     <state width="1807" height="321" key="GridCell.Tab.0.center/67.27.3773.1053@67.27.3773.1053" timestamp="1624705872114" />
-    <state width="1807" height="321" key="GridCell.Tab.0.left" timestamp="1624705872113">
-      <screen x="67" y="27" width="3773" height="1053" />
+    <state width="1874" height="331" key="GridCell.Tab.0.left" timestamp="1624876900032">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="381" key="GridCell.Tab.0.left/0.27.1920.1053/1920.0.1920.1080@0.27.1920.1053" timestamp="1623938530890" />
     <state width="1807" height="372" key="GridCell.Tab.0.left/1920.0.1920.1080/3840.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1623939348606" />
     <state width="1874" height="332" key="GridCell.Tab.0.left/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1624655968549" />
-    <state width="1874" height="394" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624438851381" />
+    <state width="1874" height="331" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624876900032" />
     <state width="1807" height="337" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1624545074484" />
     <state width="1807" height="341" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1624201095109" />
     <state width="1807" height="321" key="GridCell.Tab.0.left/67.27.3773.1053@67.27.3773.1053" timestamp="1624705872113" />
-    <state width="1807" height="321" key="GridCell.Tab.0.right" timestamp="1624705872114">
-      <screen x="67" y="27" width="3773" height="1053" />
+    <state width="1874" height="331" key="GridCell.Tab.0.right" timestamp="1624876900032">
+      <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state width="1874" height="381" key="GridCell.Tab.0.right/0.27.1920.1053/1920.0.1920.1080@0.27.1920.1053" timestamp="1623938530890" />
     <state width="1807" height="372" key="GridCell.Tab.0.right/1920.0.1920.1080/3840.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1623939348607" />
     <state width="1874" height="332" key="GridCell.Tab.0.right/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1624655968549" />
-    <state width="1874" height="394" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624438851381" />
+    <state width="1874" height="331" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624876900032" />
     <state width="1807" height="337" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1624545074485" />
     <state width="1807" height="341" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1624201095110" />
     <state width="1807" height="321" key="GridCell.Tab.0.right/67.27.3773.1053@67.27.3773.1053" timestamp="1624705872114" />
@@ -553,7 +549,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
-          <line>251</line>
+          <line>267</line>
           <option name="timeStamp" value="468" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -573,22 +569,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>75</line>
-          <option name="timeStamp" value="617" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>79</line>
-          <option name="timeStamp" value="620" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
           <line>253</line>
           <option name="timeStamp" value="622" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
-          <line>371</line>
+          <line>387</line>
           <option name="timeStamp" value="625" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -597,9 +583,14 @@
           <option name="timeStamp" value="626" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/open_world/RecognitionModels.py</url>
-          <line>31</line>
-          <option name="timeStamp" value="627" />
+          <url>file://$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py</url>
+          <line>134</line>
+          <option name="timeStamp" value="628" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/train_l2ac.py</url>
+          <line>83</line>
+          <option name="timeStamp" value="632" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -610,11 +601,11 @@
     <SUITE FILE_PATH="coverage/open_world_recognition$extract_features.coverage" NAME="extract_features Coverage Results" MODIFIED="1623832257149" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$RecognitionModels.coverage" NAME="RecognitionModels Coverage Results" MODIFIED="1623852928359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$loadMNIST.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621612580894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
-    <SUITE FILE_PATH="coverage/open_world_recognition$train_l2ac.coverage" NAME="train_l2ac Coverage Results" MODIFIED="1624655968508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$train_l2ac.coverage" NAME="train_l2ac Coverage Results" MODIFIED="1624875625296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$test.coverage" NAME="test Coverage Results" MODIFIED="1622208908365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$setup_train_data.coverage" NAME="setup_train_data Coverage Results" MODIFIED="1624651796079" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$test_metadataset.coverage" NAME="test_metadataset Coverage Results" MODIFIED="1622190750578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/open_world_recognition$train_resnet.coverage" NAME="train_resnet Coverage Results" MODIFIED="1624705872093" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$train_resnet.coverage" NAME="train_resnet Coverage Results" MODIFIED="1624876900011" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$plot_utils.coverage" NAME="plot_utils Coverage Results" MODIFIED="1623741846697" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world$main.coverage" NAME="main Coverage Results" MODIFIED="1619799660891" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
     <SUITE FILE_PATH="coverage/open_world_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1620285685210" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />

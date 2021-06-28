@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import os
 import imageio
+import copy
 
 
 
@@ -53,7 +54,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
     fig_sim_list = []
     fig_final_list = []
 
-
+    best_model = copy.deepcopy(model.state_dict())
+    best_F1 = -2.0
+    best_epoch = 0
+    best_state = {'model': best_model,
+                  'F1': best_F1,
+                  'epoch': best_epoch, }
 
     for i in range(epochs):
         trn_corr = 0
@@ -125,6 +131,16 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
         calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
+        if tst_metrics_dict['F1'][-1] > best_F1:
+            best_F1 = tst_metrics_dict['F1'][-1]
+            best_epoch = i + 1
+            best_model = copy.deepcopy(model.state_dict())
+            best_state = {'model': best_model,
+                          'F1': best_F1,
+                          'epoch': best_epoch,}
+
+
+
         if gif_path is not None:
 
             fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
@@ -172,7 +188,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
     print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
-    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores
+    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
 
 
 def validate_model(loader, model, criterion, device, probability_threshold):
