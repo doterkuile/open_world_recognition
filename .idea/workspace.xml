@@ -25,11 +25,6 @@
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/L2AC_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/encoder_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/encoder_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/meta_learner/meta_learner_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_l2ac.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_l2ac.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_resnet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -395,6 +390,7 @@
       <workItem from="1624705349881" duration="1157000" />
       <workItem from="1624788500025" duration="627000" />
       <workItem from="1624866253948" duration="7083000" />
+      <workItem from="1624881009066" duration="1172000" />
     </task>
     <servers />
   </component>
