@@ -22,7 +22,7 @@ module use /opt/insy/modulefiles
 module purge
 module load cuda/10.0
 module load cudnn/10.0-7.6.0.64
-module load miniconda
+module load miniconda/3.7
 
 # configuration variables
 python_script=train_l2ac.py

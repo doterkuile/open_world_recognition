@@ -122,7 +122,7 @@ class EfficientNet(EncoderBase):
 
 
     def getModel(self, pretrained):
-        model = efficientnetPy.EfficientNet.from_pretrained('efficientnet-b7')
+        model = efficientnetPy.EfficientNet.from_pretrained('efficientnet-b0')
 
         return model
 

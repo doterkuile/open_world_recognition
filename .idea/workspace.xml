@@ -25,6 +25,15 @@
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_world/ObjectDatasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/ObjectDatasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/example_script.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/example_script.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/setup_train_data.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_amazon.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_amazon.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_l2ac.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_l2ac_long.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_l2ac_long.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_resnet.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_resnet.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -389,6 +398,7 @@
       <workItem from="1624643921923" duration="10773000" />
       <workItem from="1624705349881" duration="1157000" />
       <workItem from="1624788500025" duration="627000" />
+      <workItem from="1624866253948" duration="2178000" />
     </task>
     <servers />
   </component>

@@ -25,7 +25,7 @@ mkdir -p /tmp/$USER && cp -a $data_path$package /tmp/$USER
 module use /opt/insy/modulefiles
 module purge
 
-module load miniconda
+module load miniconda/3.7
 conda activate $conda_env
 
 python $python_script $config_file

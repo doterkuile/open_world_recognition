@@ -26,7 +26,7 @@ data_path=/tudelft.net/staff_umbrella/openworldrecognition/
 module use /opt/insy/modulefiles
 module purge
 
-module load miniconda
+module load miniconda/3.7
 conda activate $conda_env
 
 module load cuda/10.0

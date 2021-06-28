@@ -203,6 +203,40 @@ class CIFAR100Dataset(ObjectDatasetBase):
         return im, label
 
 
+class TinyImageNetDataset(ObjectDatasetBase):
+
+
+    def __init__(self, dataset_path, image_resize=64):
+        super().__init__(dataset_path)
+
+        self.trn_mean_pixel = [0.4914, 0.4822, 0.4465]
+        self.trn_std_pixel = [0.2023, 0.1994, 0.2010]
+
+        self.tst_mean_pixel = [0.4914, 0.4822, 0.4465]
+        self.tst_std_pixel = [0.2023, 0.1994, 0.2010]
+
+        self.transform_train = transforms.Compose([
+                transforms.Resize(image_resize),
+                transforms.ToTensor(),
+                # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
+        ])
+
+        self.transform_test = transforms.Compose([
+            transforms.Resize(image_resize),
+            transforms.ToTensor(),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
+
+        ])
+
+        self.train_data = datasets.ImageFolder(root=f'{dataset_path}/train')
+        self.test_data = datasets.ImageFolder(root=f'{dataset_path}/val')
+        # self.image_shape = [1, 3, 32, 32]
+        self.classes = [i for i in range(len(self.train_data.classes))]
+
+
+
 def main():
 
 
