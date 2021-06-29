@@ -6,7 +6,7 @@ dataset_path: 'datasets/CIFAR100'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
-encoder: ResNet50
+encoder: Resnet50
 feature_layer: avgpool
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
