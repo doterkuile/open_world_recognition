@@ -62,7 +62,13 @@ def parseConfigFile(device, multiple_gpu):
     weights = np.ones(batch_size-1) * 1/(top_n+1)
     weights = np.append(weights, (top_n)/(top_n+1))
     weights = torch.tensor(weights, dtype=torch.float).view(-1,1).to(device)
-    pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
+
+    # If same class extend entries is true then dataset is already balanced
+    if not same_class_extend_entries:
+        pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
+    else:
+        pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
+
 
     ## Classes
     # Load dataset
@@ -234,29 +240,5 @@ def loadModel(model, file_path):
         print(f'Model at path {file_path} not found. Continuing with empty model')
 
 
-def plotLosses(trainig_file_path, n_training, n_test, figure_path):
-
-    data = np.load(trainig_file_path + '.npz')
-    train_losses = data['train_losses']
-    test_losses = data['test_losses']
-    train_correct = data['train_correct']
-    test_correct = data['test_correct']
-    fig = plt.figure()
-    plt.plot(train_losses, label='training loss')
-    plt.plot(test_losses, label='validation loss')
-    plt.title('Loss at the end of each epoch')
-    plt.legend();
-    plt.show()
-    fig.savefig(figure_path + 'losses')
-
-    fig = plt.figure()
-    plt.plot([float(t) / float(n_training)*100 for t in train_correct], label='training accuracy')
-    plt.plot([float(t) / float(n_test)*100 for t in test_correct], label='validation accuracy')
-    plt.title('Accuracy at the end of each epoch')
-    plt.legend();
-    plt.show()
-    fig.savefig(figure_path + 'accuracy')
-
-    return
 
 

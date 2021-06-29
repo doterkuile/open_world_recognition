@@ -39,7 +39,11 @@ def parseConfigFile(config_file, device, multiple_gpu):
     same_class_reverse = config['same_class_reverse']
     same_class_extend_entries = config['same_class_extend_entries']
 
-    pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
+    # If same class extend entries is true then dataset is already balanced
+    if not same_class_extend_entries:
+        pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
+    else:
+        pos_weight = torch.tensor([1.0]).to(device).to(dtype=torch.float)
 
     criterion = eval('nn.' + config['criterion'])(pos_weight, reduction='mean')
 
