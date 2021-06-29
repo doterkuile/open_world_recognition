@@ -27,7 +27,7 @@ import abc
 
 class EncoderBase(nn.Module):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=False):
+    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=True):
         super().__init__()
         self.model_path = model_path
         self.model_class = model_class
@@ -66,7 +66,7 @@ class EncoderBase(nn.Module):
 
 class Resnet50(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
         super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
@@ -82,7 +82,7 @@ class Resnet50(EncoderBase):
 
 class Resnet152(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
         super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -97,7 +97,7 @@ class Resnet152(EncoderBase):
 
 class AlexNet(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
 
         super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
 
@@ -114,9 +114,9 @@ class AlexNet(EncoderBase):
 
 class EfficientNet(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=False):
+    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=True):
 
-        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+        super().__init__(model_class, model_path, train_classes, feature_layer, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 

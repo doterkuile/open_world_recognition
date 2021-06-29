@@ -37,8 +37,8 @@ cp config/$base_config_file config/$config_file
 file=config/$config_file
 var_1=name	
 array_1=(0014 0015 0016 0017)
-var_2=top_n
-array_2=(4 4 4 4)
+var_2=feature_layer
+array_2=(avgpool avgpool avgpool _avg_pooling)
 var_3=encoders
 array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
 len=${#array_1[@]}

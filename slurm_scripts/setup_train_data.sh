@@ -14,14 +14,12 @@
 #SBATCH --mail-type=fail         		# send mail if job fails
 #SBATCH --mail-user=doterkuile@gmail.com
 
+
+# configuration variables
 python_script=setup_train_data.py
 config_file=CIFAR100_train.yaml
-
 conda_env=l2acenv
-package=open_world_recognition
-data_path=/tudelft.net/staff_umbrella/openworldrecognition/
 
-#mkdir -p /tmp/$USER && cp -a $data_path$package /tmp/$USER
 
 module use /opt/insy/modulefiles
 module purge
@@ -32,18 +30,15 @@ conda activate $conda_env
 module load cuda/10.0
 module load cudnn/10.0-7.6.0.64
 
-file=config/$config_file
-var1=name
-var2=top_n
 
 # Loop variables
 file=config/$config_file
 var_1=top_n	
-array_1=(1 2 9 9)
-var_2=train_classes
-array_2=(20 20 20 80)
-var_3=test_classes
-array_3=(20 20 20 80)
+array_1=(4 4 4 4)
+var_2=feature_layer
+array_2=(avgpool avgpool avgpool _avg_pooling)
+var_3=encoders
+array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 

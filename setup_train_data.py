@@ -105,8 +105,9 @@ def parseConfigFile(device, multiple_gpu):
     # Load model
     model_path = config['model_path']
     model_class = config['model_class']
+    pretrained = config['pretrained']
     feature_layer = config['feature_layer']
-    model = eval('RecognitionModels.' + model_class)(model_path, feature_layer).to(device)
+    model = eval('RecognitionModels.' + model_class)(model_class, model_path, train_classes, feature_layer, pretrained).to(device)
 
     return dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
 
