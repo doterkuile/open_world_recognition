@@ -23,15 +23,10 @@ def parseConfigFile(config_file, device, multiple_gpu):
     with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    ## Training/laoding parameters:
-    load_memory = config['load_memory']
-    save_images = config['save_images']
-    enable_training = config['enable_training']
+
 
     ## Training hyperparameters
     batch_size = config['batch_size']
-    learning_rate = config['learning_rate']
-    epochs = config['epochs']
 
     ## L2AC Parameters
     top_k = int(config['top_k'])
@@ -44,6 +39,9 @@ def parseConfigFile(config_file, device, multiple_gpu):
     same_class_reverse = config['same_class_reverse']
     same_class_extend_entries = config['same_class_extend_entries']
 
+    pos_weight = torch.tensor([top_n]).to(device).to(dtype=torch.float)
+
+    criterion = eval('nn.' + config['criterion'])(pos_weight, reduction='mean')
 
     ## Classes
     # Load dataset
@@ -52,30 +50,25 @@ def parseConfigFile(config_file, device, multiple_gpu):
     dataset_path = config['dataset_path'] + f'/{encoder}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
     dataset_class = config['dataset_class']
 
-    train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
-                                                      ,True,  same_class_reverse, same_class_extend_entries)
+
     test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes,
                                                             train_samples_per_cls
                                                             , False, same_class_reverse, same_class_extend_entries)
 
     # Load model
-    features_size = len(train_dataset.memory[0])
+    features_size = len(test_dataset.memory[0])
 
 
     model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
+    state_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_best_state.pth'
+    best_state = torch.load(state_path)
     model_class = config['model_class']
     model = eval('RecognitionModels.' + model_class)(model_path, train_classes,features_size, batch_size, top_k).to(device)
-
-    # If multiple gpu's available
-    if multiple_gpu:
-        print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
-        model = nn.DataParallel(model)
-
-
     print('Load model ' + model_path)
-    OpenWorldUtils.loadModel(model, model_path)
+    # OpenWorldUtils.loadModel(model, model_path)
+    model.load_state_dict(best_state['model'])
 
-    return train_dataset, test_dataset, model, config
+    return test_dataset, model, config, criterion
 
 def main():
     # set random seed
@@ -99,87 +92,50 @@ def main():
     with open('config/' + evaluation_config_file) as file:
         config_evaluate = yaml.load(file, Loader=yaml.FullLoader)
 
-    exp_name = config_evaluate['name']
-    batch_size = config_evaluate['batch_size']
+    exp_nrs = config_evaluate['name']
+    loop_variable_name = config_evaluate['variable']
+    loop_variable = {loop_variable_name: []}
+    figure_path = config_evaluate['figure_path']
 
-    exp_folder = 'output/' + exp_name
-    train_config_file = exp_folder + '/' + exp_name + '_config.yaml'
-    figure_path = exp_folder + '/' + exp_name
+    metrics_dict = {'loss': [],
+                    'accuracy': [],
+                    'precision': [],
+                    'recall': [],
+                    'F1': [],
+                    'mean_pred': [],
+                    'mean_true': []}
 
-    # Overwrite terminal argument if necessary
-    # config_file = 'config/L2AC_train.yaml'
+    for exp in exp_nrs:
 
-    # Parse config file
-    train_dataset, test_dataset, model, config= parseConfigFile(
-        train_config_file, device, multiple_gpu)
+        exp_folder = f'output/{exp}'
+        train_config_file = f'{exp_folder}/{exp}_config.yaml'
 
+        # Overwrite terminal argument if necessary
+        # config_file = 'config/L2AC_train.yaml'
 
-    # Get hyperparameters
-    train_classes = config['train_classes']
-    train_samples_per_cls = config['train_samples_per_cls']
-    probability_treshold = config['probability_threshold']
-    criterion = eval('nn.' + config['criterion'])()
+        # Parse config file
+        test_dataset, model, config, criterion = parseConfigFile(
+            train_config_file, device, multiple_gpu)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+        loop_variable[loop_variable_name].append(config[loop_variable_name])
+        # Get hyperparameters
+        train_classes = config['train_classes']
+        train_samples_per_cls = config['train_samples_per_cls']
+        probability_treshold = config['probability_threshold']
 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+        test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False, pin_memory=True)
 
-    trn_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
-    tst_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
+        # meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+        # meta_utils.validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
+        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw= meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
 
-    # meta_utils.validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
-    # meta_utils.validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
-    criterion = nn.BCEWithLogitsLoss(reduction='none')
-    trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw= meta_utils.validate_model(train_loader, model, criterion, device, probability_treshold)
-    tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw= meta_utils.validate_model(test_loader, model, criterion, device, probability_treshold)
+        meta_utils.calculate_metrics(metrics_dict, tst_y_true, tst_y_pred, tst_loss)
 
 
-    start = time.time()
+    plot_utils.plot_best_F1(metrics_dict['F1'], loop_variable, f'{figure_path}_F1')
+    plot_utils.plot_best_loss(metrics_dict['loss'], loop_variable, f'{figure_path}_loss')
 
-    title = 'Intermediate similarity score'
-    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
 
-    plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true, title, figure_path + '_intermediate_sim_pbd')
-
-    print("Trn scores took " + str(time.time() - start) + 's')
-    start = time.time()
-
-    title = 'Final similarity score'
-    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
-    plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true,tst_y_pred_raw, tst_y_true, title, figure_path + '_final_sim_pbd')
-
-    print("Tst scores took " + str(time.time() - start) + 's')
-
-    #
-    # plot_utils.plot_intermediate_similarity(trn_intermediate_same_cls, trn_intermediate_diff_cls,
-    #                                         tst_intermediate_same_cls, tst_intermediate_diff_cls, figure_path)
-    # plot_utils.plot_final_similarity(trn_final_same_cls, trn_final_diff_cls, tst_final_same_cls, tst_final_diff_cls,
-    #                                  figure_path)
-    #
-    # OpenWorldUtils.saveModel(model, model_path)
-    #
-    # np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
-    #          train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
-    #          test_recall=tst_recall, train_F1=trn_F1, test_F1=tst_F1)
-    #
-    # np.savez(sim_path,
-    #          trn_final_same_cls=trn_similarity_scores['final_same_cls'],
-    #          trn_intermediate_same_cls=trn_similarity_scores['intermediate_same_cls'],
-    #          trn_final_diff_cls=trn_similarity_scores['final_diff_cls'],
-    #          trn_intermediate_diff_cls=trn_similarity_scores['intermediate_diff_cls'],
-    #          tst_final_same_cls=tst_similarity_scores['final_same_cls'],
-    #          tst_intermediate_same_cls=tst_similarity_scores['intermediate_same_cls'],
-    #          tst_final_diff_cls=tst_similarity_scores['final_diff_cls'],
-    #          tst_intermediate_diff_cls=tst_similarity_scores['intermediate_diff_cls'],
-    #          )
 
     return
 

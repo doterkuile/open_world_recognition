@@ -190,3 +190,29 @@ def plot_prob_density(fig, axs, trn_sim_score, y_trn, tst_sim_score, y_tst, titl
     if figure_path is not None:
         fig.savefig(figure_path)
 
+def plot_best_F1(F1, loop_variable, figure_path):
+
+
+    fig = plt.figure()
+    var_name = list(loop_variable.keys())[0]
+    plt.plot(loop_variable[var_name], F1, label='F1 score')
+    plt.ylabel('F1')
+    plt.xlabel(f'{var_name}')
+    plt.title('F1 score')
+    plt.legend()
+    fig.savefig(figure_path + f'_{var_name}')
+    return
+
+
+def plot_best_loss(loss, loop_variable, figure_path):
+
+
+    fig = plt.figure()
+    var_name = list(loop_variable.keys())[0]
+    plt.plot(loop_variable[var_name], loss, label='loss')
+    plt.ylabel('loss')
+    plt.xlabel(f'{var_name}')
+    plt.title('loss score')
+    plt.legend()
+    fig.savefig(figure_path + f'_{var_name}')
+    return

@@ -138,6 +138,7 @@ def main():
     start = time.time()
 
     OpenWorldUtils.saveModel(model, model_path)
+    best_state['model_class'] = config['model_class']
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path,

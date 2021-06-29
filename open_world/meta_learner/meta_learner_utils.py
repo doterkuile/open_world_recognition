@@ -308,7 +308,7 @@ def calculate_metrics(metrics_dict, y_pred, y_true, loss):
 
     metrics_dict['accuracy'].append(metrics.accuracy_score(y_true, y_pred))
     metrics_dict['precision'].append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
-    metrics_dict['recall'].append(metrics.recall_score(y_true, y_pred))
+    metrics_dict['recall'].append(metrics.recall_score(y_true, y_pred, zero_division=0))
     metrics_dict['F1'].append(metrics.f1_score(y_true=y_true, y_pred=y_pred, zero_division=0))
 
     metrics_dict['mean_pred'].append(y_pred.mean())

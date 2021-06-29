@@ -30,7 +30,7 @@ base_config_file=L2AC_train_base.yaml
 config_file=L2AC_train.yaml
 conda_env=l2acenv
 
-cp $base_config_file $config_file
+cp config/$base_config_file config/$config_file
 
 
 # Loop variables
