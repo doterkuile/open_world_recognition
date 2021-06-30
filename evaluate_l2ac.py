@@ -138,6 +138,7 @@ def main():
 
     plot_utils.plot_best_F1(metrics_dict['F1'], loop_variable, f'{figure_path}_F1')
     plot_utils.plot_best_loss(metrics_dict['loss'], loop_variable, f'{figure_path}_loss')
+    plot_utils.plot_best_accuracy(metrics_dict['accuracy'],loop_variable, f'{figure_path}_accuracy')
 
 
 
