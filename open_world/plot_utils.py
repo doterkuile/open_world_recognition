@@ -201,7 +201,7 @@ def plot_best_F1(F1, loop_variable, figure_path):
     plt.title('F1 score')
     plt.xticks(rotation=45)
     plt.legend()
-    fig.savefig(figure_path + f'_{var_name}')
+    fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
 
 
@@ -217,7 +217,7 @@ def plot_best_loss(loss, loop_variable, figure_path):
     plt.xticks(rotation=45)
 
     plt.legend()
-    fig.savefig(figure_path + f'_{var_name}')
+    fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
 
 def plot_best_accuracy(accuracy, loop_variable, figure_path):
@@ -232,5 +232,5 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
     plt.xticks(rotation=45)
 
     plt.legend()
-    fig.savefig(figure_path + f'_{var_name}')
+    fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
