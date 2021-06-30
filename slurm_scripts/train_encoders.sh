@@ -37,7 +37,7 @@ file=config/$config_file
 var_1=name	
 array_1=(e0001 e0002 e0003 e0004 e0005)
 var_2=model_class
-array_2=(resnet50 resnet50 resnet152 AlexNet EfficientNet)
+array_2=(Resnet50 Resnet50 Resnet152 AlexNet EfficientNet)
 var_3=pretrained 
 array_3=(True False True True True)
 len=${#array_1[@]}
@@ -46,7 +46,7 @@ len=${#array_1[@]}
 
 
 var_4=epochs
-value_4=5
+value_4=2
 
 conda activate $conda_env
 

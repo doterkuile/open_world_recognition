@@ -193,7 +193,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_recall.append(metrics.recall_score(y_true, y_pred, average='weighted'))
         tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, average='weighted', zero_division=0))
 
-        if tst_acc[-1] > tst_acc:
+        if tst_acc[-1] > best_acc:
             best_acc = tst_acc[-1]
             best_epoch = i + 1
             best_model = copy.deepcopy(model.state_dict())
