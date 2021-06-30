@@ -13,7 +13,7 @@ pretrained: False
 ## Training hyperparameters
 criterion: CrossEntropyLoss
 optimizer: Adam
-learning_rate: 0.01
+learning_rate: 0.001
 batch_size: 128
 epochs: 1
   

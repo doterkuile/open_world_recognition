@@ -35,11 +35,11 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(e0001 e0002 e0001 e0001 e0040)
+array_1=(e0001 e0002 e0003 e0004 e0005)
 var_2=model_class
-array_2=(resnet50 resnet50 resnet152 vgg11 vgg11)
+array_2=(resnet50 resnet50 resnet152 AlexNet EfficientNet)
 var_3=pretrained 
-array_3=(True False True True False)
+array_3=(True False True True True)
 len=${#array_1[@]}
 
 
