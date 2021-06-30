@@ -25,52 +25,16 @@ module load cudnn/10.0-7.6.0.64
 module load miniconda/3.7
 
 # configuration variables
-python_script=train_l2ac.py
-base_config_file=L2AC_train_base.yaml
-config_file=L2AC_train.yaml
+python_script=evaluate_l2ac.py
+config_file=L2AC_evaluate.yaml
 conda_env=l2acenv
 
-cp config/$base_config_file config/$config_file
-
-
-# Loop variables
-file=config/$config_file
-var_1=name	
-array_1=(0022 0023)
-var_2=same_class_reverse
-array_2=(True False)
-var_3=same_class_extend_entries
-array_3=(False True)
-len=${#array_1[@]}
-
-
-
-
-var_4=epochs
-value_4=200
 
 conda activate $conda_env
 
 
-for ((i=0;i<$len; i++))
 
-do
+python $python_script $config_file
 
-        echo "$var_4 = ${value_4}"
-        sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
-	
-
-	echo "$var_1 = ${array_1[$i]}"
-	echo "$var_2 = ${array_2[$i]}"
-        echo "$var_3 = ${array_3[$i]}"
-
-	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
-	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
-	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
-
-
-	python $python_script $config_file
-
-done
 
 conda deactivate
