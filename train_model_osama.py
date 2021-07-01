@@ -100,9 +100,9 @@ def train_model(output_path, model, dataloaders, \
             epoch_loss = running_loss / dataset_sizes[phase]
 
             metrics_dict[phase]['accuracy'].append(metrics.accuracy_score(y_true, y_pred))
-            metrics_dict[phase]['precision'].append(metrics.precision_score(y_true=y_true, y_pred=y_pred, average='weighted'))
-            metrics_dict[phase]['recall'].append(metrics.recall_score(y_true, y_pred, average='weighted'))
-            metrics_dict[phase]['F1'].append(metrics.f1_score(y_true=y_true, y_pred=y_pred, average='weighted'))
+            metrics_dict[phase]['precision'].append(metrics.precision_score(y_true=y_true, y_pred=y_pred, average='weighted',zero_division=0))
+            metrics_dict[phase]['recall'].append(metrics.recall_score(y_true, y_pred, average='weighted',zero_division=0))
+            metrics_dict[phase]['F1'].append(metrics.f1_score(y_true=y_true, y_pred=y_pred, average='weighted',zero_division=0))
 
             metrics_dict[phase]['mean_pred'].append(y_pred.mean())
             metrics_dict[phase]['mean_true'].append(y_true.mean())

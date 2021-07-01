@@ -107,7 +107,7 @@ class AlexNet(EncoderBase):
 
 
     def getModel(self, pretrained):
-        model = AlexNetmod.alexnet(pretrained=pretrained)
+        model = AlexNetmod.alexnet(pretrained=pretrained, out_classes=100)
         return model
 
     def reset_final_layer(self, output_classes):
