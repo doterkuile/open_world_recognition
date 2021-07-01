@@ -1,0 +1,10 @@
+RSH_p 1.000 epochs 000 Train_Accuracy 0.009 Train_Loss 3583.333 Validation_Accuracy 0.010 Validation_Loss 4.609 completed on 20210701-123215
+RSH_p 1.000 epochs 000 Train_Accuracy 0.010 Train_Loss 3582.930 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-123455
+RSH_p 1.000 epochs 000 Train_Accuracy 0.009 Train_Loss 3583.299 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-123750
+RSH_p 1.000 epochs 001 Train_Accuracy 0.009 Train_Loss 4.608 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-123922
+RSH_p 1.000 epochs 002 Train_Accuracy 0.009 Train_Loss 4.608 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-124058
+RSH_p 1.000 epochs 003 Train_Accuracy 0.010 Train_Loss 4.608 Validation_Accuracy 0.010 Validation_Loss 4.607 completed on 20210701-124236
+RSH_p 1.000 epochs 004 Train_Accuracy 0.010 Train_Loss 4.608 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-124418
+RSH_p 1.000 epochs 005 Train_Accuracy 0.010 Train_Loss 4.608 Validation_Accuracy 0.010 Validation_Loss 4.606 completed on 20210701-124553
+RSH_p 1.000 epochs 000 Train_Accuracy 0.010 Train_Loss 4.605 Validation_Accuracy 0.010 Validation_Loss 4.605 completed on 20210701-125029
+RSH_p 1.000 epochs 001 Train_Accuracy 0.011 Train_Loss 4.605 Validation_Accuracy 0.011 Validation_Loss 4.605 completed on 20210701-125150

@@ -20,6 +20,7 @@ from torchvision import datasets, transforms, models
 import time
 from tqdm import tqdm
 import copy
+import train_model_osama as train_correct
 
 
 def main():
@@ -56,9 +57,17 @@ def main():
 
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
+    dataloaders = {'train': train_loader,
+                   'val': test_loader,}
 
-    model.load_state_dict(best_state['model'])
+    dataset_sizes =  {'train': len(train_data),
+                      'val': len(test_data),}
+    i_p = 1
+    filename='output.txt'
+    # trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
+    trn_metrics, tst_metrics = train_correct.train_model(config['model_class'], model,dataloaders,dataset_sizes, criterion, optimizer, i_p, model_path, filename, epochs)
+
+    # model.load_state_dict(best_state['model'])
 
     # Train metrics
     trn_loss = trn_metrics['loss']
@@ -89,8 +98,8 @@ def main():
     plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
     plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
-    OpenWorldUtils.saveModel(model, model_path)
-    torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
+    # OpenWorldUtils.saveModel(model, model_path)
+    # torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
              train_precision=trn_precision, test_precision=tst_precision, train_recall=trn_recall,
@@ -287,7 +296,6 @@ def parseConfigFile(device, multiple_gpu):
     if not os.path.exists(exp_folder):
         os.makedirs(exp_folder)
 
-    torch.nn.CrossEntropyLoss
 
     config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
     shutil.copyfile('config/' + config_file, config_save_path)
@@ -322,8 +330,8 @@ def parseConfigFile(device, multiple_gpu):
     #     out_features=train_classes))
     model.to(device)
 
-    criterion = eval('nn.' + config['criterion'])(reduction='mean')
-    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
+    criterion = eval('nn.' + config['criterion'])()
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate, momentum=0.9)
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 
