@@ -109,6 +109,7 @@ class AlexNet(EncoderBase):
         return model
 
     def reset_final_layer(self, output_classes):
+        self.model.classifier[1] = nn.Linear(256 * 1 * 1, 4096)
         self.model.classifier[-1] = torch.nn.Linear(in_features=self.model.classifier[-1].in_features, out_features=output_classes)
         return
 
