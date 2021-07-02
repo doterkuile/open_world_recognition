@@ -52,8 +52,8 @@ def main():
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=2)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
 
     dataloaders = {'train': train_loader,
@@ -155,7 +155,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # Apply the model
             y_out, feature_layer = model(X0_train)
             batch_loss = criterion(y_out, y_train)
-            y_out = F.log_softmax(y_out, dim=1)
+            # y_out = F.log_softmax(y_out, dim=1)
 
             # Tally the number of correct predictions
             predicted = torch.max(y_out.data, 1)[1]

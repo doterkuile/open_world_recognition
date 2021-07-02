@@ -107,7 +107,7 @@ def train_model(output_path, model, dataloaders, \
             metrics_dict[phase]['mean_pred'].append(y_pred.mean())
             metrics_dict[phase]['mean_true'].append(y_true.mean())
 
-            metrics_dict[phase]['loss'].append(loss.item())
+            metrics_dict[phase]['loss'].append(epoch_loss)
 
 
 
