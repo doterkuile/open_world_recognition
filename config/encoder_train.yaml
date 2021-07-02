@@ -1,21 +1,21 @@
 ## Experiment
-name: 'e0003'
+name: 'e0001'
 
 ## Paths and classes
-dataset_path: 'datasets'
+dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
 image_resize: 64
-model_class: Resnet152
-feature_layer: avgpool #_avg_pooling
+model_class: AlexNet
+feature_layer: features #_avg_pooling
 model_path: networks
 pretrained: True
 
 ## Training hyperparameters
 criterion: CrossEntropyLoss
-optimizer: Adam
+optimizer: SGD
 learning_rate: 0.001
-batch_size: 128
-epochs: 2
+batch_size: 100
+epochs: 80
   
 ## L2AC parameters
 train_classes: 100

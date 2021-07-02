@@ -44,7 +44,6 @@ def main():
     exp_folder = 'output/' + exp_name
     figure_path = exp_folder + '/' + exp_name
     results_path = exp_folder + '/' + exp_name + '_results.npz'
-    sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = config['dataset_path']
     train_data, test_data = train_dataset.getData()
@@ -52,9 +51,9 @@ def main():
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
     trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
 
@@ -89,7 +88,11 @@ def main():
     plot_utils.plot_F1(trn_F1, tst_F1, figure_path)
     plot_utils.plot_mean_prediction(trn_mean_pred, trn_mean_true, tst_mean_pred, tst_mean_true, figure_path)
 
+    # Save in output folder
     OpenWorldUtils.saveModel(model, model_path)
+    # Save encoder in datasetfolder
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder.pt'
+    OpenWorldUtils.saveModel(model, )
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,
@@ -287,7 +290,6 @@ def parseConfigFile(device, multiple_gpu):
     if not os.path.exists(exp_folder):
         os.makedirs(exp_folder)
 
-    torch.nn.CrossEntropyLoss
 
     config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
     shutil.copyfile('config/' + config_file, config_save_path)
@@ -323,7 +325,7 @@ def parseConfigFile(device, multiple_gpu):
     model.to(device)
 
     criterion = eval('nn.' + config['criterion'])(reduction='mean')
-    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate, momentum=0.9)
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 

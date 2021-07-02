@@ -6,7 +6,7 @@ from torchvision import datasets, transforms, models
 import efficientnet_pytorch as efficientnetPy
 
 
-import torchvision.models.resnet as resnet
+
 from torchvision.utils import make_grid
 import torch.utils.model_zoo as model_zoo
 import os
@@ -35,10 +35,11 @@ class EncoderBase(nn.Module):
         self.feature_layer = feature_layer
         self.selected_out = OrderedDict()
         self.model = self.getModel(pretrained)
+        self.output_classes = train_classes
 
-        if pretrained:
-            for param in self.model.parameters():
-                param.requires_grad = False
+        # if pretrained:
+        #     for param in self.model.parameters():
+        #         param.requires_grad = False
 
         self.reset_final_layer(train_classes)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
@@ -105,7 +106,7 @@ class AlexNet(EncoderBase):
 
 
     def getModel(self, pretrained):
-        model = models.alexnet(pretrained=pretrained)
+        model = alexnet(pretrained=pretrained, out_classes=self.output_classes)
         return model
 
     def reset_final_layer(self, output_classes):
@@ -158,7 +159,7 @@ class ResNet50old(nn.Module):
 
 class ResNet50Features(models.ResNet):
     def __init__(self, model_path, feature_layer):
-        super().__init__(resnet.Bottleneck, [3, 4, 6, 3])
+        super().__init__(models.resnet.Bottleneck, [3, 4, 6, 3])
 
         self.pretrained = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
         torch.save(self.pretrained.state_dict(), model_path)
@@ -182,6 +183,62 @@ class ResNet50Features(models.ResNet):
 
         return x, self.selected_out[self.feature_layer]
 
+__all__ = ['AlexNet', 'alexnet']
+
+
+
+class AlexNet(nn.Module):
+
+    def __init__(self, num_classes=1000):
+        super(AlexNet, self).__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(64, 192, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(192, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+        )
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(256 * 6 * 6, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Linear(4096, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), 256 * 1 * 1)
+        x = self.classifier(x)
+        return x
+
+def alexnet(pretrained=False, out_classes=200, **kwargs):
+    r"""AlexNet model architecture from the
+    `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+
+    model_urls = {
+        'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+    }
+
+    model = AlexNet(**kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['alexnet']))
+    model.classifier[1] = nn.Linear(256 * 1 * 1, 4096)
+    model.classifier[6] = nn.Linear(4096, out_classes)
+    return model
 
 
 class Identity(torch.nn.Module):
