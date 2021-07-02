@@ -92,7 +92,7 @@ def main():
     OpenWorldUtils.saveModel(model, model_path)
     # Save encoder in datasetfolder
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder.pt'
-    OpenWorldUtils.saveModel(model, )
+    OpenWorldUtils.saveModel(model,encoder_file_path)
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
     np.savez(results_path, train_loss=trn_loss, test_loss=tst_loss, train_acc=trn_acc, test_acc=tst_acc,

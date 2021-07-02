@@ -34,8 +34,9 @@ class EncoderBase(nn.Module):
         self.pretrained = pretrained
         self.feature_layer = feature_layer
         self.selected_out = OrderedDict()
-        self.model = self.getModel(pretrained)
         self.output_classes = train_classes
+
+        self.model = self.getModel(pretrained)
 
         # if pretrained:
         #     for param in self.model.parameters():

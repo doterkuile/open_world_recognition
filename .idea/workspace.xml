@@ -22,7 +22,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="" />
+    <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_resnet.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
