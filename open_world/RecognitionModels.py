@@ -187,10 +187,10 @@ __all__ = ['AlexNet', 'alexnet']
 
 
 
-class AlexNet(nn.Module):
+class AlexNet_modified(nn.Module):
 
     def __init__(self, num_classes=1000):
-        super(AlexNet, self).__init__()
+        super(AlexNet_modified, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
             nn.ReLU(inplace=True),
@@ -233,7 +233,7 @@ def alexnet(pretrained=False, out_classes=200, **kwargs):
         'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
     }
 
-    model = AlexNet(**kwargs)
+    model = AlexNet_modified(**kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['alexnet']))
     model.classifier[1] = nn.Linear(256 * 1 * 1, 4096)
