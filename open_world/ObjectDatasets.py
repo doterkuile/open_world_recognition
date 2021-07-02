@@ -169,15 +169,15 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.transform_train = transforms.Compose([
                 transforms.Resize(image_resize),
                 transforms.ToTensor(),
-                # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+                # transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
             transforms.Resize(image_resize),
             transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            # transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
 

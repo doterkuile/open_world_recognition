@@ -38,9 +38,9 @@ class EncoderBase(nn.Module):
         self.selected_out = OrderedDict()
         self.model = self.getModel(pretrained)
 
-        if pretrained:
-            for param in self.model.parameters():
-                param.requires_grad = False
+        # if pretrained:
+        #     for param in self.model.parameters():
+        #         param.requires_grad = False
 
         self.reset_final_layer(train_classes)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))

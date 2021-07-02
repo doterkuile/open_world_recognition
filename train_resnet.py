@@ -45,17 +45,16 @@ def main():
     exp_folder = 'output/' + exp_name
     figure_path = exp_folder + '/' + exp_name
     results_path = exp_folder + '/' + exp_name + '_results.npz'
-    sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
-    dataset_path = config['dataset_path']
     train_data, test_data = train_dataset.getData()
 
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=2)
+
 
     dataloaders = {'train': train_loader,
                    'val': test_loader,}
@@ -64,8 +63,8 @@ def main():
                       'val': len(test_data),}
     i_p = 1
     filename='output.txt'
-    # trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
-    trn_metrics, tst_metrics = train_correct.train_model(config['model_class'], model,dataloaders,dataset_sizes, criterion, optimizer, i_p, model_path, filename, epochs)
+    trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
+    # trn_metrics, tst_metrics = train_correct.train_model(config['model_class'], model,dataloaders,dataset_sizes, criterion, optimizer, i_p, model_path, filename, epochs)
 
     # model.load_state_dict(best_state['model'])
 
@@ -202,7 +201,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         tst_recall.append(metrics.recall_score(y_true, y_pred, average='weighted'))
         tst_F1.append(metrics.f1_score(y_true=y_true, y_pred=y_pred, average='weighted', zero_division=0))
 
-        if tst_acc[-1] > tst_acc:
+        if tst_acc[-1] > best_acc:
             best_acc = tst_acc[-1]
             best_epoch = i + 1
             best_model = copy.deepcopy(model.state_dict())
