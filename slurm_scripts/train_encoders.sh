@@ -35,11 +35,11 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(e0001 e0002 e0003 e0004 e0005)
+array_1=(e0001 e0002 e0003 e0004)
 var_2=model_class
-array_2=(Resnet50 Resnet50 Resnet152 AlexNet EfficientNet)
-var_3=pretrained 
-array_3=(True False True True True)
+array_2=(Resnet50 Resnet152 AlexNet EfficientNet)
+var_3=feature_layer 
+array_3=(avgpool avgpool features _avg_pooling)
 len=${#array_1[@]}
 
 
