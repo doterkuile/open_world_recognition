@@ -6,8 +6,8 @@ dataset_path: 'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset
 image_resize: 64
 model_path: 'networks/CIFAR100/encoder/resnet50.pt'
-model_class: EfficientNet
-feature_layer: _avg_pooling
+model_class: AlexNet
+feature_layer: features
 pretrained: True
 training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
 figures_path: 'figures/CIFAR100_'

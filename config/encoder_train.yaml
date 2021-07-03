@@ -15,7 +15,7 @@ criterion: CrossEntropyLoss
 optimizer: SGD
 learning_rate: 0.001
 batch_size: 100
-epochs: 80
+epochs: 2
   
 ## L2AC parameters
 train_classes: 100

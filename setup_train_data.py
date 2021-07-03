@@ -107,7 +107,11 @@ def parseConfigFile(device, multiple_gpu):
     model_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
-    model = eval('RecognitionModels.' + model_class)(model_class, model_path, train_classes, feature_layer, pretrained).to(device)
+    num_classes = len(dataset.classes)
+    model = eval('RecognitionModels.' + model_class)(model_class, model_path, num_classes, feature_layer, pretrained).to(device)
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder.pt'
+
+    model.load_state_dict(torch.load(encoder_file_path))
 
     return dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
 
