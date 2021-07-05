@@ -38,8 +38,8 @@ file=config/$config_file
 var_1=name	
 array_1=(0014 0015 0016 0017)
 var_2=feature_layer
-array_2=(avgpool avgpool avgpool _avg_pooling)
-var_3=encoders
+array_2=(avgpool avgpool features _avg_pooling)
+var_3=encoder
 array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
