@@ -80,7 +80,7 @@ def parseConfigFile(device, multiple_gpu):
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
                                                       ,enable_training,  same_class_reverse, same_class_extend_entries)
 
-    features_size = len(dataset.memory[0])
+    features_size = len(dataset.trn_memory[0])
 
     # Load model
     if config['name'] == 'encoder':

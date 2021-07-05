@@ -30,7 +30,9 @@ class MetaDataset(data_utils.Dataset):
         self.top_n = top_n
         self.top_k = top_k
         self.train = train
-        self.memory, self.true_labels = self.load_memory(self.data_path)
+        self.trn_memory, self.trn_true_labels = self.load_trn_memory(self.data_path)
+        self.tst_memory, self.tst_true_labels = self.load_tst_memory(self.data_path)
+
         if same_class_extend_entries:
             self.load_balanced_train_idx(self.data_path)
         else:
@@ -51,27 +53,35 @@ class MetaDataset(data_utils.Dataset):
         if self.train:
             idx_X0 = self.train_X0[idx]
             idx_X1 = self.train_X1[idx,:]
-            x0_rep = self.memory[idx_X0,:]
-            x1_rep = self.memory[idx_X1,:]
+            x0_rep = self.trn_memory[idx_X0,:]
+            x1_rep = self.trn_memory[idx_X1,:]
             y = torch.tensor(self.train_Y[idx], dtype=torch.float)
-            true_label_X0 = self.true_labels[idx_X0]
-            true_label_X1 = self.true_labels[idx_X1]
+            true_label_X0 = self.trn_true_labels[idx_X0]
+            true_label_X1 = self.trn_true_labels[idx_X1]
         else:
             idx_X0 = self.valid_X0[idx]
             idx_X1 = self.valid_X1[idx,:]
-            x0_rep = self.memory[idx_X0, :]
-            x1_rep = self.memory[idx_X1, :]
+            x0_rep = self.tst_memory[idx_X0, :]
+            x1_rep = self.tst_memory[idx_X1, :]
             y = torch.tensor(self.valid_Y[idx], dtype=torch.float)
-            true_label_X0 = self.true_labels[idx_X0]
-            true_label_X1 = self.true_labels[idx_X1]
+            true_label_X0 = self.tst_true_labels[idx_X0]
+            true_label_X1 = self.tst_true_labels[idx_X1]
 
         return [x0_rep, x1_rep], y, [true_label_X0, true_label_X1]
 
 
-    def load_memory(self, data_path):
+    def load_trn_memory(self, data_path):
         features = np.load(data_path)['train_rep']
         try:
-            labels = np.load(data_path)['labels_rep']
+            labels = np.load(data_path)['trn_labels_rep']
+        except KeyError:
+            labels = np.zeros(features.shape[0])
+        return features, labels
+
+    def load_tst_memory(self, data_path):
+        features = np.load(data_path)['test_rep']
+        try:
+            labels = np.load(data_path)['tst_labels_rep']
         except KeyError:
             labels = np.zeros(features.shape[0])
         return features, labels

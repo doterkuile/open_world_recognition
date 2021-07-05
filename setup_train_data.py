@@ -51,25 +51,31 @@ def main():
     #     print(f'Model:{model_path}\nFeature layer: {feature_layer}')
     #     return
 
+    tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(test_data, model, classes, feature_memory_path, load_memory)
 
-    print('Extract features')
-    data_rep, data_cls_rep, labels_rep = meta_utils.extract_features(train_data, model, classes, feature_memory_path, load_memory)
-
-    print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
-    train_X0, train_X1, train_Y = meta_utils.rank_samples_from_memory(classes[:train_classes], data_rep, data_cls_rep,
-                                                                      labels_rep, classes, train_samples_per_cls, top_n,
-                                                                      randomize_samples)
 
     print(f'Rank validation samples with {test_classes} classes, {train_samples_per_cls} samples per class')
-    valid_X0, valid_X1, valid_Y = meta_utils.rank_samples_from_memory(classes[-test_classes:], data_rep, data_cls_rep,
-                                                                      labels_rep, classes, train_samples_per_cls, 1,
+    valid_X0, valid_X1, valid_Y = meta_utils.rank_samples_from_memory(classes[-test_classes:], tst_data_rep, tst_data_cls_rep,
+                                                                      tst_labels_rep, classes, 100, 1,
+                                                                      randomize_samples)
+
+
+
+
+    print('Extract features')
+    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(train_data, model, classes, feature_memory_path, load_memory)
+
+    print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
+    train_X0, train_X1, train_Y = meta_utils.rank_samples_from_memory(classes[:train_classes], trn_data_rep, trn_data_cls_rep,
+                                                                      trn_labels_rep, classes, train_samples_per_cls, top_n,
                                                                       randomize_samples)
 
 
 
     print(f'Save results to {memory_path}')
     np.savez(memory_path,
-             train_rep=data_rep, labels_rep=labels_rep,  # including all validation examples.
+             train_rep=trn_data_rep, trn_labels_rep=trn_labels_rep,  # including all validation examples.
+             test_rep=tst_data_rep, tst_labels_rep=tst_labels_rep,
              train_X0=train_X0, train_X1=train_X1, train_Y=train_Y,
              valid_X0=valid_X0, valid_X1=valid_X1, valid_Y=valid_Y)
     return
