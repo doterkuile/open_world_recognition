@@ -36,8 +36,8 @@ file=config/$config_file
 var_1=top_n	
 array_1=(4 4 4 4)
 var_2=feature_layer
-array_2=(avgpool avgpool featuers _avg_pooling)
-var_3=encoder
+array_2=(avgpool avgpool features _avg_pooling)
+var_3=model_class
 array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
