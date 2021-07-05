@@ -240,11 +240,26 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
         ])
 
-        self.train_data = datasets.ImageFolder(root=f'{dataset_path}/train')
-        self.test_data = datasets.ImageFolder(root=f'{dataset_path}/val')
+        self.train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
+        self.test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
         # self.image_shape = [1, 3, 32, 32]
         self.classes = [i for i in range(len(self.train_data.classes))]
 
+    def getImage(self, x):
+
+        inv_normalize = transforms.Normalize(
+            mean=[-self.trn_mean_pixel[0] / self.trn_std_pixel[0], -self.trn_mean_pixel[1] / self.trn_std_pixel[1], -self.trn_mean_pixel[1] / self.trn_std_pixel[1]],
+            std=[1 / self.trn_std_pixel[0], 1 / self.trn_std_pixel[1], 1 / self.trn_std_pixel[2]]
+        )
+        im = inv_normalize(self.test_data[x][0])
+        # im =self.test_data[x][0]
+        label = self.test_data[x][1]
+        im = np.transpose(im.numpy(), (1, 2, 0))
+        plt.imshow(np.transpose(im, (0, 1, 2)))
+        plt.title(self.train_data.classes[label])
+        plt.show()
+
+        return im, label
 
 
 def main():

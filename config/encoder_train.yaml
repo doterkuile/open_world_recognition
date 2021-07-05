@@ -2,11 +2,11 @@
 name: 'e0001'
 
 ## Paths and classes
-dataset_path: 'datasets/CIFAR100'
-dataset_class: CIFAR100Dataset
+dataset_path: datasets/TinyImageNet #'datasets/CIFAR100'
+dataset_class: TinyImageNetDataset #CIFAR100Dataset
 image_resize: 64
-model_class: EfficientNet
-feature_layer: _avg_pooling
+model_class: Resnet50
+feature_layer: avgpool
 model_path: networks
 pretrained: True
 
