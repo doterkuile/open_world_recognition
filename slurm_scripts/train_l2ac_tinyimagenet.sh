@@ -38,9 +38,9 @@ file=config/$config_file
 var_1=name	
 array_1=(0010)
 var_2=dataset_path
-array_2=('datasets/TinyImageNet')
+array_2=(datasets/TinyImageNet)
 var_3=encoder
-array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
+array_3=(Resnet50)
 len=${#array_1[@]}
 
 
