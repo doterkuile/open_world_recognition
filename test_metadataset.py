@@ -24,7 +24,7 @@ def main():
 	with open(config_file) as file:
 		config = yaml.load(file, Loader=yaml.FullLoader)
 
-	data_path = config['dataset_path'] + "/train_idx.npz"
+	data_path = f'datasets/{config["dataset_path"]}/train_idx.npz'
 	metadataset = ObjectDatasets.MetaDataset(data_path, ncls, top_n)
 	# metadataset.__getitem__(0)
 

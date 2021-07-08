@@ -36,7 +36,7 @@ def main():
 
     feature_layer = config['feature_layer']
     model_class = config['model_class']
-    dataset_path = config['dataset_path'] + f'/{model_class}'
+    dataset_path = f"datasets/{config['dataset_path']}/{model_class}"
     memory_path = f'{dataset_path}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
     model_path = config['model_path']
     # If dataset folder does not exist make folder
@@ -101,7 +101,7 @@ def parseConfigFile(device, multiple_gpu):
     randomize_samples = config['randomize_samples']
 
     # Load dataset
-    dataset_path = config['dataset_path']
+    dataset_path = f"datasets/{config['dataset_path']}"
     dataset_class = config['dataset_class']
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']

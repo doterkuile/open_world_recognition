@@ -2,7 +2,7 @@
 name: '0037'
 
 ## Paths and classes
-dataset_path: 'datasets/amazon'
+dataset_path: amazon
 dataset_class: MetaDataset
 model_path: 'networks/amazon/L2AC.pt'
 model_class: L2AC

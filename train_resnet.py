@@ -45,7 +45,7 @@ def main():
     figure_path = exp_folder + '/' + exp_name
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
-    dataset_path = config['dataset_path']
+    dataset_path = f'datasets/{config["dataset_path"]}'
     train_data, test_data = train_dataset.getData()
 
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
@@ -307,7 +307,7 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     train_classes = config['train_classes']
     dataset_class = config['dataset_class']
-    dataset_path = config['dataset_path']
+    dataset_path = f'dataset/{config["dataset_path"]}'
     image_resize = config['image_resize']
     feature_layer = config['feature_layer']
     model_path = config['model_path']

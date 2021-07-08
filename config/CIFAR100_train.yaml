@@ -2,7 +2,7 @@
 name: 'e0000'
 
 ## Paths and classes
-dataset_path: 'datasets/CIFAR100'
+dataset_path: CIFAR100
 dataset_class: CIFAR100Dataset
 image_resize: 64
 model_path: 'networks/CIFAR100/encoder/resnet50.pt'

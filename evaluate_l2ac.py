@@ -51,7 +51,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     # Load dataset
     encoder = config['encoder']
     feature_layer = config['feature_layer']
-    dataset_path = config['dataset_path'] + f'/{encoder}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
+    dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
     dataset_class = config['dataset_class']
 
 

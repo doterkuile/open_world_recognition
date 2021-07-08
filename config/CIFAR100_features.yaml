@@ -1,5 +1,5 @@
 ## Paths and classes
-dataset_path: 'datasets/CIFAR100'
+dataset_path: CIFAR100
 dataset_class: CIFAR100Dataset
 model_path: 'networks/CIFAR100/encoder/resnet50_features.pt'
 model_class: ResNet50Features
