@@ -2,8 +2,8 @@
 name: 'e_c_0004'
 
 ## Paths and classes
-dataset_path: CIFAR100 #'datasets/TinyImageNet' #'datasets/CIFAR100'
-dataset_class: CIFAR100Dataset #TinyImageNetDataset #CIFAR100Dataset
+dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
+dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 64
 model_class: ResNet50
 feature_layer: avgpool
@@ -19,7 +19,7 @@ batch_size: 100
 epochs: 2
   
 ## L2AC parameters
-train_classes: 100
+train_classes: 200
 test_classes: 20
 
 ## Training/loading parameters
