@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_balanced_set  	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=long						# select quality of service
+#SBATCH --qos=short						# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
-#SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=8gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:p100:1             		# number of gpus per node
-#SBATCH --time=07:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=04:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -36,9 +36,9 @@ cp config/$base_config_file config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(0010)
-var_2=dataset_path
-array_2=(datasets/TinyImageNet)
+array_1=(i0004)
+var_2=learning_rate
+array_2=(0.0001)
 var_3=encoder
 array_3=(Resnet50)
 len=${#array_1[@]}
@@ -47,7 +47,7 @@ len=${#array_1[@]}
 
 
 var_4=epochs
-value_4=2
+value_4=200
 
 conda activate $conda_env
 

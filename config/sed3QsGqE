@@ -1,0 +1,27 @@
+## Experiment
+name: 'e0002'
+
+## Paths and classes
+dataset_path: 'datasets'
+dataset_class: CIFAR100Dataset
+image_resize: 64
+model_class: Resnet50
+feature_layer: avgpool
+model_path: networks
+pretrained: False
+
+## Training hyperparameters
+criterion: CrossEntropyLoss
+optimizer: Adam
+learning_rate: 0.001
+batch_size: 128
+epochs: 80
+  
+## L2AC parameters
+train_classes: 100
+test_classes: 20
+
+## Training/loading parameters
+load_memory: False
+enable_training: True
+save_images: True

@@ -5,10 +5,10 @@
 #SBATCH --qos=short						# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
-#SBATCH --cpus-per-task=1        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=10gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=20gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=03:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=01:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,12 +33,15 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 file=config/$config_file
-var_1=top_n	
-array_1=(4 4 4 4)
+var_1=top_n
+array_1=(4)	
+#array_1=(4 4 4 4)
 var_2=feature_layer
-array_2=(avgpool avgpool features _avg_pooling)
+array_2=(avgpool)
+#array_2=(avgpool avgpool features _avg_pooling)
 var_3=model_class
-array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
+array_3=(Resnet50)
+#array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 

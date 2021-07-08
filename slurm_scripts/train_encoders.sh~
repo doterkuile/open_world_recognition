@@ -35,20 +35,20 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(e_c_0001 e_c_0002)
+array_1=(e_c_0001 e_c_0002 e_c_0003 e_c_0004)
 var_2=model_class
-array_2=(Resnet50 EfficientNet)
+array_2=(Resnet50 Resnet50 EfficientNet EfficientNet)
 var_3=feature_layer 
-array_3=(avgpool _avg_pooling)
+array_3=(avgpool avgpool _avg_pooling avg_pooling)
 var_4=image_resize
-array_4=(64 64)
+array_4=(64 224 64 224)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=50
+value_e=2
 
 conda activate $conda_env
 

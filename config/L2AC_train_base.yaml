@@ -2,7 +2,7 @@
 name: '0004'
 
 ## Paths and classes
-dataset_path: 'datasets/CIFAR100'
+dataset_path: 'datasets/TinyImageNet'
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
