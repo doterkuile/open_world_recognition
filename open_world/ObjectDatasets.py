@@ -219,11 +219,11 @@ class TinyImageNetDataset(ObjectDatasetBase):
     def __init__(self, dataset_path, image_resize=64):
         super().__init__(dataset_path)
 
-        self.trn_mean_pixel = [0.4914, 0.4822, 0.4465]
-        self.trn_std_pixel = [0.2023, 0.1994, 0.2010]
+        self.trn_mean_pixel = [0.4802, 0.4481, 0.3975]
+        self.trn_std_pixel = [0.2302, 0.2265, 0.2262]
 
-        self.tst_mean_pixel = [0.4914, 0.4822, 0.4465]
-        self.tst_std_pixel = [0.2023, 0.1994, 0.2010]
+        self.tst_mean_pixel = [0.4802, 0.4481, 0.3975]
+        self.tst_std_pixel = [0.2302, 0.2265, 0.2262]
 
         self.transform_train = transforms.Compose([
                 transforms.Resize(image_resize),

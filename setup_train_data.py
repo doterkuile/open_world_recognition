@@ -103,10 +103,11 @@ def parseConfigFile(device, multiple_gpu):
     # Load dataset
     dataset_path = config['dataset_path']
     dataset_class = config['dataset_class']
-    image_resize = config['image_resize']
+    figure_size = config['image_resize']
+    unfreeze_layer = config['unfreeze_layer']
 
 
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, image_resize)
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, figure_size)
 
     # Load model
     model_path = config['model_path']
@@ -115,7 +116,7 @@ def parseConfigFile(device, multiple_gpu):
     feature_layer = config['feature_layer']
     num_classes = len(dataset.classes)
     model = eval('RecognitionModels.' + model_class)(model_class, model_path, num_classes, feature_layer, pretrained).to(device)
-    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder.pt'
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
 
     model.load_state_dict(torch.load(encoder_file_path))
 

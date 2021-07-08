@@ -27,7 +27,7 @@ import abc
 
 class EncoderBase(nn.Module):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=True):
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained=True):
         super().__init__()
         self.model_path = model_path
         self.model_class = model_class
@@ -38,9 +38,9 @@ class EncoderBase(nn.Module):
 
         self.model = self.getModel(pretrained)
 
-        # if pretrained:
-        #     for param in self.model.parameters():
-        #         param.requires_grad = False
+        self.freeze_feature_layers(unfreeze_layers)
+
+
 
         self.reset_final_layer(train_classes)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
@@ -60,6 +60,12 @@ class EncoderBase(nn.Module):
             self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
         return hook
 
+    def freeze_feature_layers(self, feature_depth):
+        param_keys = list(self.model.state_dict())[:-feature_depth]
+        for name , param in self.model.named_parameters():
+            if name in param_keys:
+                param.requires_grad = False
+
     def forward(self, x):
 
         x = self.model(x)
@@ -68,8 +74,8 @@ class EncoderBase(nn.Module):
 
 class Resnet50(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
-        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
+        super().__init__(model_class, model_path,train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -84,8 +90,8 @@ class Resnet50(EncoderBase):
 
 class Resnet152(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
-        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
+        super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
 
@@ -99,9 +105,8 @@ class Resnet152(EncoderBase):
 
 class AlexNet(EncoderBase):
 
-    def __init__(self, model_class, model_path,train_classes, feature_layer, pretrained=True):
-
-        super().__init__(model_class, model_path,train_classes, feature_layer, pretrained)
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=6, pretrained=True):
+        super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -116,9 +121,8 @@ class AlexNet(EncoderBase):
 
 class EfficientNet(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, pretrained=True):
-
-        super().__init__(model_class, model_path, train_classes, feature_layer, pretrained)
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
+        super().__init__(model_class, model_path,train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 

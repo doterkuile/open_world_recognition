@@ -8,6 +8,7 @@ image_resize: 224
 model_path: 'networks/CIFAR100/encoder/resnet50.pt'
 model_class: Resnet50
 feature_layer: avgpool
+unfreeze_layer: 62    #62 62 6 8
 pretrained: True
 training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
 figures_path: 'figures/CIFAR100_'

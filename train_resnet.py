@@ -91,7 +91,9 @@ def main():
     # Save in output folder
     OpenWorldUtils.saveModel(model, model_path)
     # Save encoder in datasetfolder
-    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder.pt'
+    figure_size = config['image_resize']
+    unfreeze_layer = config['unfreeze_layer']
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
     OpenWorldUtils.saveModel(model,encoder_file_path)
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 
@@ -315,7 +317,8 @@ def parseConfigFile(device, multiple_gpu):
     # Load model
     model_class = config['model_class']
     pretrained = config['pretrained']
-    model = eval('RecognitionModels.' + model_class)(model_class, model_path,train_classes, feature_layer, pretrained)
+    unfreeze_layer = config['unfreeze_layer']
+    model = eval('RecognitionModels.' + model_class)(model_class, model_path,train_classes, feature_layer, unfreeze_layer, pretrained)
     # model = getModel(model_class, train_classes, pretrained)
     # model = models.resnet152(pretrained=False).to(device)
     # model.fc = model.fc = torch.nn.Sequential(
