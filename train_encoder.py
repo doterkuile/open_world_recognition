@@ -307,7 +307,7 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     train_classes = config['train_classes']
     dataset_class = config['dataset_class']
-    dataset_path = f'dataset/{config["dataset_path"]}'
+    dataset_path = f'datasets/{config["dataset_path"]}'
     image_resize = config['image_resize']
     feature_layer = config['feature_layer']
     model_path = config['model_path']
