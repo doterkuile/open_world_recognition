@@ -51,7 +51,7 @@ def main():
     #     print(f'Model:{model_path}\nFeature layer: {feature_layer}')
     #     return
 
-    tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(test_data, model, classes, feature_memory_path, load_memory)
+    tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(test_data, model, classes, device, feature_memory_path, load_memory)
 
     tst_samples_per_cls = int(len(test_data)/tst_data_cls_rep.shape[0])
     print(f'Rank validation samples with {test_classes} classes, {tst_samples_per_cls} samples per class')

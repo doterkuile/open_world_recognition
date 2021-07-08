@@ -109,33 +109,6 @@ def parseConfigFile(device, multiple_gpu):
 
 
 
-
-
-def check_accuracy(loader, model):
-    num_correct = 0
-    num_samples = 0
-
-    # Set model to eval
-    model.eval()
-
-    with torch.no_grad():
-        for b, ([X0_test, X1_test], y_test) in enumerate(loader):
-            # Apply the model
-            y_val = model(X0_test.cuda(), X1_test.cuda())
-
-            # Tally the number of correct predictions
-
-            predicted = torch.tensor(torch.max(y_val.data, 1)[0], dtype=torch.float).to('cuda')
-            predicted[predicted <= 0.5] = 0
-            predicted[predicted > 0.5] = 1
-            num_correct += (predicted == y_test.cuda()).sum()
-            num_samples += predicted.size(0)
-
-    # Toggle model back to train
-    model.train()
-    return num_correct / num_samples
-
-
 def trainModel(model, train_loader, test_loader, epochs, criterion, optimizer):
     start_time = time.time()
 

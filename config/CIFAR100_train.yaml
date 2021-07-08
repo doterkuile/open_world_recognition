@@ -6,9 +6,9 @@ dataset_path: CIFAR100
 dataset_class: CIFAR100Dataset
 image_resize: 64
 model_path: 'networks/CIFAR100/encoder/resnet50.pt'
-model_class: AlexNet
-feature_layer: features
-unfreeze_layer: 10     #62 62 10 30
+model_class: ResNet50
+feature_layer: avgpool
+unfreeze_layer: 62     #62 62 10 30
 pretrained: True
 training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
 figures_path: 'figures/CIFAR100_'

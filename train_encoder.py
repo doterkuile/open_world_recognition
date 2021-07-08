@@ -51,8 +51,8 @@ def main():
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
 
 
     trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
@@ -131,6 +131,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
                   'acc': best_acc,
                   'epoch': best_epoch, }
 
+
     for i in range(epochs):
         trn_corr = 0
         trn_loss = []
@@ -165,19 +166,19 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
             # Update parameters
             batch_loss.backward()
             optimizer.step()
-            trn_loss.append(batch_loss.cpu().item())
+            trn_loss.append(batch_loss.detach().cpu())
 
         # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
-        trn_loss = np.array(trn_loss).mean()
+        trn_loss = torch.stack(trn_loss).numpy().mean()
         # Print epoch results
         print(
             f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
             f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
         # Training metrics
-        y_pred = np.array(torch.stack(y_pred))
-        y_true = np.array(torch.stack(y_true))
+        y_pred = torch.stack(y_pred).numpy()
+        y_true = torch.stack(y_true).numpy()
         # trn_losses = np.array(trn_losses).mean()
 
         trn_acc.append(metrics.accuracy_score(y_true, y_pred))
@@ -188,7 +189,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
         trn_mean_pred.append(y_pred.mean())
         trn_mean_true.append(y_true.mean())
 
-        trn_losses.append(trn_loss.item())
+        trn_losses.append(trn_loss)
 
         # Run the testing batches
         y_pred, y_true, tst_loss = validate_model(test_loader, model, criterion, device)
@@ -296,9 +297,6 @@ def parseConfigFile(device, multiple_gpu):
     config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
     shutil.copyfile('config/' + config_file, config_save_path)
 
-    # Training/laoding parameters:
-    enable_training = config['enable_training']
-
     # Training hyperparameters
     batch_size = config['batch_size']
     learning_rate = config['learning_rate']
@@ -307,7 +305,8 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     train_classes = config['train_classes']
     dataset_class = config['dataset_class']
-    dataset_path = f'datasets/{config["dataset_path"]}'
+    dataset_path = f'datasets' \
+                   f'/{config["dataset_path"]}'
     image_resize = config['image_resize']
     feature_layer = config['feature_layer']
     model_path = config['model_path']
@@ -319,12 +318,7 @@ def parseConfigFile(device, multiple_gpu):
     pretrained = config['pretrained']
     unfreeze_layer = config['unfreeze_layer']
     model = eval('RecognitionModels.' + model_class)(model_class, model_path,train_classes, feature_layer, unfreeze_layer, pretrained)
-    # model = getModel(model_class, train_classes, pretrained)
-    # model = models.resnet152(pretrained=False).to(device)
-    # model.fc = model.fc = torch.nn.Sequential(
-    # torch.nn.Linear(
-    #     in_features=2048,
-    #     out_features=train_classes))
+
     model.to(device)
 
     criterion = eval('nn.' + config['criterion'])(reduction='mean')
@@ -332,25 +326,6 @@ def parseConfigFile(device, multiple_gpu):
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 
-def getModel(model_class, train_classes, pretrained=False):
-
-    model = eval(f'models.{model_class.lower()}')(pretrained)
-
-    if pretrained:
-        for param in model.parameters():
-            param.requires_grad = False
-
-    (fc_final_name, fc_final_layer) = [module for module in model.named_modules() if not isinstance(module, nn.Sequential)][-1]
-    # model = torch.nn.Linear(in_features=fc_final.in_features, out_features=train_classes)
-    if fc_final_name == 'fc':
-        model.fc = torch.nn.Linear(in_features=fc_final_layer.in_features, out_features=train_classes)
-    elif fc_final_name == 'classifier.6':
-        model.classifier[-1] = torch.nn.Linear(in_features=fc_final_layer.in_features, out_features=train_classes)
-    else:
-        print(f'Model {model} with {fc_final_name} not recognized returning model without changing last layer')
-
-
-    return model
 
 if __name__ == "__main__":
     main()

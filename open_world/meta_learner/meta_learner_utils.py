@@ -319,7 +319,7 @@ def calculate_metrics(metrics_dict, y_pred, y_true, loss):
     return
 
 
-def extract_features(data, model, classes, memory_path, load_memory=False):
+def extract_features(data, model, classes, device, memory_path, load_memory=False):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
@@ -339,10 +339,10 @@ def extract_features(data, model, classes, memory_path, load_memory=False):
             # Extract features of sample and mean feature vector per class
             for cls in tqdm(classes):
                 # convert to tensor
-                class_samples[cls] = torch.stack(class_samples[cls])
+                class_samples[cls] = torch.stack(class_samples[cls]).to(device=device)
 
                 # calculate features
-                out, cls_rep = model(class_samples[cls].cuda())
+                out, cls_rep = model(class_samples[cls])
                 train_rep.append(cls_rep)
                 labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 
