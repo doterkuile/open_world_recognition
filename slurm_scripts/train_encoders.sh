@@ -35,20 +35,22 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(e_c_0001 e_c_0002)
+array_1=(e_c_0001 e_c_0002 e_c_0003 e_c_0004)
 var_2=model_class
-array_2=(Resnet50 EfficientNet)
+array_2=(Resnet50 Resnet152 AlexNet EfficientNet)
 var_3=feature_layer 
-array_3=(avgpool _avg_pooling)
+array_3=(avgpool avgpool features _avg_pooling)
 var_4=image_resize
-array_4=(64 64)
+array_4=(64 64 64 64)
+var_5=unfreeze_layer
+array_5=(62 62 8 30)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=50
+value_e=2
 
 conda activate $conda_env
 
@@ -65,11 +67,15 @@ do
 	echo "$var_2 = ${array_2[$i]}"
         echo "$var_3 = ${array_3[$i]}"
 	echo "$var_4 = ${array_4[$i]}"
+	echo "$var_5 = ${array_5[$i]}"
+
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
         sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $file
+
 
 
 	python $python_script $config_file

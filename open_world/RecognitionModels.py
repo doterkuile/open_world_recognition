@@ -105,7 +105,7 @@ class Resnet152(EncoderBase):
 
 class AlexNet(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=6, pretrained=True):
+    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
         super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
