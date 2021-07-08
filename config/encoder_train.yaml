@@ -5,9 +5,9 @@ name: 'e_c_0004'
 dataset_path: CIFAR100 #'datasets/TinyImageNet' #'datasets/CIFAR100'
 dataset_class: CIFAR100Dataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 64
-model_class: Resnet50
+model_class: ResNet50
 feature_layer: avgpool
-unfreeze_layer: 30
+unfreeze_layer: 62
 model_path: networks
 pretrained: True
 
