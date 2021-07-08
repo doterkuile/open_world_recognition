@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=2gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=5gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
 #SBATCH --time=10:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
@@ -35,23 +35,23 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name
-array_1 =(e_c_0011 e_c_0012)	
+array_1 =(e_c_0013 e_c_0014)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
 array_2=(ResNet50 ResNet50)
 var_3=feature_layer 
 array_3=(avgpool avgpool)
 var_4=image_resize
-array_4=(64 64)
+array_4=(224 224)
 var_5=unfreeze_layer
-array_5=(176 320) #176 320)
+array_5=(2 62) #176 320)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=50
+value_e=2
 
 conda activate $conda_env
 
