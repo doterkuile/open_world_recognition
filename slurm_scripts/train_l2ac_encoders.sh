@@ -40,7 +40,7 @@ array_1=(0014 0015 0016 0017)
 var_2=feature_layer
 array_2=(avgpool avgpool features _avg_pooling)
 var_3=encoder
-array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
+array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 

@@ -40,8 +40,8 @@ var_2=feature_layer
 array_2=(avgpool)
 #array_2=(avgpool avgpool features _avg_pooling)
 var_3=model_class
-array_3=(Resnet50)
-#array_3=(Resnet50 Resnet152 AlexNet EfficientNet)
+array_3=(ResNet50)
+#array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 

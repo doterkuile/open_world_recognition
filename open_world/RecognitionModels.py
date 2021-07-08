@@ -72,7 +72,7 @@ class EncoderBase(nn.Module):
 
         return x, self.selected_out[self.feature_layer]
 
-class Resnet50(EncoderBase):
+class ResNet50(EncoderBase):
 
     def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
         super().__init__(model_class, model_path,train_classes, feature_layer, unfreeze_layers, pretrained)
@@ -88,7 +88,7 @@ class Resnet50(EncoderBase):
         self.model.fc = torch.nn.Linear(in_features=self.model.fc.in_features, out_features=output_classes)
         return
 
-class Resnet152(EncoderBase):
+class ResNet152(EncoderBase):
 
     def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
         super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)

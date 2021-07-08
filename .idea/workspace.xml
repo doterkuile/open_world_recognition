@@ -24,19 +24,10 @@
   <component name="ChangeListManager">
     <list default="true" id="c3f7244b-16a5-4f2b-b1cc-aa3f2030acd0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/CIFAR100_features.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/CIFAR100_features.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/CIFAR100_test.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/CIFAR100_test.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/CIFAR100_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/CIFAR100_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/L2AC_amazon_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_amazon_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/L2AC_test.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_test.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/L2AC_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/L2AC_train_base.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/L2AC_train_base.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/encoder_train.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/encoder_train.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evaluate_l2ac.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluate_l2ac.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_world/OpenWorldUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/OpenWorldUtils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup_train_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup_train_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_metadataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_metadataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_resnet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_world/RecognitionModels.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_world/RecognitionModels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/slurm_scripts/train_encoders.sh" beforeDir="false" afterPath="$PROJECT_DIR$/slurm_scripts/train_encoders.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_resnet.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +55,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Random-Shadows-Highlights" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/train_encoder.py" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -78,7 +69,7 @@
       <recent name="$PROJECT_DIR$/open_world/meta_learner" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.train_resnet">
+  <component name="RunManager" selected="Python.train_encoder">
     <configuration name="ObjectDatasets" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="open_world_recognition" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -277,6 +268,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="train_encoder" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="open_world_recognition" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/l2acenv/bin/python3" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_encoder.py" />
+      <option name="PARAMETERS" value="encoder_train.yaml" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="train_l2ac" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="open_world_recognition" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -299,28 +312,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_resnet" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="open_world_recognition" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/l2acenv/bin/python3" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_resnet.py" />
-      <option name="PARAMETERS" value="encoder_train.yaml" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.ObjectDatasets" />
       <item itemvalue="Python.RecognitionModels" />
@@ -331,7 +322,7 @@
       <item itemvalue="Python.test" />
       <item itemvalue="Python.test_metadataset" />
       <item itemvalue="Python.train_l2ac" />
-      <item itemvalue="Python.train_resnet" />
+      <item itemvalue="Python.train_encoder" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -412,7 +403,7 @@
       <workItem from="1625472103966" duration="2708000" />
       <workItem from="1625489124402" duration="4764000" />
       <workItem from="1625557260965" duration="2794000" />
-      <workItem from="1625746990868" duration="485000" />
+      <workItem from="1625746990868" duration="1435000" />
     </task>
     <servers />
   </component>
@@ -432,13 +423,13 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2350" y="192" width="1084" height="888" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1625557832045">
-      <screen x="1920" y="0" width="1920" height="1080" />
+    <state x="487" y="181" width="1084" height="708" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1625748132127">
+      <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="2756" y="217" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053/1920.0.1920.1080@0.27.1920.1053" timestamp="1623936708869" />
     <state x="4270" y="193" width="1084" height="812" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623762497711" />
     <state x="2350" y="192" width="1084" height="888" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1625557832045" />
-    <state x="487" y="181" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623333447670" />
+    <state x="487" y="181" width="1084" height="708" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1625748132127" />
     <state x="158" y="334" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1623152954746" />
     <state x="67" y="159" width="1853" height="734" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.3773.1053@67.27.3773.1053" timestamp="1623403356643" />
     <state width="1851" height="480" key="DebuggerActiveHint" timestamp="1624268499348">
@@ -450,13 +441,13 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="167" y="125" width="1653" height="855" key="DiffContextDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623317468327" />
-    <state x="4595" y="306" width="424" height="484" key="FileChooserDialogImpl" timestamp="1624788525079">
-      <screen x="3840" y="0" width="1920" height="1080" />
+    <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl" timestamp="1625748130118">
+      <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="4595" y="306" key="FileChooserDialogImpl/1920.0.1920.1080/3840.0.1920.1080/0.27.1920.1053@3840.0.1920.1080" timestamp="1624788525078" />
     <state x="4595" y="306" width="424" height="484" key="FileChooserDialogImpl/1920.0.1920.1080/3840.0.1920.1080/0.36.1920.1080@3840.0.1920.1080" timestamp="1623762484357" />
     <state x="2675" y="306" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@1920.0.1920.1080" timestamp="1624003094266" />
-    <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1623314200042" />
+    <state x="796" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1625748130118" />
     <state x="1920" y="325" width="424" height="484" key="FileChooserDialogImpl/67.27.3773.1053@67.27.3773.1053" timestamp="1622208515461" />
     <state width="1807" height="432" key="GridCell.Tab.0.bottom" timestamp="1625739239203">
       <screen x="67" y="27" width="1853" height="1053" />
@@ -696,6 +687,7 @@
     <SUITE FILE_PATH="coverage/open_world_recognition$train_resnet.coverage" NAME="train_resnet Coverage Results" MODIFIED="1625739239186" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$plot_utils.coverage" NAME="plot_utils Coverage Results" MODIFIED="1623741846697" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world$main.coverage" NAME="main Coverage Results" MODIFIED="1619799660891" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
+    <SUITE FILE_PATH="coverage/open_world_recognition$train_encoder.coverage" NAME="train_encoder Coverage Results" MODIFIED="1625748134561" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/open_world_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1620285685210" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
     <SUITE FILE_PATH="coverage/open_world_recognition$meta_learner.coverage" NAME="meta_learner Coverage Results" MODIFIED="1621775117300" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/open_world" />
   </component>

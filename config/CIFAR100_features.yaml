@@ -2,7 +2,7 @@
 dataset_path: CIFAR100
 dataset_class: CIFAR100Dataset
 model_path: 'networks/CIFAR100/encoder/resnet50_features.pt'
-model_class: ResNet50Features
+model_class: ResNet50
 training_history_path: 'networks/CIFAR100/encoder/resnet50_features_model_history'
 figures_path: 'figures/CIFAR100_'
 

@@ -40,7 +40,7 @@ array_1=(i0004)
 var_2=learning_rate
 array_2=(0.0001)
 var_3=encoder
-array_3=(Resnet50)
+array_3=(ResNet50)
 len=${#array_1[@]}
 
 

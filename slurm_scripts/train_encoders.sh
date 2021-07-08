@@ -25,7 +25,7 @@ module load cudnn/10.0-7.6.0.64
 module load miniconda/3.7
 
 # configuration variables
-python_script=train_resnet.py
+python_script=train_encoder.py
 config_file=encoder_train.yaml
 conda_env=l2acenv
 
@@ -37,7 +37,7 @@ file=config/$config_file
 var_1=name	
 array_1=(e_c_0001 e_c_0002 e_c_0003 e_c_0004)
 var_2=model_class
-array_2=(Resnet50 Resnet152 AlexNet EfficientNet)
+array_2=(ResNet50 ResNet152 AlexNet EfficientNet)
 var_3=feature_layer 
 array_3=(avgpool avgpool features _avg_pooling)
 var_4=image_resize
