@@ -35,7 +35,7 @@ file=config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name
-array_1 =(e_c_0009 e_c_0010)	
+array_1 =(e_c_0011 e_c_0012)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
 array_2=(ResNet50 ResNet50)
@@ -44,7 +44,7 @@ array_3=(avgpool avgpool)
 var_4=image_resize
 array_4=(64 64)
 var_5=unfreeze_layer
-array_5=(2 62) #176 320)
+array_5=(176 320) #176 320)
 len=${#array_1[@]}
 
 
