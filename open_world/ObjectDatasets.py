@@ -230,21 +230,19 @@ class TinyImageNetDataset(ObjectDatasetBase):
                 transforms.RandomRotation(20),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.ToTensor(),
-                # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
         ])
 
         self.transform_test = transforms.Compose([
             transforms.Resize(image_resize),
             transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
 
         self.train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
         self.test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
-        # self.image_shape = [1, 3, 32, 32]
+        self.image_shape = [1, 3, image_resize, image_resize]
         self.classes = [i for i in range(len(self.train_data.classes))]
 
     def getImage(self, x):
