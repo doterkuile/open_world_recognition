@@ -63,7 +63,7 @@ def main():
 
 
     print('Extract features')
-    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(train_data, model, classes, feature_memory_path, load_memory)
+    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(train_data, model, classes, device, feature_memory_path, load_memory)
 
     print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
     train_X0, train_X1, train_Y = meta_utils.rank_samples_from_memory(classes[:train_classes], trn_data_rep, trn_data_cls_rep,
