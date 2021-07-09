@@ -10,4 +10,4 @@
 !/figures/.gitignore
 /output/*
 !/output/.gitignore
-*/idea
+.idea/
