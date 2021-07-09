@@ -304,6 +304,7 @@ def parseConfigFile(device, multiple_gpu):
 
     # L2AC Parameters
     class_ratio = config['class_ratio']
+    train_phase = 'encoder'
     dataset_class = config['dataset_class']
     dataset_path = f'datasets' \
                    f'/{config["dataset_path"]}'
@@ -311,7 +312,7 @@ def parseConfigFile(device, multiple_gpu):
     feature_layer = config['feature_layer']
     model_path = config['model_path']
 
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, image_resize)
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path,class_ratio,train_phase, image_resize)
 
     # Load model
     model_class = config['model_class']

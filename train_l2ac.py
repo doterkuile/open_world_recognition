@@ -59,14 +59,14 @@ def main():
     dataset_path = train_dataset.data_path
 
     # Get hyperparameters
-    train_classes = config['train_classes']
+    test_classes = config['class_ratio']['l2ac_test']
     train_samples_per_cls = config['train_samples_per_cls']
-    probability_treshold = config['probability_threshold']
+    probability_threshold = config['probability_threshold']
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workser=4)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
-                                              train_classes, train_samples_per_cls, train=False)
+                                              test_classes, train_samples_per_cls, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
 
 
@@ -78,7 +78,7 @@ def main():
                                                                                                        criterion,
                                                                                                        optimizer,
                                                                                                        device,
-                                                                                                       probability_treshold,
+                                                                                                       probability_threshold,
                                                                                                        gif_path)
 
     model.load_state_dict(best_state['model'])
@@ -110,7 +110,7 @@ def main():
     trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(
         train_loader, model,
         criterion, device,
-        probability_treshold)
+        probability_threshold)
     print(f'\nTrain data validate_model duration: {time.time() - start:.0f} seconds')
 
     start = time.time()
@@ -118,7 +118,7 @@ def main():
     tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(
         test_loader, model,
         criterion, device,
-        probability_treshold)
+        probability_threshold)
     print(f'\nTest data validate_model duration: {time.time() - start:.0f} seconds')
 
     start = time.time()

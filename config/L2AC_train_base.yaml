@@ -21,8 +21,13 @@ epochs: 2
 ## L2AC parameters
 top_k: 5
 top_n: 4
-train_classes: 20
-test_classes: 20
+
+## L2AC parameters
+class_ratio: 
+  encoder: 100
+  l2ac_train: 20
+  l2ac_test: 20
+  
 train_samples_per_cls: 500
 probability_threshold: 0.5
 
