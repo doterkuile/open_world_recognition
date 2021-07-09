@@ -161,6 +161,15 @@ class ObjectDatasetBase(abc.ABC):
 
         return (self.train_loader, self.test_loader)
 
+    def getEncoderClasses(self):
+        return self.classes['encoder']
+
+    def getL2ACTrainClasses(self):
+        return self.classes['l2ac_train']
+
+    def getL2ACTestClasses(self):
+        return self.classes['l2ac_test']
+
 
 
 
@@ -191,8 +200,8 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
         ])
 
-        self.train_data = datasets.CIFAR100(root='datasets', train=True, download=True, transform=self.transform_train)
-        self.test_data = datasets.CIFAR100(root='datasets', train=False, download=True, transform=self.transform_test)
+        self.train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_train)
+        self.test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=self.transform_test)
         self.image_shape = [1, 3, 32, 32]
         self.classes = [i for i in range(len(self.train_data.classes))]
 
