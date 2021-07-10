@@ -209,20 +209,20 @@ class CIFAR100Dataset(ObjectDatasetBase):
     def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
 
         train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
-        train_data.class_to_idx = {train_data.class_to_idx[i] for i in train_data.classes}
-        datalist = [(d,t) for d, t in train_data if t in self.class_idx[train_phase]]
-        train_data.targets = [t for d,t in datalist]
-        train_data.data = [d for d,t in datalist]
+        train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
+        idx = [i for i in range(0,len(train_data.targets)) if train_data.targets[i] in self.class_idx[train_phase]]
+        train_data.targets = [train_data.targets[i] for i in idx]
+        train_data.data = train_data.data[idx]
 
 
         self.train_data = train_data
 
         test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
-        test_data.class_to_idx = {test_data.class_to_idx[i] for i in test_data.classes}
+        test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
 
-        datalist = [(d,t) for d, t in test_data if t in self.class_idx[train_phase]]
-        test_data.targets = [t for d,t in datalist]
-        test_data.data = [d for d,t in datalist]
+        idx = [i for i in range(0,len(test_data.targets)) if test_data.targets[i] in self.class_idx[train_phase]]
+        test_data.targets = [test_data.targets[i] for i in idx]
+        test_data.data = test_data.data[idx]
         self.test_data = test_data
 
 
@@ -280,7 +280,7 @@ class TinyImageNetDataset(ObjectDatasetBase):
     def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
 
         train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
-        train_data.class_to_idx = {train_data.class_to_idx[i] for i in train_data.classes}
+        train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
         train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase]]
         train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase]]
         train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase]]
@@ -288,7 +288,7 @@ class TinyImageNetDataset(ObjectDatasetBase):
         self.train_data = train_data
 
         test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
-        test_data.class_to_idx = {test_data.class_to_idx[i] for i in test_data.classes}
+        test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
         test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase]]
         test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase]]
         test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]

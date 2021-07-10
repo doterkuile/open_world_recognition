@@ -20,8 +20,6 @@ import copy
 
 
 def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold, gif_path=None):
-    start_time = time.time()
-
 
     trn_metrics_dict = {'loss': [],
                     'accuracy': [],
@@ -168,7 +166,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
 
     if gif_path is not None:
-        start = time.time()
 
         images_sim = []
         for filename in fig_sim_list:
@@ -184,9 +181,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
         imageio.mimsave(gif_path + '_final_similarity.gif', images_final, fps=2, loop=1)
 
-        print(f'\nGIF creation duration: {time.time() - start:.0f} seconds')  # print the time elapsed
 
-    print(f'\nDuration: {time.time() - start_time:.0f} seconds')  # print the time elapsed
 
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
 
@@ -366,7 +361,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
                              randomize_samples=True, same_class_reverse=False, balance_same_class_entries=False):
 
     X0, X1, Y = [], [], []
-    base_cls_offset = classes.index(class_set[0])  # -> gives index of first class of interest
+    base_cls_offset = class_set[0] #classes.index(class_set[0])  # -> gives index of first class of interest
     for cls in tqdm(class_set):
         tmp_X1 = []
         tmp_Y = []
@@ -392,7 +387,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         # Add offset of the base class
         sim_idx += base_cls_offset
         # Plus one idx to correct for the removed class of interest
-        sim_idx[sim_idx >= ix] += 1
+        sim_idx[sim_idx >= cls] += 1
 
         # Get the top classes from the sorted similarities
         sim_idx = sim_idx[:, -top_n:] # -> For each of the train_per_cls samples of a class.

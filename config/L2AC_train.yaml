@@ -6,7 +6,7 @@ dataset_path: TinyImageNet
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
-encoder: Resnet50
+encoder: ResNet50
 feature_layer: avgpool
 unfreeze_layer: 62    #62 62 6 8
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
@@ -17,13 +17,17 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.001
 batch_size: 256
-epochs: 200
+epochs: 2
 
 ## L2AC parameters
 top_k: 5
 top_n: 4
-train_classes: 20
-test_classes: 20
+
+class_ratio: 
+  encoder: 100
+  l2ac_train: 20
+  l2ac_test: 20
+
 train_samples_per_cls: 500
 probability_threshold: 0.5
 
