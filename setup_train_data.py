@@ -26,13 +26,13 @@ def main():
 
 
     # Parse config file
-    dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config = parseConfigFile(device, multiple_gpu)
+    train_dataset, test_dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config = parseConfigFile(device, multiple_gpu)
 
 
 
     # Setup dataset
-    (train_data, test_data) = dataset.getData()
-    classes = dataset.classes
+    (train_data, test_data) = train_dataset.getData()
+    classes = train_dataset.classes
 
     feature_layer = config['feature_layer']
     model_class = config['model_class']
@@ -96,8 +96,11 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     top_n = int(config['top_n'])
     train_samples_per_cls = config['train_samples_per_cls'] # Number of samples per class
-    train_classes = config['train_classes']  # Classes used for training
-    test_classes = config['test_classes'] # Classes used for validation
+    class_ratio = config['class_ratio']
+    train_phase = 'l2ac_train'
+    test_phase = 'l2ac_test'
+    train_classes = class_ratio['l2ac_train'] # Classes used for training
+    test_classes = class_ratio['l2ac_test'] # Classes used for validation
     randomize_samples = config['randomize_samples']
 
     # Load dataset
@@ -107,20 +110,21 @@ def parseConfigFile(device, multiple_gpu):
     unfreeze_layer = config['unfreeze_layer']
 
 
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, figure_size)
+    train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size)
+    test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
 
     # Load model
     model_path = config['model_path']
     model_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
-    num_classes = len(dataset.classes)
+    num_classes = config['class_ratio']['encoder']
     model = eval('RecognitionModels.' + model_class)(model_class, model_path, num_classes, feature_layer, pretrained).to(device)
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
 
     model.load_state_dict(torch.load(encoder_file_path))
 
-    return dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
+    return train_dataset, test_dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
 
 if __name__ == "__main__":
     main()

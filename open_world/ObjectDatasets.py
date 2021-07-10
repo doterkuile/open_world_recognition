@@ -144,12 +144,20 @@ class MetaDataset(data_utils.Dataset):
 class ObjectDatasetBase(abc.ABC):
 
     @abc.abstractmethod
-    def __init__(self, dataset_path: str):
+    def __init__(self, dataset_path: str, class_ratio, train_phase):
         self.dataset_path = dataset_path
+        self.class_idx = {key: [] for key in class_ratio.keys()}
+        self.class_idx['encoder'] = list(range(0, class_ratio['encoder']))
+        self.class_idx['l2ac_train'] = list(range(class_ratio['encoder'], class_ratio['encoder'] + class_ratio['l2ac_train']))
+        self.class_idx['l2ac_test'] = list(range(class_ratio['encoder'] + class_ratio['l2ac_train'], class_ratio['encoder'] + class_ratio['l2ac_train'] +class_ratio['l2ac_test']))
+        self.train_phase = train_phase
         pass
 
     @abc.abstractmethod
     def getImage(self, x):
+        pass
+    @abc.abstractmethod
+    def setupDataSplit(self, train_data, test_data, class_ratio, train_phase):
         pass
 
     def getData(self):
@@ -167,8 +175,8 @@ class ObjectDatasetBase(abc.ABC):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path, image_resize=64):
-        super().__init__(dataset_path)
+    def __init__(self, dataset_path, class_ratio, train_phase='encoder', image_resize=64):
+        super().__init__(dataset_path, class_ratio, train_phase)
 
         self.trn_mean_pixel = [x / 255.0 for x in [129.3, 124.1,  112.4]]
         self.trn_std_pixel = [x / 255.0 for x in [68.2, 65.4, 70.4]]
@@ -191,10 +199,32 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
         ])
 
-        self.train_data = datasets.CIFAR100(root='datasets', train=True, download=True, transform=self.transform_train)
-        self.test_data = datasets.CIFAR100(root='datasets', train=False, download=True, transform=self.transform_test)
-        self.image_shape = [1, 3, 32, 32]
+        train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_train)
+        test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=self.transform_test)
+        self.setupDataSplit(train_data, test_data, class_ratio, train_phase)
+
+        self.image_shape = [1, 3, image_resize, image_resize]
         self.classes = [i for i in range(len(self.train_data.classes))]
+
+    def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
+
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.class_to_idx = {train_data.class_to_idx[i] for i in train_data.classes}
+        datalist = [(d,t) for d, t in train_data if t in self.class_idx[train_phase]]
+        train_data.targets = [t for d,t in datalist]
+        train_data.data = [d for d,t in datalist]
+
+
+        self.train_data = train_data
+
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.class_to_idx = {test_data.class_to_idx[i] for i in test_data.classes}
+
+        datalist = [(d,t) for d, t in test_data if t in self.class_idx[train_phase]]
+        test_data.targets = [t for d,t in datalist]
+        test_data.data = [d for d,t in datalist]
+        self.test_data = test_data
+
 
     def getImage(self, x):
 
@@ -216,8 +246,8 @@ class CIFAR100Dataset(ObjectDatasetBase):
 class TinyImageNetDataset(ObjectDatasetBase):
 
 
-    def __init__(self, dataset_path, image_resize=64):
-        super().__init__(dataset_path)
+    def __init__(self, dataset_path, class_ratio, train_phase='encoder', image_resize=64):
+        super().__init__(dataset_path, class_ratio, train_phase)
 
         self.trn_mean_pixel = [0.4802, 0.4481, 0.3975]
         self.trn_std_pixel = [0.2302, 0.2265, 0.2262]
@@ -240,10 +270,30 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
         ])
 
-        self.train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
-        self.test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
+        train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
+        test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
+        self.setupDataSplit(train_data, test_data, class_ratio, train_phase)
+
         self.image_shape = [1, 3, image_resize, image_resize]
         self.classes = [i for i in range(len(self.train_data.classes))]
+
+    def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
+
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.class_to_idx = {train_data.class_to_idx[i] for i in train_data.classes}
+        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase]]
+        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase]]
+        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase]]
+
+        self.train_data = train_data
+
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.class_to_idx = {test_data.class_to_idx[i] for i in test_data.classes}
+        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase]]
+        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase]]
+        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]
+
+        self.test_data = test_data
 
     def getImage(self, x):
 

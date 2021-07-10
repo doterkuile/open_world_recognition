@@ -50,8 +50,8 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     top_k = int(config['top_k'])
     top_n = int(config['top_n'])
-    train_classes = config['train_classes']
-    test_classes = config['test_classes']
+    train_classes = config['class_ratio']['l2ac_train']
+    test_classes = config['class_ratio']['l2ac_test']
     train_samples_per_cls = config['train_samples_per_cls']
 
     # Dataset preparation parameters:
