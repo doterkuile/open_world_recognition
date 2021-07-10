@@ -15,8 +15,12 @@ figures_path: 'figures/CIFAR100_'
 
 ## L2AC parameters
 top_n: 4
-train_classes: 20
-test_classes: 20
+
+class_ratio: 
+  encoder: 50
+  l2ac_train: 20
+  l2ac_test: 20
+
 train_samples_per_cls: 500
 randomize_samples: True
 
