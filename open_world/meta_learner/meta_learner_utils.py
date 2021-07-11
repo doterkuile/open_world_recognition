@@ -334,12 +334,14 @@ def extract_features(data, model, classes, device, memory_path, load_memory=Fals
             # Extract features of sample and mean feature vector per class
             for cls in tqdm(classes):
                 # convert to tensor
-                class_samples[cls] = torch.stack(class_samples[cls]).to(device=device)
+                # class_samples[cls] = torch.stack(class_samples[cls])
 
+                for s in class_samples[cls]:
+                    # pass
                 # calculate features
-                out, cls_rep = model(class_samples[cls])
-                train_rep.append(cls_rep)
-                labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
+                    out, cls_rep = model(s.view(1,s.shape[0], s.shape[1],s.shape[2]).to(device=device))
+                    train_rep.append(cls_rep)
+                    labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 
                 # Mean feature vector per class
                 train_cls_rep.append(cls_rep.mean(dim=0))
