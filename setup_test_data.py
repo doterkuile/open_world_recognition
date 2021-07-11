@@ -39,7 +39,10 @@ def main():
     feature_layer = config['feature_layer']
     model_class = config['model_class']
     dataset_path = f"datasets/{config['dataset_path']}/{model_class}"
-    memory_path = f'{dataset_path}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}'
+    unfreeze_layer = config['unfreeze_layer']
+    image_resize = config['image_resize']
+
+    memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}'
     train_memory_path = f'{memory_path}_train.npz'
 
     model_path = config['model_path']
