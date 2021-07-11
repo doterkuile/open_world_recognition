@@ -58,7 +58,7 @@ do
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
 
-	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
+	sed -i "s/$var_1:.*/$var_1: ${array_1[$i]}/"  $file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
 
