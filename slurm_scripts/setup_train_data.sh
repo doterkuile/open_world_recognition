@@ -35,14 +35,14 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 file=config/$config_file
-var_1=top_n
-array_1=(4)	
+var_1=image_resize
+array_1=(224 224 224 224)	
 #array_1=(4 4 4 4)
-var_2=feature_layer
-array_2=(avgpool)
+var_2=unfreeze_layer
+array_2=(2 62 176 320)
 #array_2=(avgpool avgpool features _avg_pooling)
 var_3=model_class
-array_3=(ResNet50)
+array_3=(ResNet50 ResNet50 ResNet50 ResNet50)
 #array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
