@@ -36,11 +36,11 @@ cp config/$base_config_file config/$config_file
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(i0004)
-var_2=learning_rate
-array_2=(0.0001)
-var_3=encoder
-array_3=(ResNet50)
+array_1=(l_t_0005 l_t_0006 l_t_0007 l_t_0008)
+var_2=image_resize
+array_2=(224 224 224 224)
+var_3=unfreeze_layer
+array_3=(2 62 176 320)
 len=${#array_1[@]}
 
 
