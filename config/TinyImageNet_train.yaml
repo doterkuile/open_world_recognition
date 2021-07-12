@@ -4,7 +4,7 @@ name: 'e0000'
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: TinyImageNetDataset
-image_resize: 64
+image_resize: 224
 model_path: 'networks/CIFAR100/encoder/resnet50.pt'
 model_class: ResNet50
 feature_layer: avgpool
