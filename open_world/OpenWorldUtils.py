@@ -74,7 +74,9 @@ def parseConfigFile(device, multiple_gpu):
     # Load dataset
     encoder = config['encoder']
     feature_layer = config['feature_layer']
-    dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
+    image_resize = config['image_resize']
+    unfreeze_layer = config['unfreeze_layer']
+    dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}.npz'
     dataset_class = config['dataset_class']
 
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
