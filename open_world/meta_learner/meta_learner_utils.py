@@ -350,7 +350,7 @@ def extract_features(data, model, classes, device, memory_path, load_memory=Fals
 
             # Convert to tensor
             train_rep = torch.cat(train_rep).cpu()
-            train_cls_rep = torch.stack(train_cls_rep).cpu()
+            train_cls_rep = torch.cat(train_cls_rep).cpu()
             labels_rep = torch.cat(labels_rep, dim=0).cpu()
 
 
