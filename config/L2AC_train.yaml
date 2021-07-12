@@ -1,8 +1,8 @@
 ## Experiment
-name: 'i0004'
+name: '0001_same_class'
 
 ## Paths and classes
-dataset_path: TinyImageNet
+dataset_path: CIFAR100
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
@@ -25,7 +25,7 @@ top_k: 5
 top_n: 4
 
 class_ratio: 
-  encoder: 100
+  encoder: 50
   l2ac_train: 20
   l2ac_test: 20
 

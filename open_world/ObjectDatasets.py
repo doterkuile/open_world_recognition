@@ -164,8 +164,8 @@ class ObjectDatasetBase(abc.ABC):
         return (self.train_data, self.test_data)
 
     def getDataloaders(self, batch_size):
-        self.train_loader = DataLoader(self.train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
-        self.test_loader = DataLoader(self.test_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
+        self.train_loader = DataLoader(self.train_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+        self.test_loader = DataLoader(self.test_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
         return (self.train_loader, self.test_loader)
 

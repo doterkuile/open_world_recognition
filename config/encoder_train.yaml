@@ -7,7 +7,7 @@ dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 64
 model_class: EfficientNet
 feature_layer: _avg_pooling
-unfreeze_layer: 330
+unfreeze_layer: 33en
 model_path: networks
 pretrained: True
 

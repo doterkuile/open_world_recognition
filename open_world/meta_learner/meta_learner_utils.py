@@ -344,7 +344,9 @@ def extract_features(data, model, classes, device, memory_path, load_memory=Fals
                     labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 
                 # Mean feature vector per class
-                train_cls_rep.append(cls_rep.mean(dim=0))
+
+                mean_cls = torch.stack(train_rep[-len(class_samples[cls]):]).mean(dim=0)
+                train_cls_rep.append(mean_cls)
 
             # Convert to tensor
             train_rep = torch.cat(train_rep).cpu()
