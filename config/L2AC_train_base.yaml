@@ -4,14 +4,11 @@ name: '0004'
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: MetaDataset
-model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
 unfreeze_layer: 62    #62 62 6 8
-training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
-figures_path: 'figures/CIFAR100_'
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
@@ -25,10 +22,12 @@ top_k: 5
 top_n: 4
 
 class_ratio: 
-  encoder: 100
+  encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
-  
+
+test_class_selection: same_cls
+
 train_samples_per_cls: 500
 probability_threshold: 0.5
 
@@ -36,10 +35,5 @@ probability_threshold: 0.5
 same_class_reverse: False
 same_class_extend_entries: False
 
-
-
 ## Training/loading parameters
-load_memory: False
-enable_training: True
-save_images: True
 create_similarity_gif: True

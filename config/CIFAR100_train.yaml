@@ -5,27 +5,19 @@ name: 'e0000'
 dataset_path: CIFAR100
 dataset_class: CIFAR100Dataset
 image_resize: 224
-model_path: 'networks/CIFAR100/encoder/resnet50.pt'
 model_class: ResNet50
 feature_layer: avgpool
 unfreeze_layer: 62     #62 62 10 30
 pretrained: True
-training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
-figures_path: 'figures/CIFAR100_'
 
 ## L2AC parameters
 top_n: 4
 
 class_ratio: 
-  encoder: 50
+  encoder_train: 50
   l2ac_train: 20
   l2ac_test: 20
 
 train_samples_per_cls: 500
 randomize_samples: True
 
-
-## Training/loading parameters
-load_memory: False
-enable_training: True
-save_images: True

@@ -20,7 +20,7 @@ epochs: 2
   
 ## L2AC parameters
 class_ratio: 
-  encoder: 100
+  encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
 

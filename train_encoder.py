@@ -304,7 +304,7 @@ def parseConfigFile(device, multiple_gpu):
 
     # L2AC Parameters
     class_ratio = config['class_ratio']
-    train_phase = 'encoder'
+    train_phase = 'encoder_train'
     dataset_class = config['dataset_class']
     dataset_path = f'datasets' \
                    f'/{config["dataset_path"]}'
@@ -318,7 +318,7 @@ def parseConfigFile(device, multiple_gpu):
     model_class = config['model_class']
     pretrained = config['pretrained']
     unfreeze_layer = config['unfreeze_layer']
-    model = eval('RecognitionModels.' + model_class)(model_class, model_path, class_ratio['encoder'], feature_layer, unfreeze_layer, pretrained)
+    model = eval('RecognitionModels.' + model_class)(model_class, model_path, class_ratio[train_phase], feature_layer, unfreeze_layer, pretrained)
 
     model.to(device)
 

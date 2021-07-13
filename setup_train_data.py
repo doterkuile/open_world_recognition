@@ -41,7 +41,7 @@ def main():
     dataset_path = f"datasets/{config['dataset_path']}/{model_class}"
     unfreeze_layer = config['unfreeze_layer']
     image_resize = config['image_resize']
-    memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_train.npz'
+    memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_diff_cls_train.npz'
     model_path = config['model_path']
     # If dataset folder does not exist make folder
     if not os.path.exists(dataset_path):
@@ -115,7 +115,7 @@ def parseConfigFile(device, multiple_gpu, train_phase):
     model_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
-    num_classes = config['class_ratio']['encoder']
+    num_classes = config['class_ratio']['encoder_train']
     model = eval('RecognitionModels.' + model_class)(model_class, model_path, num_classes, feature_layer, pretrained).to(device)
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
 

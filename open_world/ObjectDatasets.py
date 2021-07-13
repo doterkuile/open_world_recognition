@@ -147,9 +147,9 @@ class ObjectDatasetBase(abc.ABC):
     def __init__(self, dataset_path: str, class_ratio, train_phase):
         self.dataset_path = dataset_path
         self.class_idx = {key: [] for key in class_ratio.keys()}
-        self.class_idx['encoder'] = list(range(0, class_ratio['encoder']))
-        self.class_idx['l2ac_train'] = list(range(class_ratio['encoder'], class_ratio['encoder'] + class_ratio['l2ac_train']))
-        self.class_idx['l2ac_test'] = list(range(class_ratio['encoder'] + class_ratio['l2ac_train'], class_ratio['encoder'] + class_ratio['l2ac_train'] +class_ratio['l2ac_test']))
+        self.class_idx['encoder_train'] = list(range(0, class_ratio['encoder_train']))
+        self.class_idx['l2ac_train'] = list(range(class_ratio['encoder_train'], class_ratio['encoder_train'] + class_ratio['l2ac_train']))
+        self.class_idx['l2ac_test'] = list(range(class_ratio['encoder_train'] + class_ratio['l2ac_train'], class_ratio['encoder_train'] + class_ratio['l2ac_train'] +class_ratio['l2ac_test']))
         self.train_phase = train_phase
         pass
 
