@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_data_setup   	# create a short name for your job
+#SBATCH --job-name=train_data_setup_2   	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=short						# select quality of service

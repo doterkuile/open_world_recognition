@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_resnet 	# create a short name for your job
+#SBATCH --job-name=train_encoders 	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=long						# select quality of service

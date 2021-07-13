@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_l2ac_balanced_set  	# create a short name for your job
+#SBATCH --job-name=train_l2ac_reverse_extend  	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=short						# select quality of service
