@@ -26,25 +26,28 @@ module load miniconda/3.7
 
 # configuration variables
 python_script=train_l2ac.py
+base_config_file=L2AC_train_base.yaml
 config_file=L2AC_train.yaml
 conda_env=l2acenv
+
+cp config/$base_config_file config/$config_file
 
 
 # Loop variables
 file=config/$config_file
 var_1=name	
-array_1=(0033 0034 0035 0036 0040)
+array_1=(l_t_0001 l_t_0002 l_t_0003)
 var_2=top_n
-array_2=(4 4 4 4 4)
-var_3=model_class
-array_3=(L2AC L2AC_cosine L2AC_no_lstm L2AC_extended_similarity L2AC_smaller_fc)
+array_2=(1 4 9)
+var_3=test_class_selection
+array_3=(same_cls same_cls same_cls)
 len=${#array_1[@]}
 
 
 
 
-var_4=epochs
-value_4=2
+var_e=epochs
+value_e=2
 
 conda activate $conda_env
 
@@ -53,8 +56,8 @@ for ((i=0;i<$len; i++))
 
 do
 
-        echo "$var_4 = ${value_4}"
-        sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
+        echo "$var_e = ${value_e}"
+        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $file
 	
 
 	echo "$var_1 = ${array_1[$i]}"
