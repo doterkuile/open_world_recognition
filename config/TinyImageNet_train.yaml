@@ -14,7 +14,7 @@ training_history_path: 'networks/CIFAR100/encoder/resnet50_setup_train_history'
 figures_path: 'figures/CIFAR100_'
 
 ## L2AC parameters
-top_n: '4'
+top_n: 1
 class_ratio: 
   encoder: 100
   l2ac_train: 20

@@ -1,31 +1,31 @@
 ## Experiment
-name: '0001_same_class'
+name: '0001_effnet'
 
 ## Paths and classes
-dataset_path: CIFAR100
+dataset_path: TinyImageNet
 dataset_class: MetaDataset
 model_path: 'networks/CIFAR100/L2AC.pt'
 model_class: L2AC
-encoder: ResNet50
-feature_layer: avgpool
+encoder: EfficientNet
+feature_layer: _avg_pooling
 image_resize: 224
-unfreeze_layer: 62    #62 62 6 8
+unfreeze_layer: 118    #62 62 6 8
 training_history_path: 'networks/CIFAR100/encoder/L2AC_model_history'
 figures_path: 'figures/CIFAR100_'
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
-optimizer: Adam
+optimizer: SGD
 learning_rate: 0.0001
 batch_size: 256
-epochs: 30
+epochs: 50
 
 ## L2AC parameters
 top_k: 5
 top_n: 4
 
 class_ratio: 
-  encoder: 50
+  encoder: 100
   l2ac_train: 20
   l2ac_test: 20
 

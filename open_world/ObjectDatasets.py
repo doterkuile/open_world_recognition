@@ -186,6 +186,8 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
         self.transform_train = transforms.Compose([
                 transforms.Resize(image_resize),
+                transforms.RandomRotation(20),
+                transforms.RandomHorizontalFlip(0.5),
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),

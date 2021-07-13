@@ -69,6 +69,7 @@ def main():
                                               test_classes, train_samples_per_cls, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
+    test_criterion = criterion = eval('nn.' + config['criterion'])(reduction='mean')
 
 
     trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMetaModel(model,
@@ -76,6 +77,7 @@ def main():
                                                                                                        test_loader,
                                                                                                        epochs,
                                                                                                        criterion,
+                                                                                                       test_criterion,
                                                                                                        optimizer,
                                                                                                        device,
                                                                                                        probability_threshold,
@@ -106,14 +108,15 @@ def main():
         tst_similarity_scores['final_diff_cls'],
         figure_path)
 
+
     trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(
         train_loader, model,
-        criterion, device,
+        test_criterion, device,
         probability_threshold)
 
     tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(
         test_loader, model,
-        criterion, device,
+        test_criterion, device,
         probability_threshold)
 
     title = 'Intermediate similarity score'

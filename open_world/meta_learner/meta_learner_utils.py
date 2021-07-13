@@ -19,7 +19,7 @@ import copy
 
 
 
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimizer, device, probability_treshold, gif_path=None):
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device, probability_treshold, gif_path=None):
 
     trn_metrics_dict = {'loss': [],
                     'accuracy': [],
@@ -89,7 +89,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
             batch_loss = criterion(y_out, y_train)
 
-            # Tally the number of correct predictions
+            # Apply probability threshold
             predicted = y_out.detach().clone().sigmoid()
 
             predicted[predicted <= probability_treshold] = 0
@@ -126,7 +126,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, optimize
 
 
         # Run the testing batches
-        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, criterion, device, probability_treshold)
+        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, test_criterion, device, probability_treshold)
         calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
         if tst_metrics_dict['F1'][-1] > best_F1:

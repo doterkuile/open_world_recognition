@@ -56,18 +56,13 @@ def main():
 
     train_classes_idx = dataset.class_idx[train_phase]
 
-
-
-
-
-
     print('Extract features')
     tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(train_data, model, train_classes_idx, device, feature_memory_path, load_memory)
-    train_samples_per_cls_test = 100
+    tst_samples_per_cls = int(len(train_data) / tst_data_cls_rep.shape[0])
 
     print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
     valid_X0, valid_X1, valid_Y = meta_utils.rank_samples_from_memory(train_classes_idx, tst_data_rep, tst_data_cls_rep,
-                                                                      tst_labels_rep, train_classes_idx, train_samples_per_cls_test, 1,
+                                                                      tst_labels_rep, train_classes_idx, tst_samples_per_cls, 1,
                                                                       randomize_samples)
 
 
