@@ -69,7 +69,7 @@ def main():
                                               test_classes, train_samples_per_cls, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
-    test_criterion = criterion = eval('nn.' + config['criterion'])(reduction='mean')
+    test_criterion = criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
 
     trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMetaModel(model,
