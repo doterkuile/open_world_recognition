@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=20gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=01:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=02:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -36,13 +36,13 @@ module load cudnn/10.0-7.6.0.64
 # Loop variables
 file=config/$config_file
 var_1=image_resize
-array_1=(224 224 224 224)	
+array_1=(224 224 224)	
 #array_1=(4 4 4 4)
 var_2=unfreeze_layer
-array_2=(2 62 176 320)
+array_2=(62 62 62)
 #array_2=(avgpool avgpool features _avg_pooling)
-var_3=model_class
-array_3=(ResNet50 ResNet50 ResNet50 ResNet50)
+var_3=top_n
+array_3=(1 4 9)
 #array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 

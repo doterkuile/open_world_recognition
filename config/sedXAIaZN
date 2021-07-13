@@ -1,0 +1,30 @@
+## Experiment
+name: 'e_t_0002'
+
+## Paths and classes
+dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
+dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
+image_resize: 64
+model_class: ResNet50
+feature_layer: avgpool
+unfreeze_layer: 62
+model_path: networks
+pretrained: True
+
+## Training hyperparameters
+criterion: CrossEntropyLoss
+optimizer: SGD
+learning_rate: 0.001
+batch_size: 100
+epochs: 2
+  
+## L2AC parameters
+class_ratio: 
+  encoder: 100
+  l2ac_train: 20
+  l2ac_test: 20
+
+## Training/loading parameters
+load_memory: False
+enable_training: True
+save_images: True
