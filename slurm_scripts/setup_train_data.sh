@@ -19,8 +19,11 @@
 python_script_1=setup_train_data.py
 python_script_2=setup_test_data.py
 
+config_file_base=TinyImageNet_train_base.yaml
 config_file=TinyImageNet_train.yaml
 conda_env=l2acenv
+
+cp config/$base_config_file config/$config_file
 
 
 module use /opt/insy/modulefiles
