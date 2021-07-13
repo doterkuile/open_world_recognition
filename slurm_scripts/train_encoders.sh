@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_resnet 	# create a short name for your job
+#SBATCH --job-name=train_encoders 	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=long						# select quality of service
@@ -26,10 +26,12 @@ module load miniconda/3.7
 
 # configuration variables
 python_script=train_encoder.py
+base_config_file=encoder_train_base.yaml
 config_file=encoder_train.yaml
 conda_env=l2acenv
 
-file=config/$config_file
+cp config/$base_config_file config/$config_file
+
 
 
 # Loop variables
