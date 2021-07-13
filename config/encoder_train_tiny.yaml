@@ -8,7 +8,6 @@ image_resize: 224
 model_class: EfficientNet
 feature_layer: _avg_pooling
 unfreeze_layer: 330
-model_path: networks
 pretrained: True
 
 ## Training hyperparameters
@@ -24,7 +23,4 @@ class_ratio:
   l2ac_train: 20
   l2ac_test: 20
 
-## Training/loading parameters
-load_memory: False
-enable_training: True
-save_images: True
+

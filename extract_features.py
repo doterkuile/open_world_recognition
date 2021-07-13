@@ -53,12 +53,11 @@ def main():
 
     n_cls = config['train_classes']
     n_smpl = config['train_samples_per_cls']
-    load_memory = config['load_memory']
     memory_path = config['dataset_path'] + '/memory_' + str(n_cls) + '_' + str(n_smpl) + '.npz'
 
     # Extract features
     print('Extract features')
-    data_rep, data_cls_rep, labels_rep = meta_utils.extract_features(train_data, model, classes, memory_path, load_memory)
+    data_rep, data_cls_rep, labels_rep = meta_utils.extract_features(train_data, model, classes)
 
     print('Save features at: ' + memory_path)
     np.savez(memory_path, data_rep=data_rep, train_cls_rep=data_cls_rep, labels_rep=labels_rep)

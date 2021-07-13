@@ -4,12 +4,10 @@ name: '0037'
 ## Paths and classes
 dataset_path: amazon
 dataset_class: MetaDataset
-model_path: 'networks/amazon/L2AC.pt'
 model_class: L2AC
 encoder: AmazonEncoder
 feature_layer: layer
-training_history_path: 'networks/amazon/encoder/L2AC_model_history'
-figures_path: 'figures/amazon_'
+
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
@@ -32,7 +30,4 @@ same_class_reverse: False
 same_class_extend_entries: False
 
 ## Training/loading parameters
-load_memory: False
-enable_training: True
-save_images: True
 create_similarity_gif: True

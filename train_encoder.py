@@ -310,7 +310,6 @@ def parseConfigFile(device, multiple_gpu):
                    f'/{config["dataset_path"]}'
     image_resize = config['image_resize']
     feature_layer = config['feature_layer']
-    model_path = config['model_path']
 
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path,class_ratio,train_phase, image_resize)
 
@@ -318,7 +317,7 @@ def parseConfigFile(device, multiple_gpu):
     model_class = config['model_class']
     pretrained = config['pretrained']
     unfreeze_layer = config['unfreeze_layer']
-    model = eval('RecognitionModels.' + model_class)(model_class, model_path, class_ratio[train_phase], feature_layer, unfreeze_layer, pretrained)
+    model = eval('RecognitionModels.' + model_class)(model_class, class_ratio[train_phase], feature_layer, unfreeze_layer, pretrained)
 
     model.to(device)
 

@@ -7,8 +7,7 @@ dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 64
 model_class: EfficientNet
 feature_layer: _avg_pooling
-unfreeze_layer: 33en
-model_path: networks
+unfreeze_layer: 30
 pretrained: True
 
 ## Training hyperparameters
@@ -23,8 +22,3 @@ class_ratio:
   encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
-
-## Training/loading parameters
-load_memory: False
-enable_training: True
-save_images: True

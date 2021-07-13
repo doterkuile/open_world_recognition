@@ -67,7 +67,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     state_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_best_state.pth'
     best_state = torch.load(state_path)
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, train_classes,features_size, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(train_classes,features_size, batch_size, top_k).to(device)
     print('Load model ' + model_path)
     # OpenWorldUtils.loadModel(model, model_path)
     model.load_state_dict(best_state['model'])

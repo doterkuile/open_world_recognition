@@ -45,24 +45,15 @@ def main():
     memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_diff_cls'
     train_memory_path = f'{memory_path}_train.npz'
 
-    model_path = config['model_path']
     # If dataset folder does not exist make folder
     if not os.path.exists(dataset_path):
         os.makedirs(dataset_path)
 
-    load_memory = config['load_memory']
-    feature_memory_path = dataset_path + '/memory.npz'
-    #
-    # if feature_layer not in model.state_dict().keys():
-    #     print("Feature layer not present in state dict, make sure they are correct:\n")
-    #     print(f'Model:{model_path}\nFeature layer: {feature_layer}')
-    #     return
 
     test_classes_idx = dataset.class_idx[train_phase]
 
     tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(test_data, model, test_classes_idx,
-                                                                                 device, feature_memory_path,
-                                                                                 load_memory)
+                                                                                 device)
 
     tst_samples_per_cls = int(len(test_data) / tst_data_cls_rep.shape[0])
     print(f'Rank validation samples with {test_classes} classes, {tst_samples_per_cls} samples per class')
@@ -128,12 +119,11 @@ def parseConfigFile(device, multiple_gpu, train_phase):
     test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size)
 
     # Load model
-    model_path = config['model_path']
     model_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
     num_classes = config['class_ratio']['encoder_train']
-    model = eval('RecognitionModels.' + model_class)(model_class, model_path, num_classes, feature_layer, pretrained).to(device)
+    model = eval('RecognitionModels.' + model_class)(model_class, num_classes, feature_layer, pretrained).to(device)
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
 
     model.load_state_dict(torch.load(encoder_file_path))

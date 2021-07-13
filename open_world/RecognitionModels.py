@@ -27,9 +27,8 @@ import abc
 
 class EncoderBase(nn.Module):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained=True):
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers, pretrained=True):
         super().__init__()
-        self.model_path = model_path
         self.model_class = model_class
         self.pretrained = pretrained
         self.feature_layer = feature_layer
@@ -74,8 +73,8 @@ class EncoderBase(nn.Module):
 
 class ResNet50(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
-        super().__init__(model_class, model_path,train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -90,8 +89,8 @@ class ResNet50(EncoderBase):
 
 class ResNet152(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
-        super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
+        super().__init__(model_class, train_classes, feature_layer, unfreeze_layers, pretrained)
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
 
@@ -105,8 +104,8 @@ class ResNet152(EncoderBase):
 
 class AlexNet(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
-        super().__init__(model_class, model_path, train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
+        super().__init__(model_class, train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -121,8 +120,8 @@ class AlexNet(EncoderBase):
 
 class EfficientNet(EncoderBase):
 
-    def __init__(self, model_class, model_path, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
-        super().__init__(model_class, model_path,train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -135,60 +134,6 @@ class EfficientNet(EncoderBase):
     def reset_final_layer(self, output_classes):
         self.model._fc = torch.nn.Linear(in_features=self.model._fc.in_features, out_features=output_classes)
         return
-
-
-
-class ResNet50old(nn.Module):
-    def __init__(self, model_path, train_classes):
-
-        super().__init__()
-        self.resnet = models.resnet50(pretrained=False)
-        # self.load_state_dict(torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=False))
-        # for param in self.parameters():
-        #     param.requires_grad = False
-        self.resnet.fc = nn.Linear(2048, train_classes)
-        self.model_path = model_path
-        self.selected_out = OrderedDict()
-
-    def feature_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
-        return hook
-
-
-    def forward(self, x):
-        x = self.resnet(x)
-        return x
-
-
-
-class ResNet50Features(models.ResNet):
-    def __init__(self, model_path, feature_layer):
-        super().__init__(models.resnet.Bottleneck, [3, 4, 6, 3])
-
-        self.pretrained = torch.hub.load('pytorch/vision:v0.2.2', 'resnet50', pretrained=True)
-        torch.save(self.pretrained.state_dict(), model_path)
-
-        for param in self.pretrained.parameters():
-            param.requires_grad = False
-
-        self.model_path = model_path
-        self.feature_layer = feature_layer
-
-        self.selected_out = OrderedDict()
-        self.hook = getattr(self.pretrained, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
-
-    def feature_hook(self, layer_name):
-        def hook(module, input, output):
-            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
-        return hook
-
-    def forward(self, x):
-        x = self.pretrained(x)
-
-        return x, self.selected_out[self.feature_layer]
-
-__all__ = ['AlexNet', 'alexnet']
 
 
 
@@ -256,7 +201,7 @@ class Identity(torch.nn.Module):
 
 
 class L2AC_base(torch.nn.Module):
-    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
+    def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super().__init__()
         self.has_lstm = True
         self.feature_size = feature_size
@@ -311,9 +256,9 @@ class L2AC_base(torch.nn.Module):
 
 class L2AC(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
+    def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
 
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+        super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
 
     def setMatchingLayer(self):
@@ -342,8 +287,8 @@ class L2AC(L2AC_base):
 
 class L2AC_cosine(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048,  batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
 
@@ -368,8 +313,8 @@ class L2AC_cosine(L2AC_base):
 
 class L2AC_no_lstm(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048,  batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.has_lstm = False
 
@@ -413,8 +358,8 @@ class L2AC_no_lstm(L2AC_base):
 
 class L2AC_extended_similarity(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048,  batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048,  batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
 
@@ -454,8 +399,8 @@ class L2AC_extended_similarity(L2AC_base):
 
 class L2AC_smaller_fc(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
         # Override default input size
         self.input_size = 512
         self.matching_layer = self.setMatchingLayer()
@@ -494,8 +439,8 @@ class L2AC_smaller_fc(L2AC_base):
 
 class L2AC_abssub(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
 
     def setMatchingLayer(self):
@@ -520,8 +465,8 @@ class L2AC_abssub(L2AC_base):
 
 class L2AC_concat(L2AC_base):
 
-    def __init__(self, model_path, num_classes, feature_size=2048, batch_size=10, top_k=5):
-        super().__init__(model_path, num_classes, feature_size, batch_size, top_k)
+    def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
+        super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
 
     def setMatchingLayer(self):

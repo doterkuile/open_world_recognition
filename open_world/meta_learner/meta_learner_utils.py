@@ -314,44 +314,39 @@ def calculate_metrics(metrics_dict, y_pred, y_true, loss):
     return
 
 
-def extract_features(data, model, classes, device, memory_path, load_memory=False):
+def extract_features(data, model, classes, device):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
     model.eval()
 
-    if load_memory:
-        train_rep = np.load(memory_path)['data_rep']
-        train_cls_rep = np.load(memory_path)['train_cls_rep']
-        labels_rep = np.load(memory_path)['labels_rep']
 
-    else:
-        with torch.no_grad():
-            # Create dict of samples per class
-            for sample, label in data:
-                class_samples[label].append(sample)
+    with torch.no_grad():
+        # Create dict of samples per class
+        for sample, label in data:
+            class_samples[label].append(sample)
 
-            # Extract features of sample and mean feature vector per class
-            for cls in tqdm(classes):
-                # convert to tensor
-                # class_samples[cls] = torch.stack(class_samples[cls])
+        # Extract features of sample and mean feature vector per class
+        for cls in tqdm(classes):
+            # convert to tensor
+            # class_samples[cls] = torch.stack(class_samples[cls])
 
-                for s in class_samples[cls]:
-                    # pass
-                # calculate features
-                    out, cls_rep = model(s.view(1,s.shape[0], s.shape[1],s.shape[2]).to(device=device))
-                    train_rep.append(cls_rep)
-                    labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
+            for s in class_samples[cls]:
+                # pass
+            # calculate features
+                out, cls_rep = model(s.view(1,s.shape[0], s.shape[1],s.shape[2]).to(device=device))
+                train_rep.append(cls_rep)
+                labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
 
-                # Mean feature vector per class
+            # Mean feature vector per class
 
-                mean_cls = torch.stack(train_rep[-len(class_samples[cls]):]).mean(dim=0)
-                train_cls_rep.append(mean_cls)
+            mean_cls = torch.stack(train_rep[-len(class_samples[cls]):]).mean(dim=0)
+            train_cls_rep.append(mean_cls)
 
-            # Convert to tensor
-            train_rep = torch.cat(train_rep).cpu()
-            train_cls_rep = torch.cat(train_cls_rep).cpu()
-            labels_rep = torch.cat(labels_rep, dim=0).cpu()
+        # Convert to tensor
+        train_rep = torch.cat(train_rep).cpu()
+        train_cls_rep = torch.cat(train_cls_rep).cpu()
+        labels_rep = torch.cat(labels_rep, dim=0).cpu()
 
 
     return train_rep, train_cls_rep, labels_rep

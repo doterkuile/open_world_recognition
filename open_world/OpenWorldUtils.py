@@ -36,12 +36,6 @@ def parseConfigFile(device, multiple_gpu):
     shutil.copyfile('config/' + config_file, config_save_path)
 
 
-
-    # Training/laoding parameters:
-    load_memory = config['load_memory']
-    save_images = config['save_images']
-    enable_training = config['enable_training']
-
     # Training hyperparameters
     batch_size = config['batch_size']
     learning_rate = config['learning_rate']
@@ -86,12 +80,10 @@ def parseConfigFile(device, multiple_gpu):
     features_size = len(dataset.trn_memory[0])
 
     # Load model
-    if config['name'] == 'encoder':
-        model_path = config['model_path']
-    else:
-        model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
+ 
+    model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(model_path, train_classes,features_size, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(train_classes,features_size, batch_size, top_k).to(device)
 
     # If multiple gpu's available
     # if multiple_gpu:
