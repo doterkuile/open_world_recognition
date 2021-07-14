@@ -34,7 +34,6 @@ cp config/$base_config_file config/$config_file
 
 
 # Loop variables
-file=config/$config_file
 var_1=name	
 array_1=(l_t_0001 l_t_0002 l_t_0003)
 var_2=top_n
@@ -42,8 +41,6 @@ array_2=(1 4 9)
 var_3=test_class_selection
 array_3=(same_cls same_cls same_cls)
 len=${#array_1[@]}
-
-
 
 
 var_e=epochs
@@ -55,6 +52,9 @@ conda activate $conda_env
 for ((i=0;i<$len; i++))
 
 do
+	file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+
+	cp config/$base_config_file $file
 
         echo "$var_e = ${value_e}"
         sed -i "s/$var_e:.*/$var_e: ${value_e}/" $file

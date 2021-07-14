@@ -34,7 +34,6 @@ cp config/$base_config_file config/$config_file
 
 
 # Loop variables
-file=config/$config_file
 var_1=name	
 array_1=(0029 0030 0031 0032)
 var_2=top_n
@@ -55,6 +54,9 @@ conda activate $conda_env
 for ((i=0;i<$len; i++))
 
 do
+	file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+
+	cp config/$base_config_file $file	
 
         echo "$var_4 = ${value_4}"
         sed -i "s/$var_4:.*/$var_4: ${value_4}/" $file
