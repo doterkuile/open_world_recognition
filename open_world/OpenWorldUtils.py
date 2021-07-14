@@ -23,7 +23,7 @@ def parseConfigFile(device, multiple_gpu):
     config_file = args.config_file
 
     # Open yaml file
-    with open('config/' + config_file) as file:
+    with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # Save yaml file in output folder
