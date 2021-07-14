@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 from scipy import stats
 
 
 def plot_losses(train_losses, test_losses, figure_path):
-
     fig = plt.figure()
     plt.plot(train_losses, label='training loss')
     plt.plot(test_losses, label='validation loss')
@@ -19,8 +19,6 @@ def plot_losses(train_losses, test_losses, figure_path):
 
 
 def plot_accuracy(train_acc, test_acc, figure_path):
-
-
     fig = plt.figure()
     plt.plot(train_acc, label='training accuracy')
     plt.plot(test_acc, label='validation accuracy')
@@ -31,9 +29,8 @@ def plot_accuracy(train_acc, test_acc, figure_path):
     fig.savefig(figure_path + '_accuracy')
     return
 
+
 def plot_precision(train_precision, test_precision, figure_path):
-
-
     fig = plt.figure()
     plt.plot(train_precision, label='training precision')
     plt.plot(test_precision, label='validation precision')
@@ -44,9 +41,8 @@ def plot_precision(train_precision, test_precision, figure_path):
     fig.savefig(figure_path + '_precision')
     return
 
+
 def plot_recall(train_recall, test_recall, figure_path):
-
-
     fig = plt.figure()
     plt.plot(train_recall, label='training recall')
     plt.plot(test_recall, label='validation recall')
@@ -57,9 +53,8 @@ def plot_recall(train_recall, test_recall, figure_path):
     fig.savefig(figure_path + '_recall')
     return
 
+
 def plot_F1(train_F1, test_F1, figure_path):
-
-
     fig = plt.figure()
     plt.plot(train_F1, label='training F1')
     plt.plot(test_F1, label='validation F1')
@@ -69,7 +64,6 @@ def plot_F1(train_F1, test_F1, figure_path):
     plt.legend()
     fig.savefig(figure_path + '_F1')
     return
-
 
 
 def plot_mean_prediction(trn_pred, trn_true, tst_pred, tst_true, figure_path):
@@ -87,8 +81,6 @@ def plot_mean_prediction(trn_pred, trn_true, tst_pred, tst_true, figure_path):
 
 
 def plot_intermediate_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls, figure_path):
-
-
     fig = plt.figure()
     plt.plot(trn_same_cls, label='Training same class', alpha=1, color='blue')
     plt.plot(trn_diff_cls, label='Training diff class', alpha=0.4, color='blue')
@@ -116,86 +108,69 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     return
 
 
-def plot_prob_density(fig, axs, trn_sim_score, y_trn, tst_sim_score, y_tst, title, figure_path=None):
-
+def plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title, figure_path=None):
     if len(axs) != 2:
         print('Axes not correct, no prob density plotted')
         return
+
+    x_label = 'Output score'
+    legend_label = 'Dataset'
 
     # make sure to select only x1 samples of a different class
     trn_idx_diff_class = (y_trn == 0).nonzero()[0].squeeze()
     trn_idx_same_class = (y_trn == 1).nonzero()[0].squeeze()
 
-    if len(trn_sim_score.shape) == 2:
-        trn_sim_score_same = trn_sim_score[trn_idx_same_class,:].reshape(-1)
-        trn_sim_score_diff = trn_sim_score[trn_idx_diff_class,:].reshape(-1)
-    else:
-        trn_sim_score_same = trn_sim_score[trn_idx_same_class]
-        trn_sim_score_diff = trn_sim_score[trn_idx_diff_class]
-    trn_label = np.full((len(trn_sim_score_same)), 'trn same')
-    trn_label2 = np.full((len(trn_sim_score_diff)), 'trn diff')
+    trn_score_same = trn_score[trn_idx_same_class].reshape(-1)
+    trn_score_diff = trn_score[trn_idx_diff_class].reshape(-1)
+    trn_label = np.full((len(trn_score_same)), 'train')
+    trn_label2 = np.full((len(trn_score_diff)), 'train')
 
     tst_idx_diff_class = (y_tst == 0).nonzero()[0].squeeze()
     tst_idx_same_class = (y_tst == 1).nonzero()[0].squeeze()
 
-    if len(trn_sim_score.shape) == 2:
-        tst_sim_score_same = tst_sim_score[tst_idx_same_class,:].reshape(-1)
-        tst_sim_score_diff = tst_sim_score[tst_idx_diff_class,:].reshape(-1)
-    else:
-        tst_sim_score_same = tst_sim_score[tst_idx_same_class]
-        tst_sim_score_diff = tst_sim_score[tst_idx_diff_class]
+    tst_score_same = tst_score[tst_idx_same_class].reshape(-1)
+    tst_score_diff = tst_score[tst_idx_diff_class].reshape(-1)
 
-    tst_label = np.full((len(tst_sim_score_same)), 'tst same')
-    tst_label2 = np.full((len(tst_sim_score_diff)), 'tst diff')
+    tst_label = np.full((len(tst_score_same)), 'test')
+    tst_label2 = np.full((len(tst_score_diff)), 'test')
 
-    same_scores_combined = np.concatenate([trn_sim_score_same, tst_sim_score_same], axis=0)
-    same_labels_combined = np.concatenate([trn_label, tst_label], axis=0)
-    # scores = pd.DataFrame(scores_combined, columns=['score'])
-    same_score_dict = {'score': same_scores_combined,
-                   'class': same_labels_combined}
+    same_score_dict = {x_label: np.concatenate([trn_score_same, tst_score_same], axis=0),
+                       legend_label: np.concatenate([trn_label, tst_label], axis=0)}
 
     same_scores = pd.DataFrame.from_dict(same_score_dict)
-    same_scores['score'] = same_scores['score'].astype(float)
-    same_scores['class'] = same_scores['class'].astype(str)
+    same_scores[x_label] = same_scores[x_label].astype(float)
+    same_scores[legend_label] = same_scores[legend_label].astype(str)
 
-    diff_scores_combined = np.concatenate([trn_sim_score_diff, tst_sim_score_diff], axis=0)
-    diff_labels_combined = np.concatenate([trn_label2, tst_label2], axis=0)
-    # scores = pd.DataFrame(scores_combined, columns=['score'])
-    diff_score_dict = {'score': diff_scores_combined,
-                   'class': diff_labels_combined}
+    diff_score_dict = {x_label:  np.concatenate([trn_score_diff, tst_score_diff], axis=0),
+                       legend_label: np.concatenate([trn_label2, tst_label2], axis=0)}
 
     diff_scores = pd.DataFrame.from_dict(diff_score_dict)
-    diff_scores['score'] = diff_scores['score'].astype(float)
-    diff_scores['class'] = diff_scores['class'].astype(str)
-
-    # fig, (ax1, ax2) = plt.subplots(2,1,figsize=(15,10))
+    diff_scores[x_label] = diff_scores[x_label].astype(float)
+    diff_scores[legend_label] = diff_scores[legend_label].astype(str)
 
     # giving title to the plot
     fig.suptitle(title, fontsize=24)
 
-    # sns.kdeplot(ax=axs[0],
-    #     data=same_scores, x="score", hue="class",
-    #     fill=True, common_norm=False, palette="muted",
-    #     alpha=0.5, linewidth=0, multiple='layer'
-    # )
-    #
-    # sns.kdeplot(ax=axs[1],
-    #     data=diff_scores, x="score", hue="class",
-    #     fill=True, common_norm=False, palette="muted",
-    #     alpha=0.5, linewidth=0, multiple='layer'
-    # )
-    sns.histplot(ax=axs[0], data=same_scores, x='score', hue='class', stat='probability', kde=False, common_norm=False, element='bars', binrange=(0,1), binwidth=0.005)
-    sns.histplot(ax=axs[1], data=diff_scores, x='score', hue='class', stat='probability', kde=False, common_norm=False, element='bars', binrange=(0,1), binwidth=0.005)
+    axs[0].set_title('Same class', fontweight="bold", size=18)
+    axs[1].set_title('Different class', fontweight="bold", size=18)
+    axs[0].set_ylabel('Density')
+    axs[1].set_ylabel('Density')
+
+
+    sns.histplot(ax=axs[0], data=same_scores, x=x_label, hue=legend_label, stat='probability', kde=False, common_norm=False,
+                 element='bars', binrange=(0, 1), binwidth=0.005)
+
+    sns.histplot(ax=axs[1], data=diff_scores, x=x_label, hue=legend_label, stat='probability', kde=False, common_norm=False,
+                 element='bars', binrange=(0, 1), binwidth=0.005)
 
     if figure_path is not None:
         fig.savefig(figure_path)
 
+
 def plot_best_F1(F1, loop_variable, figure_path):
-
-
     fig = plt.figure()
     var_name = list(loop_variable.keys())[0]
-    plt.plot(loop_variable[var_name], F1, '-o',label='F1 score')
+    plt.plot(loop_variable[var_name], F1, '-o', label='F1 score')
     plt.ylabel('F1')
     plt.xlabel(f'{var_name}')
     plt.title('F1 score')
@@ -206,8 +181,6 @@ def plot_best_F1(F1, loop_variable, figure_path):
 
 
 def plot_best_loss(loss, loop_variable, figure_path):
-
-
     fig = plt.figure()
     var_name = list(loop_variable.keys())[0]
     plt.plot(loop_variable[var_name], loss, '-o', label='loss')
@@ -220,9 +193,8 @@ def plot_best_loss(loss, loop_variable, figure_path):
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
 
+
 def plot_best_accuracy(accuracy, loop_variable, figure_path):
-
-
     fig = plt.figure()
     var_name = list(loop_variable.keys())[0]
     plt.plot(loop_variable[var_name], accuracy, '-o', label='accuracy')
@@ -234,3 +206,24 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
     plt.legend()
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
+
+
+def main():
+    fig, axs = plt.subplots(2, 1, figsize=(15, 10))
+
+    data_size = 500
+    k = 5
+    trn_score = np.random.rand(data_size, k)
+    y_trn = np.random.randint(0, 2, (data_size, 1))
+    tst_score = np.random.rand(data_size, k)
+    y_tst = np.random.randint(0, 2, (data_size, 1))
+
+    title = 'Matching layer output'
+
+    plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title)
+    plt.show()
+    return
+
+
+if __name__ == '__main__':
+    main()
