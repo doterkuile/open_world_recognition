@@ -27,15 +27,12 @@ module load miniconda/3.7
 # configuration variables
 python_script=train_encoder.py
 base_config_file=encoder_train_base.yaml
-config_file=encoder_train.yaml
 conda_env=l2acenv
 
-cp config/$base_config_file config/$config_file
 
 
 
 # Loop variables
-file=config/$config_file
 var_1=name
 array_1=(e_t_0005 e_t_0006)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
@@ -61,9 +58,13 @@ conda activate $conda_env
 for ((i=0;i<$len; i++))
 
 do
+	config_file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+
+	mkdir -p output/${array_1[$i]}
+	cp -r config/$base_config_file $config_file
 
         echo "$var_e = ${value_e}"
-        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $file
+        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
 	
 
 	echo "$var_1 = ${array_1[$i]}"
@@ -73,11 +74,11 @@ do
 	echo "$var_5 = ${array_5[$i]}"
 
 
-	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
-	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
-	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
-        sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $file
-	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $file
+	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
+	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
+        sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 
 
 

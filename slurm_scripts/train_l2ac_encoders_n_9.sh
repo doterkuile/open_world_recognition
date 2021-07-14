@@ -27,14 +27,11 @@ module load miniconda/3.7
 # configuration variables
 python_script=train_l2ac.py
 base_config_file=L2AC_train_base.yaml
-config_file=L2AC_train.yaml
 conda_env=l2acenv
 
-cp config/$base_config_file config/$config_file
 
 
 # Loop variables
-file=config/$config_file
 var_1=name	
 array_1=(0005 0006 0007 0008)
 var_2=feature_layer
@@ -57,9 +54,13 @@ conda activate $conda_env
 for ((i=0;i<$len; i++))
 
 do
+	config_file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+
+	mkdir -p output/${array_1[$i]}
+	cp -r config/$base_config_file $config_file
 
         echo "$var_e = ${value_e}"
-        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $file
+        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
 	
 
 	echo "$var_1 = ${array_1[$i]}"
@@ -67,10 +68,10 @@ do
         echo "$var_3 = ${array_3[$i]}"
 	echo "$var_4 = ${array_4[$i]}"
 
-	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $file
-	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
-	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
-	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $file
+	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
+	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 
 
 	python $python_script $config_file

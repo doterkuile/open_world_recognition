@@ -295,7 +295,10 @@ def parseConfigFile(device, multiple_gpu):
 
 
     config_save_path = exp_folder + '/' + exp_name + '_config.yaml'
-    shutil.copyfile('config/' + config_file, config_save_path)
+    try:
+        shutil.copyfile(config_file, config_save_path)
+    except shutil.SameFileError:
+        pass
 
     # Training hyperparameters
     batch_size = config['batch_size']

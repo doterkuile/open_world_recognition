@@ -1,5 +1,5 @@
 ## Experiment
-name: '0001_test'
+name: '0004'
 
 ## Paths and classes
 dataset_path: TinyImageNet
@@ -12,21 +12,21 @@ unfreeze_layer: 62    #62 62 6 8
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
-optimizer: SGD
+optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
 epochs: 2
 
 ## L2AC parameters
 top_k: 5
-top_n: 1
+top_n: 4
 
 class_ratio: 
   encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
 
-test_class_selection: diff_cls
+test_class_selection: same_cls
 
 train_samples_per_cls: 500
 probability_threshold: 0.5

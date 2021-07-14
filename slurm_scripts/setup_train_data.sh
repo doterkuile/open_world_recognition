@@ -20,10 +20,7 @@ python_script_1=setup_train_data.py
 python_script_2=setup_test_data.py
 
 config_file_base=TinyImageNet_train_base.yaml
-config_file=TinyImageNet_train.yaml
 conda_env=l2acenv
-
-cp config/$base_config_file config/$config_file
 
 
 module use /opt/insy/modulefiles
@@ -37,7 +34,6 @@ module load cudnn/10.0-7.6.0.64
 
 
 # Loop variables
-file=config/$config_file
 var_1=image_resize
 array_1=(224 224 224)	
 #array_1=(4 4 4 4)
@@ -56,14 +52,18 @@ len=${#array_1[@]}
 for ((i=0;i<$len; i++))
 
 do
+	config_file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+
+	mkdir -p output/${array_1[$i]}
+	cp -r config/$base_config_file $config_file
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
 
-	sed -i "s/$var_1:.*/$var_1: ${array_1[$i]}/"  $file
-	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $file
-	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $file
+	sed -i "s/$var_1:.*/$var_1: ${array_1[$i]}/"  $config_file
+	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
+	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
 
 
 	python $python_script_1 $config_file

@@ -93,7 +93,7 @@ def main():
     args = parser.parse_args()
     evaluation_config_file = args.config_file
 
-    with open('config/' + evaluation_config_file) as file:
+    with open(evaluation_config_file) as file:
         config_evaluate = yaml.load(file, Loader=yaml.FullLoader)
 
     exp_nrs = config_evaluate['name']

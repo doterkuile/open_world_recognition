@@ -26,7 +26,7 @@ module load miniconda/3.7
 
 # configuration variables
 python_script=evaluate_l2ac.py
-config_file=L2AC_evaluate.yaml
+config_file=config/L2AC_evaluate.yaml
 conda_env=l2acenv
 
 
