@@ -54,7 +54,9 @@ for ((i=0;i<$len; i++))
 do
 	file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
 
-	cp config/$base_config_file $file
+	mkdir -p output/${array_1[$i]}
+	cp -r config/$base_config_file $file
+
 
         echo "$var_e = ${value_e}"
         sed -i "s/$var_e:.*/$var_e: ${value_e}/" $file

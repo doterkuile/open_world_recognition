@@ -88,7 +88,7 @@ def parseConfigFile(device, multiple_gpu, train_phase):
     config_file = args.config_file
 
 
-    with open('config/' + config_file) as file:
+    with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # L2AC Parameters
