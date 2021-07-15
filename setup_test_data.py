@@ -52,7 +52,12 @@ def main():
 
     test_classes_idx = dataset.class_idx[train_phase]
 
-    tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(test_data, model, test_classes_idx,
+    batch_size =100
+    (data_loader, _) = dataset.getDataloaders(batch_size)
+
+
+
+    tst_data_rep, tst_data_cls_rep, tst_labels_rep = meta_utils.extract_features(data_loader, model, test_classes_idx,
                                                                                  device)
 
     tst_samples_per_cls = int(len(test_data) / tst_data_cls_rep.shape[0])
@@ -81,7 +86,7 @@ def combineTrainTest(memory_path):
     test_data = np.load(f'{memory_path}_test.npz')
 
     np.savez(f'{memory_path}.npz',
-             train_rep=train_data['train_rep'], trn_labels_rep=train_data['trn_labels_rep'],  # including all validation examples.
+             train_rep=train_data['train_rep'], trn_labels_rep=train_data['trn_labels_rep'],  # including all train examples.
              test_rep=test_data['test_rep'], tst_labels_rep=test_data['tst_labels_rep'],  # including all validation examples.
              train_X0=train_data['train_X0'], train_X1=train_data['train_X1'], train_Y=train_data['train_Y'],
              valid_X0=test_data['valid_X0'], valid_X1=test_data['valid_X1'], valid_Y=test_data['valid_Y'])

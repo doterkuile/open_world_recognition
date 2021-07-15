@@ -314,46 +314,37 @@ def calculate_metrics(metrics_dict, y_pred, y_true, loss):
     return
 
 
-def extract_features(data, model, classes, device):
+def extract_features(data_loader, model, classes, device):
 
     class_samples = {key: [] for key in classes}
     train_rep, train_cls_rep, labels_rep= [], [], []
+
     model.eval()
 
-
     with torch.no_grad():
-        # Create dict of samples per class
-        for sample, label in data:
-            class_samples[label].append(sample)
+        for b, (x, y_train) in tqdm(enumerate(data_loader),
+                                           total=int(len(data_loader.dataset) / data_loader.batch_size)):
 
-        # Extract features of sample and mean feature vector per class
-        for cls in tqdm(classes):
-            # convert to tensor
-            # class_samples[cls] = torch.stack(class_samples[cls])
-
-            for s in class_samples[cls]:
-                # pass
-            # calculate features
-                out, cls_rep = model(s.view(1,s.shape[0], s.shape[1],s.shape[2]).to(device=device))
-                train_rep.append(cls_rep)
-                labels_rep.append(cls *torch.ones(cls_rep.shape[0],1))
-
-            # Mean feature vector per class
-
-            mean_cls = torch.stack(train_rep[-len(class_samples[cls]):]).mean(dim=0)
-            train_cls_rep.append(mean_cls)
-
-        # Convert to tensor
-        train_rep = torch.cat(train_rep).cpu()
-        train_cls_rep = torch.cat(train_cls_rep).cpu()
-        labels_rep = torch.cat(labels_rep, dim=0).cpu()
+            x = x.to(device)
+            y_train = y_train.to(device)
 
 
-    return train_rep, train_cls_rep, labels_rep
+            # Apply the model
+            _, feature_layer = model(x)
+
+            train_rep.append(feature_layer)
+            labels_rep.append(y_train)
+
+    train_rep = torch.cat(train_rep, dim=0)
+    labels_rep = torch.cat(labels_rep, dim=0)
 
 
+    for cls in classes:
+        train_cls_rep.append(train_rep[(labels_rep == cls).nonzero()].mean(dim=0))
 
+    train_cls_rep = torch.cat(train_cls_rep, dim=0)
 
+    return train_rep.detach().cpu(), train_cls_rep.detach().cpu(), labels_rep.detach().cpu()
 
 
 def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n,
