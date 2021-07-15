@@ -48,9 +48,12 @@ def main():
 
     train_classes_idx = dataset.class_idx[train_phase]
 
+    batch_size = 100
+    (data_loader,_) = dataset.getDataloaders(batch_size)
+
 
     print('Extract features')
-    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(train_data, model, train_classes_idx, device)
+    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(data_loader, model, train_classes_idx, device)
 
     print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
     train_X0, train_X1, train_Y = meta_utils.rank_samples_from_memory(train_classes_idx, trn_data_rep, trn_data_cls_rep,

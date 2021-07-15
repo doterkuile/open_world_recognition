@@ -19,7 +19,7 @@ epochs: 2
 
 ## L2AC parameters
 top_k: 5
-top_n: 4
+top_n: 1
 
 class_ratio: 
   encoder_train: 100

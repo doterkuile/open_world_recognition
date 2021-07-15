@@ -111,7 +111,7 @@ def main():
 
     trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(
         train_loader, model,
-        test_criterion, device,
+        criterion, device,
         probability_threshold)
 
     tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(

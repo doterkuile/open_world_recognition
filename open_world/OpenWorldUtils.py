@@ -21,7 +21,6 @@ def parseConfigFile(device, multiple_gpu):
     parser.add_argument("config_file")
     args = parser.parse_args()
     config_file = args.config_file
-    print(config_file)
 
     # Open yaml file
     with open(config_file) as file:
