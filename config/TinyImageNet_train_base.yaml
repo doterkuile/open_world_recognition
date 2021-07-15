@@ -1,5 +1,5 @@
 ## Experiment
-name: 'e0000'
+name: 'setup_data'
 
 ## Paths and classes
 dataset_path: TinyImageNet

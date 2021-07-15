@@ -19,7 +19,7 @@
 python_script_1=setup_train_data.py
 python_script_2=setup_test_data.py
 
-config_file_base=TinyImageNet_train_base.yaml
+base_config_file=TinyImageNet_train_base.yaml
 conda_env=l2acenv
 
 
@@ -35,26 +35,29 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=image_resize
-array_1=(224 224 224)	
+array_1=(224)	
 #array_1=(4 4 4 4)
 var_2=unfreeze_layer
-array_2=(62 62 62)
+array_2=(62)
 #array_2=(avgpool avgpool features _avg_pooling)
 var_3=top_n
-array_3=(1 4 9)
+array_3=(1)
 #array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 
 # conda activate $conda_env
 
+var_n=name
+array_n=(setup_data)
+
 
 for ((i=0;i<$len; i++))
 
 do
-	config_file=output/${array_1[$i]}/${array_1[$i]}_config.yaml
+	config_file=output/${array_n[$i]}/${array_n[$i]}_config.yaml
 
-	mkdir -p output/${array_1[$i]}
+	mkdir -p output/${array_n[$i]}
 	cp -r config/$base_config_file $config_file
 
 	echo "$var_1 = ${array_1[$i]}"
