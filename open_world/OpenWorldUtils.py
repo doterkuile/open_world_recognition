@@ -96,7 +96,7 @@ def parseConfigFile(device, multiple_gpu):
         print('Load model ' + model_path)
         loadModel(model, model_path)
 
-    criterion = eval('nn.' + config['criterion'])(pos_weight, reduction='mean')
+    criterion = eval('nn.' + config['criterion'])(pos_weight=pos_weight, reduction='mean')
     # criterion = eval('nn.' + config['criterion'])()
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
