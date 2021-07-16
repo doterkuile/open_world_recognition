@@ -9,7 +9,6 @@ import os
 
 
 def main():
-
     # set random seed
     torch.manual_seed(42)
 
@@ -23,16 +22,9 @@ def main():
     else:
         print(f'Running with {torch.cuda.device_count()} GPUs')
 
-    train_phase = 'l2ac_train'
-
-
     # Parse config file
-    dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config = parseConfigFile(device, multiple_gpu, train_phase)
-
-
-
-    # Setup dataset
-    (train_data, _) = dataset.getData()
+    trn_dataset, tst_dataset, model, top_n, trn_classes, tst_classes, trn_samples_per_cls, randomize_samples, config = parseConfigFile(
+        device, multiple_gpu)
 
 
 
@@ -41,54 +33,87 @@ def main():
     dataset_path = f"datasets/{config['dataset_path']}/{model_class}"
     unfreeze_layer = config['unfreeze_layer']
     image_resize = config['image_resize']
-    memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_diff_cls_train.npz'
+    memory_path = f'{dataset_path}/{feature_layer}_{image_resize}_{unfreeze_layer}_{trn_classes}_{trn_samples_per_cls}_{top_n}'
     # If dataset folder does not exist make folder
     if not os.path.exists(dataset_path):
         os.makedirs(dataset_path)
 
+    # Setup dataset
+    (trn_data, tst_data_same_cls) = trn_dataset.getData()
+    (tst_data_diff_cls, _) = tst_dataset.getData()
 
-    train_classes_idx = dataset.class_idx[train_phase]
-
+    # setup dataloaders
     batch_size = 100
-    (data_loader,_) = dataset.getDataloaders(batch_size)
+    (trn_loader, tst_loader_same_cls) = trn_dataset.getDataloaders(batch_size)
+    (tst_loader_diff_cls, _) = tst_dataset.getDataloaders(batch_size)
 
-    print('Extract features')
-    trn_data_rep, trn_data_cls_rep, trn_labels_rep = meta_utils.extract_features(data_loader, model, train_classes_idx, device)
+    trn_cls_idx = [trn_data.class_to_idx[key] for key in trn_data.class_to_idx.keys()]
+    tst_same_cls_idx = [tst_data_same_cls.class_to_idx[key] for key in tst_data_same_cls.class_to_idx.keys()]
+    tst_diff_cls_idx = [tst_data_diff_cls.class_to_idx[key] for key in tst_data_diff_cls.class_to_idx.keys()]
 
-    print(f'Rank training samples with {train_classes} classes, {train_samples_per_cls} samples per class')
-    train_X0, train_X1, train_Y = meta_utils.rank_samples_from_memory(train_classes_idx, trn_data_rep, trn_data_cls_rep,
-                                                                      trn_labels_rep, train_classes_idx, train_samples_per_cls, top_n,
-                                                                      randomize_samples)
+    # Setup train data
+    trn_data_rep, trn_cls_rep, trn_labels_rep, trn_X0, trn_X1, trn_Y = dataToL2ACFormat(model, trn_loader, trn_cls_idx,
+                                                                                        trn_samples_per_cls, top_n,
+                                                                                        device, randomize_samples)
+
+    # Setup test data with different classes
+    tst_samples_per_cls = int(len(tst_data_diff_cls) / len(tst_diff_cls_idx))
+    tst_data_rep, tst_cls_rep, tst_labels_rep, tst_X0, tst_X1, tst_Y = dataToL2ACFormat(model, tst_loader_diff_cls,
+                                                                                        tst_diff_cls_idx,
+                                                                                        tst_samples_per_cls, 1,
+                                                                                        device, randomize_samples)
+
+    print(f'Save results to {memory_path}_diff_cls.npz')
+    np.savez(f'{memory_path}_diff_cls.npz',
+             train_rep=trn_data_rep, trn_labels_rep=trn_labels_rep,
+             test_rep=tst_data_rep, tst_labels_rep=tst_labels_rep,
+             train_X0=trn_X0, train_X1=trn_X1, train_Y=trn_Y,
+             valid_X0=tst_X0, valid_X1=tst_X1, valid_Y=tst_Y)
+
+    # Setup test data with same classes
+    tst_samples_per_cls = int(len(tst_data_same_cls) / len(tst_same_cls_idx))
+    tst_data_rep, tst_cls_rep, tst_labels_rep, tst_X0, tst_X1, tst_Y = dataToL2ACFormat(model, tst_loader_same_cls,
+                                                                                        tst_same_cls_idx,
+                                                                                        tst_samples_per_cls, 1,
+                                                                                        device, randomize_samples)
+
+    print(f'Save results to {memory_path}_same_cls.npz')
+    np.savez(f'{memory_path}_same_cls.npz',
+             train_rep=trn_data_rep, trn_labels_rep=trn_labels_rep,
+             test_rep=tst_data_rep, tst_labels_rep=tst_labels_rep,
+             train_X0=trn_X0, train_X1=trn_X1, train_Y=trn_Y,
+             valid_X0=tst_X0, valid_X1=tst_X1, valid_Y=tst_Y)
 
 
-
-
-    print(f'Save results to {memory_path}')
-    np.savez(memory_path,
-             train_rep=trn_data_rep, trn_labels_rep=trn_labels_rep,  # including all validation examples.
-             train_X0=train_X0, train_X1=train_X1, train_Y=train_Y)
     return
 
 
-def parseConfigFile(device, multiple_gpu, train_phase):
+def dataToL2ACFormat(encoder, dataloader, cls_idx, samples_per_cls, top_n, device, randomize_samples):
+    data_rep, cls_rep, labels_rep = meta_utils.extract_features(dataloader, encoder, cls_idx, device)
 
+    X0, X1, Y = meta_utils.rank_samples_from_memory(cls_idx, data_rep, cls_rep, labels_rep, cls_idx, samples_per_cls,
+                                                    top_n, randomize_samples)
+
+    return data_rep, cls_rep, labels_rep, X0, X1, Y
+
+
+def parseConfigFile(device, multiple_gpu):
     # Get config file argument
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file")
     args = parser.parse_args()
     config_file = args.config_file
 
-
     with open(config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # L2AC Parameters
     top_n = int(config['top_n'])
-    train_samples_per_cls = config['train_samples_per_cls'] # Number of samples per class
+    train_samples_per_cls = config['train_samples_per_cls']  # Number of samples per class
     class_ratio = config['class_ratio']
 
-    train_classes = class_ratio['l2ac_train'] # Classes used for training
-    test_classes = class_ratio['l2ac_test'] # Classes used for validation
+    train_classes = class_ratio['l2ac_train']  # Classes used for training
+    test_classes = class_ratio['l2ac_test']  # Classes used for validation
     randomize_samples = config['randomize_samples']
 
     # Load dataset
@@ -97,20 +122,23 @@ def parseConfigFile(device, multiple_gpu, train_phase):
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
 
-
+    train_phase = 'l2ac_train'
     train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size)
+    test_phase = 'l2ac_test'
 
+    test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
     # Load model
     model_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
     num_classes = config['class_ratio']['encoder_train']
-    model = eval('RecognitionModels.' + model_class)(model_class,num_classes, feature_layer, pretrained).to(device)
+    model = eval('RecognitionModels.' + model_class)(model_class, num_classes, feature_layer, pretrained).to(device)
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
 
     model.load_state_dict(torch.load(encoder_file_path))
 
-    return train_dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
+    return train_dataset, test_dataset, model, top_n, train_classes, test_classes, train_samples_per_cls, randomize_samples, config
+
 
 if __name__ == "__main__":
     main()

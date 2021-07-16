@@ -184,14 +184,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.tst_mean_pixel = [x / 255.0 for x in [129.7, 124.3, 112.7]]
         self.tst_std_pixel = [x / 255.0 for x in [68.4, 65.6, 70.7]]
 
-        self.transform_train = transforms.Compose([
-                transforms.Resize(image_resize),
-                transforms.RandomRotation(20),
-                transforms.RandomHorizontalFlip(0.5),
-                transforms.ToTensor(),
-                # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
-        ])
+
 
         self.transform_test = transforms.Compose([
             transforms.Resize(image_resize),
@@ -200,6 +193,17 @@ class CIFAR100Dataset(ObjectDatasetBase):
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
+        if train_phase == 'l2ac_test':
+            self.transform_train = self.transform_test
+        else:
+            self.transform_train = transforms.Compose([
+                    transforms.Resize(image_resize),
+                    transforms.RandomRotation(20),
+                    transforms.RandomHorizontalFlip(0.5),
+                    transforms.ToTensor(),
+                    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
+            ])
 
         train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_train)
         test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=self.transform_test)
@@ -257,20 +261,24 @@ class TinyImageNetDataset(ObjectDatasetBase):
         self.tst_mean_pixel = [0.4802, 0.4481, 0.3975]
         self.tst_std_pixel = [0.2302, 0.2265, 0.2262]
 
-        self.transform_train = transforms.Compose([
-                transforms.Resize(image_resize),
-                transforms.RandomRotation(20),
-                transforms.RandomHorizontalFlip(0.5),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
-        ])
-
         self.transform_test = transforms.Compose([
             transforms.Resize(image_resize),
             transforms.ToTensor(),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
+        if train_phase == 'l2ac_test':
+            self.transform_train = self.transform_test
+        else:
+            self.transform_train = transforms.Compose([
+                    transforms.Resize(image_resize),
+                    transforms.RandomRotation(20),
+                    transforms.RandomHorizontalFlip(0.5),
+                    transforms.ToTensor(),
+                    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
+            ])
 
         train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
         test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)

@@ -330,19 +330,26 @@ def extract_features(data_loader, model, classes, device):
 
 
             # Apply the model
-            _, feature_layer = model(x)
+            _, feature_vector = model(x)
 
-            train_rep.append(feature_layer)
+            train_rep.append(feature_vector)
             labels_rep.append(y_train)
 
     train_rep = torch.cat(train_rep, dim=0)
     labels_rep = torch.cat(labels_rep, dim=0)
 
-
+    sort_idx = []
     for cls in classes:
         train_cls_rep.append(train_rep[(labels_rep == cls).nonzero()].mean(dim=0))
+        sort_idx.append((labels_rep == cls).nonzero())
 
     train_cls_rep = torch.cat(train_cls_rep, dim=0)
+    sort_idx = torch.cat(sort_idx, dim=0).squeeze()
+
+    # Sort labels and feature vectors
+    labels_rep = labels_rep[sort_idx]
+    train_rep = train_rep[sort_idx]
+
 
     return train_rep.detach().cpu(), train_cls_rep.detach().cpu(), labels_rep.detach().cpu()
 
@@ -406,12 +413,12 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
             tmp_Y.append(np.full((train_samples_per_cls, 1), 0))
 
         # put same class in the last dim
-        sim = metrics.pairwise.cosine_similarity(
+        sim2 = metrics.pairwise.cosine_similarity(
             data_rep[cls_offset:cls_offset + train_samples_per_cls])  # Similarity between same class
         # Remove most similar sample as this is the same sample as input sample
-        sim_idx = sim.argsort(axis=1)[:, :-1] + cls_offset  # add the offset to obtain the real offset in memory.
+        sim2_idx = sim2.argsort(axis=1)[:, :-1] + cls_offset  # add the offset to obtain the real offset in memory.
         # Append same class indices and labels to tmp_x1 and tmp_y
-        tmp_X1.append(np.expand_dims(sim_idx, 1))
+        tmp_X1.append(np.expand_dims(sim2_idx, 1))
         tmp_Y.append(np.full((train_samples_per_cls, 1), 1))
 
         # append all input samples indices
