@@ -26,7 +26,7 @@ module load miniconda/3.7
 
 # configuration variables
 python_script=train_l2ac.py
-config_file=L2AC_amazon_train.yaml
+base_config_file=L2AC_amazon_train.yaml
 conda_env=l2acenv
 
 
