@@ -2,7 +2,7 @@
 name: '0004'
 
 ## Paths and classes
-dataset_path: TinyImageNet
+dataset_path: CIFAR100
 dataset_class: MetaDataset
 model_class: L2AC
 encoder: ResNet50
@@ -15,14 +15,14 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 2
+epochs: 10
 
-## L2AC parameters
+## L2AC parametersd
 top_k: 5
 top_n: 4
 
 class_ratio: 
-  encoder_train: 100
+  encoder_train: 50
   l2ac_train: 20
   l2ac_test: 20
 

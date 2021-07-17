@@ -1,5 +1,5 @@
 ## Experiment
-name: '0037'
+name: 'l_a_0001'
 
 ## Paths and classes
 dataset_path: amazon
@@ -7,7 +7,8 @@ dataset_class: MetaDataset
 model_class: L2AC
 encoder: AmazonEncoder
 feature_layer: layer
-
+image_resize: 224
+unfreeze_layer: 62    #62 62 6 8
 
 ## Training hyperparameters
 criterion: BCEWithLogitsLoss
@@ -20,8 +21,12 @@ epochs: 1
 ## L2AC parameters
 top_k: 5
 top_n: 9
-train_classes: 900
-test_classes: 100
+class_ratio: 
+  encoder_train: 100
+  l2ac_train: 900
+  l2ac_test: 100
+
+test_class_selection: diff_cls
 train_samples_per_cls: 100
 probability_threshold: 0.5
 

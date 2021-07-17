@@ -32,7 +32,7 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(0008)
+array_1=(l_a_0001)
 var_2=top_n
 array_2=(9)
 var_3=model_class

@@ -16,7 +16,7 @@
 
 
 # configuration variables
-python_script=setup_train_data.py
+python_script_1=setup_train_data.py
 
 base_config_file=TinyImageNet_train_base.yaml
 conda_env=l2acenv
@@ -68,7 +68,7 @@ do
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
 
 
-	python $python_script $config_file
+	python $python_script_1 $config_file
 
 done
 

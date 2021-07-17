@@ -79,7 +79,10 @@ class MetaDataset(data_utils.Dataset):
         return features, labels
 
     def load_tst_memory(self, data_path):
-        features = np.load(data_path)['test_rep']
+        try:
+            features = np.load(data_path)['test_rep']
+        except KeyError:
+            features = np.load(data_path)['train_rep']
         try:
             labels = np.load(data_path)['tst_labels_rep']
         except KeyError:

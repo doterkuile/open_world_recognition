@@ -15,39 +15,34 @@ import imageio
 import copy
 
 
-
-
-
-
-def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device, probability_treshold, gif_path=None):
-
+def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device,
+                   probability_treshold, gif_path=None):
     trn_metrics_dict = {'loss': [],
-                    'accuracy': [],
-                    'precision': [],
-                    'recall': [],
-                    'F1': [],
-                    'mean_pred': [],
-                    'mean_true': []}
+                        'accuracy': [],
+                        'precision': [],
+                        'recall': [],
+                        'F1': [],
+                        'mean_pred': [],
+                        'mean_true': []}
 
     tst_metrics_dict = {'loss': [],
-                    'accuracy': [],
-                    'precision': [],
-                    'recall': [],
-                    'F1': [],
-                    'mean_pred': [],
-                    'mean_true': []}
-    
-    trn_similarity_scores = {'final_same_cls': [],
-                        'intermediate_same_cls': [],
-                        'final_diff_cls': [],
-                        'intermediate_diff_cls': [],
-                        }   
-    tst_similarity_scores = {'final_same_cls': [],
-                        'intermediate_same_cls': [],
-                        'final_diff_cls': [],
-                        'intermediate_diff_cls': [],
-                        }
+                        'accuracy': [],
+                        'precision': [],
+                        'recall': [],
+                        'F1': [],
+                        'mean_pred': [],
+                        'mean_true': []}
 
+    trn_similarity_scores = {'final_same_cls': [],
+                             'intermediate_same_cls': [],
+                             'final_diff_cls': [],
+                             'intermediate_diff_cls': [],
+                             }
+    tst_similarity_scores = {'final_same_cls': [],
+                             'intermediate_same_cls': [],
+                             'final_diff_cls': [],
+                             'intermediate_diff_cls': [],
+                             }
 
     fig_sim_list = []
     fig_final_list = []
@@ -61,7 +56,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
 
     for i in range(epochs):
         trn_corr = 0
-        trn_y_pred =[]
+        trn_y_pred = []
         trn_y_pred_raw = []
         trn_y_true = []
         trn_sim_scores = []
@@ -70,8 +65,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
         model.train()
 
         # Run the training batches
-        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader), total=len(train_loader)):
-
+        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader),
+                                                                               total=len(train_loader)):
 
             optimizer.zero_grad()
 
@@ -95,7 +90,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
 
-
             batch_corr = (predicted == y_train).sum()
             trn_corr += batch_corr
 
@@ -105,28 +99,29 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
             batch_loss.backward()
             optimizer.step()
             trn_loss.append(batch_loss.cpu().item())
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
         trn_loss = np.array(trn_loss).mean()
 
         # Print epoch results
-        print(f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
-              f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
+        print(
+            f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
+            f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
 
         # Training metrics
         trn_y_pred = np.array(torch.cat(trn_y_pred))
         trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw).detach())
         trn_y_true = np.array(torch.cat(trn_y_true))
-        trn_sim_scores = np.array(torch.cat(trn_sim_scores,dim=1).detach()).transpose(1,0)
+        trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=1).detach()).transpose(1, 0)
         calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
 
-
-
         # Run the testing batches
-        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model, test_criterion, device, probability_treshold)
+        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model,
+                                                                                          test_criterion, device,
+                                                                                          probability_treshold)
         calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
         if tst_metrics_dict['F1'][-1] > best_F1:
@@ -135,15 +130,12 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             best_model = copy.deepcopy(model.state_dict())
             best_state = {'model': best_model,
                           'F1': best_F1,
-                          'epoch': best_epoch,}
-
-
+                          'epoch': best_epoch, }
 
         if gif_path is not None:
-
             fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
             fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
-            title = f'Intermediate similarity score\n Epoch = {i+1}'
+            title = f'Intermediate similarity score\n Epoch = {i + 1}'
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
                                          title)
@@ -151,7 +143,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             plt.close(fig_sim)
             fig_sim_list.append(f'{gif_path}/sim_{i}.png')
 
-            title = f'Final similarity score\n Epoch = {i+1}'
+            title = f'Final similarity score\n Epoch = {i + 1}'
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
                                          title)
@@ -159,11 +151,8 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             fig_final_list.append(f'{gif_path}/final_{i}.png')
             plt.close(fig_final)
 
-
-
         validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
         validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
-
 
     if gif_path is not None:
 
@@ -181,8 +170,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
 
         imageio.mimsave(gif_path + '_final_similarity.gif', images_final, fps=2, loop=1)
 
-
-
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
 
 
@@ -199,13 +186,12 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     sim_scores = []
     tst_loss = []
 
-
     with torch.no_grad():
         for b, ([X0_test, X1_test], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
 
             X0_test = X0_test.to(device)
             X1_test = X1_test.to(device)
-            y_test = y_test.view(-1,1).to(device)
+            y_test = y_test.view(-1, 1).to(device)
 
             if b == (len(loader)):
                 break
@@ -242,10 +228,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
 
 
-
 def validate_similarity_scores(similarity_dict, model, data_loader, device):
-
-
     # Set model to eval
     model.eval()
 
@@ -254,7 +237,6 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
             break
         X0 = X0.to(device)
         X1 = X1.to(device)
-
 
         X0_extend = X0.repeat_interleave(X1.shape[1], dim=1)
 
@@ -269,7 +251,6 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         idx_diff_class = (y_true == 0).nonzero().squeeze()
         idx_same_class = (y_true == 1).nonzero().squeeze()
 
-
         # Get final similarity score output for different class sample
         y_out, sim_score = model(X0, X1)
 
@@ -279,7 +260,6 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         y_out_diff = y_out[idx_diff_class].squeeze()
         final_diff_cls = y_out_diff.mean()
 
-
         # Get intermediate similarity score for different class sample
         y_out_same = sim_score[idx_same_class].squeeze()
         intermediate_same_cls = y_out_same.mean()
@@ -287,9 +267,6 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         y_out_same = y_out[idx_same_class].squeeze().sigmoid()
         final_same_cls = y_out_same.mean()
 
-
-
-        
     similarity_dict['final_same_cls'].append(final_same_cls.item())
     similarity_dict['intermediate_same_cls'].append(intermediate_same_cls.item())
     similarity_dict['final_diff_cls'].append(final_diff_cls.item())
@@ -298,9 +275,8 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
     model.train()
     return
 
+
 def calculate_metrics(metrics_dict, y_pred, y_true, loss):
-
-
     metrics_dict['accuracy'].append(metrics.accuracy_score(y_true, y_pred))
     metrics_dict['precision'].append(metrics.precision_score(y_true=y_true, y_pred=y_pred, zero_division=0))
     metrics_dict['recall'].append(metrics.recall_score(y_true, y_pred, zero_division=0))
@@ -310,24 +286,21 @@ def calculate_metrics(metrics_dict, y_pred, y_true, loss):
     metrics_dict['mean_true'].append(y_true.mean())
 
     metrics_dict['loss'].append(loss.item())
-    
+
     return
 
 
 def extract_features(data_loader, model, classes, device):
-
     class_samples = {key: [] for key in classes}
-    train_rep, train_cls_rep, labels_rep= [], [], []
+    train_rep, train_cls_rep, labels_rep = [], [], []
 
     model.eval()
 
     with torch.no_grad():
         for b, (x, y_train) in tqdm(enumerate(data_loader),
-                                           total=int(len(data_loader.dataset) / data_loader.batch_size)):
-
+                                    total=int(len(data_loader.dataset) / data_loader.batch_size)):
             x = x.to(device)
             y_train = y_train.to(device)
-
 
             # Apply the model
             _, feature_vector = model(x)
@@ -350,15 +323,13 @@ def extract_features(data_loader, model, classes, device):
     labels_rep = labels_rep[sort_idx]
     train_rep = train_rep[sort_idx]
 
-
     return train_rep.detach().cpu(), train_cls_rep.detach().cpu(), labels_rep.detach().cpu()
 
 
 def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n,
                              randomize_samples=True, same_class_reverse=False, balance_same_class_entries=False):
-
     X0, X1, Y = [], [], []
-    base_cls_offset = class_set[0] #classes.index(class_set[0])  # -> gives index of first class of interest
+    base_cls_offset = class_set[0]  # classes.index(class_set[0])  # -> gives index of first class of interest
     for cls in tqdm(class_set):
         tmp_X1 = []
         tmp_Y = []
@@ -378,7 +349,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         # the rest of the classes
         # Finds the most similar classes based on the mean value
         sim = metrics.pairwise.cosine_similarity(data_rep[cls_offset:cls_offset + train_samples_per_cls],
-                                                         data_cls_rep[rest_cls_idx])
+                                                 data_cls_rep[rest_cls_idx])
         # Get indices of a sorted array
         sim_idx = sim.argsort(axis=1)
         # Add offset of the base class
@@ -387,8 +358,8 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         sim_idx[sim_idx >= cls] += 1
 
         # Get the top classes from the sorted similarities
-        sim_idx = sim_idx[:, -top_n:] # -> For each of the train_per_cls samples of a class.
-                                      # Get the top_n similar classes
+        sim_idx = sim_idx[:, -top_n:]  # -> For each of the train_per_cls samples of a class.
+        # Get the top_n similar classes
 
         # Loop over the k most similar classes based on the previous cosine similarity
         for kx in range(-top_n, 0):
@@ -399,7 +370,7 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
                 cls1_offset = np.where(labels_rep == cls1)[0].min()
                 # Find cosine similarity between the two offsets? Gives an array with size [1, train_per_cls]
                 sim1 = metrics.pairwise.cosine_similarity(data_rep[cls_offset + jx:cls_offset + jx + 1],
-                                                                  data_rep[cls1_offset:cls1_offset + train_samples_per_cls])
+                                                          data_rep[cls1_offset:cls1_offset + train_samples_per_cls])
                 # Sort indices and find most similar samples. Remove least similar example to make array of same
                 # length as similarity of same class samples
                 sim1_idx = sim1.argsort(axis=1)[:1, -(train_samples_per_cls - 1):]
@@ -437,4 +408,3 @@ def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, clas
         return X0[shuffle_idx], X1[shuffle_idx], Y[shuffle_idx]
     else:
         return X0, X1, Y
-
