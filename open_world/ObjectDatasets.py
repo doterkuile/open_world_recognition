@@ -128,8 +128,8 @@ class MetaDataset(data_utils.Dataset):
 
     def load_valid_idx(self, data_path):
         data = np.load(data_path)
-        self.valid_X0 = np.repeat(data['valid_X0'], 2, axis=0)  # the validation data is balanced.
-        self.valid_X1 = data['valid_X1'][:, 0, -self.top_k:].reshape(-1, 1, self.top_k)
+        self.valid_X0 = np.repeat(data['valid_X0'], self.top_n+1, axis=0)  # the validation data is balanced.
+        self.valid_X1 = data['valid_X1'][:, :self.top_n, -self.top_k:].reshape(-1, 1, self.top_k)
 
         if self.same_class_reverse:
             valid_X1_sim = data['valid_X1'][:, -1, :self.top_k].reshape(-1, 1, self.top_k)
@@ -138,11 +138,11 @@ class MetaDataset(data_utils.Dataset):
             valid_X1_sim = data['valid_X1'][:, -1, -self.top_k:].reshape(-1, 1, self.top_k)
 
             # Add same class to the non-similar classes
-        self.valid_X1 = np.concatenate([self.valid_X1, valid_X1_sim], axis=1).reshape(-1, self.top_k)
+        self.valid_X1 = np.concatenate([self.valid_X1, valid_X1_sim], axis=0).reshape(-1, self.top_k)
 
 
 
-        self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
+        self.valid_Y = data['valid_Y'][:, -(self.top_n+1):].reshape(-1, )
 
 class ObjectDatasetBase(abc.ABC):
 

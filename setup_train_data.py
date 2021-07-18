@@ -60,7 +60,7 @@ def main():
     tst_samples_per_cls = int(len(tst_data_diff_cls) / len(tst_diff_cls_idx))
     tst_data_rep, tst_cls_rep, tst_labels_rep, tst_X0, tst_X1, tst_Y = dataToL2ACFormat(model, tst_loader_diff_cls,
                                                                                         tst_diff_cls_idx,
-                                                                                        tst_samples_per_cls, 1,
+                                                                                        tst_samples_per_cls, top_n,
                                                                                         device, randomize_samples)
 
     print(f'Save results to {memory_path}_diff_cls.npz')
@@ -74,7 +74,7 @@ def main():
     tst_samples_per_cls = int(len(tst_data_same_cls) / len(tst_same_cls_idx))
     tst_data_rep, tst_cls_rep, tst_labels_rep, tst_X0, tst_X1, tst_Y = dataToL2ACFormat(model, tst_loader_same_cls,
                                                                                         tst_same_cls_idx,
-                                                                                        tst_samples_per_cls, 1,
+                                                                                        tst_samples_per_cls, top_n,
                                                                                         device, randomize_samples)
 
     print(f'Save results to {memory_path}_same_cls.npz')
