@@ -2,6 +2,7 @@ import torch
 import torch.utils.data as data_utils
 from open_world import OpenWorldUtils
 from open_world import ObjectDatasets
+from open_world import loss_functions
 import open_world.meta_learner.meta_learner_utils as meta_utils
 import open_world.plot_utils as plot_utils
 import yaml
@@ -69,7 +70,7 @@ def main():
                                               test_classes, train_samples_per_cls, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
-    test_criterion = criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
+    test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
 
     trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMetaModel(model,

@@ -6,6 +6,7 @@ import yaml
 import os
 import argparse
 import shutil
+from open_world import loss_functions
 
 from open_world import ObjectDatasets
 from open_world import RecognitionModels
@@ -98,6 +99,7 @@ def parseConfigFile(device, multiple_gpu):
 
     criterion = eval('nn.' + config['criterion'])(pos_weight=pos_weight, reduction='mean')
     # criterion = eval('nn.' + config['criterion'])()
+    # criterion = eval(f'loss_functions.{config["criterion"]}')
     optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate, weight_decay=1e-5)
 
     # nn.BCEWithLogitsLoss(weight=)
