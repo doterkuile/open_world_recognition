@@ -56,7 +56,7 @@ class EncoderBase(nn.Module):
 
     def feature_hook(self, layer_name):
         def hook(module, input, output):
-            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+            self.selected_out[layer_name] = output.sigmoid().reshape(input[0].shape[0], -1)
         return hook
 
     def freeze_feature_layers(self, feature_depth):
@@ -266,7 +266,7 @@ class L2AC(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                        nn.Sigmoid(),
                                        )
         return matching_layer
 

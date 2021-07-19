@@ -4,6 +4,9 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from scipy import stats
+from open_world import OpenWorldUtils
+import torch
+from torch.utils.data import DataLoader
 
 
 def plot_losses(train_losses, test_losses, figure_path):
@@ -207,21 +210,73 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
 
+def plot_feature_vector(vector, title,figure_path):
+    fig = plt.figure()
+    y = vector.view(-1).numpy()
+    x = np.arange(0,vector.shape[0])
+
+    data = pd.DataFrame({'indices': x,'values': y})
+
+    ax = sns.barplot(x='indices', y='values', data=data)
+    ax.set_title(title)
+
+    # plt.show()
+    fig.savefig(figure_path, bbox_inches='tight')
+
+    pass
+
 
 def main():
-    fig, axs = plt.subplots(2, 1, figsize=(15, 10))
 
-    data_size = 500
-    k = 5
-    trn_score = np.random.rand(data_size, k)
-    y_trn = np.random.randint(0, 2, (data_size, 1))
-    tst_score = np.random.rand(data_size, k)
-    y_tst = np.random.randint(0, 2, (data_size, 1))
+    multiple_gpu = True if torch.cuda.device_count() > 1 else False
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # Parse config file
+    (train_dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
+        device, multiple_gpu)
 
-    title = 'Matching layer output'
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
-    plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title)
-    plt.show()
+    dataset_name = 'amazon'
+    figure_path = f'figures/{dataset_name}'
+    for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
+
+        optimizer.zero_grad()
+
+        # X0_train = X0_train.to(device)
+        # X1_train = X1_train.to(device)
+        # y_train = y_train.view(-1, 1).to(device)
+
+        # Limit the number of batches
+        if b == 0:
+            break
+
+
+
+    versions = ['same', 'diff']
+
+    for version in versions:
+
+        if version == 'same':
+            idx = (y_train == 1).nonzero()[0]
+        if version == 'diff':
+            idx = (y_train == 0).nonzero()[0]
+
+        x0 = X0_train[idx].view(-1)
+        x1 = X1_train[idx][0][0].view(-1)
+
+        x_abssub = x0.sub((x1))
+        x_abssub.abs_()
+        x_add = x0.add(x1)
+        similarity_vector = torch.cat((x_abssub, x_add))
+        plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}')
+        plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}')
+        plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}')
+        plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}')
+        plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}')
+
+
+
+
     return
 
 
