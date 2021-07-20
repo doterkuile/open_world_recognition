@@ -56,7 +56,13 @@ class EncoderBase(nn.Module):
 
     def feature_hook(self, layer_name):
         def hook(module, input, output):
-            self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+            output = output.reshape(input[0].shape[0], -1)
+            output = torch.transpose(output, 1, 0)
+            test = output.max(dim=0)
+            output = torch.div(output, test.values)
+            self.selected_out[layer_name] = torch.transpose(output, 1, 0)
+
+            # self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
         return hook
 
     def freeze_feature_layers(self, feature_depth):
