@@ -210,7 +210,7 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
     return
 
-def plot_feature_vector(vector, title,figure_path):
+def plot_feature_vector(vector, title,figure_path, y_max):
     fig = plt.figure()
     y = vector.view(-1).numpy()
     x = np.arange(0,vector.shape[0])
@@ -219,6 +219,7 @@ def plot_feature_vector(vector, title,figure_path):
 
     ax = sns.barplot(x='indices', y='values', data=data)
     ax.set_title(title)
+    ax.set_ylim(0, y_max)
 
     # plt.show()
     fig.savefig(figure_path, bbox_inches='tight')
@@ -236,7 +237,7 @@ def main():
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
-    dataset_name = 'amazon'
+    dataset_name = 'cifar'
     figure_path = f'figures/{dataset_name}'
     for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
 
@@ -268,11 +269,11 @@ def main():
         x_abssub.abs_()
         x_add = x0.add(x1)
         similarity_vector = torch.cat((x_abssub, x_add))
-        plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}')
-        plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}')
-        plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}')
-        plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}')
-        plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}')
+        plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}', 4)
+        plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}', 4)
+        plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}', 4)
+        plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
+        plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
 
 
 

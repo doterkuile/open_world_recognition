@@ -27,13 +27,14 @@ import abc
 
 class EncoderBase(nn.Module):
 
-    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers, pretrained=True):
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained=True):
         super().__init__()
         self.model_class = model_class
         self.pretrained = pretrained
         self.feature_layer = feature_layer
         self.selected_out = OrderedDict()
         self.output_classes = train_classes
+        self.feature_scaling = feature_scaling
 
         self.model = self.getModel(pretrained)
 
@@ -54,15 +55,26 @@ class EncoderBase(nn.Module):
     def getModel(self, pretrained):
         pass
 
+    def scale_features(self, feature_vector):
+        if self.feature_scaling == 'sigmoid':
+            out_features = feature_vector.sigmoid().reshape(feature_vector.shape[0], -1)
+        elif self.feature_scaling == 'max_value':
+            out_features = feature_vector.reshape(feature_vector.shape[0], -1)
+            out_features = torch.transpose(out_features, 1, 0)
+            max_values = (out_features.max(dim=0)).values
+            out_features = torch.div(out_features, max_values)
+            out_features = torch.transpose(out_features, 1, 0)
+        else:
+            out_features = feature_vector.reshape(feature_vector.shape[0], -1)
+
+        return out_features
+
     def feature_hook(self, layer_name):
         def hook(module, input, output):
-            output = output.reshape(input[0].shape[0], -1)
-            output = torch.transpose(output, 1, 0)
-            test = output.max(dim=0)
-            output = torch.div(output, test.values)
-            self.selected_out[layer_name] = torch.transpose(output, 1, 0)
 
-            # self.selected_out[layer_name] = output.reshape(input[0].shape[0], -1)
+            out_features = self.scale_features(output)
+            self.selected_out[layer_name] = out_features
+
         return hook
 
     def freeze_feature_layers(self, feature_depth):
@@ -79,8 +91,8 @@ class EncoderBase(nn.Module):
 
 class ResNet50(EncoderBase):
 
-    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
-        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -95,8 +107,9 @@ class ResNet50(EncoderBase):
 
 class ResNet152(EncoderBase):
 
-    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=62, pretrained=True):
-        super().__init__(model_class, train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
+
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
 
@@ -110,8 +123,8 @@ class ResNet152(EncoderBase):
 
 class AlexNet(EncoderBase):
 
-    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
-        super().__init__(model_class, train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
@@ -126,8 +139,8 @@ class AlexNet(EncoderBase):
 
 class EfficientNet(EncoderBase):
 
-    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers=8, pretrained=True):
-        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers, pretrained)
+    def __init__(self, model_class, train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained=True):
+        super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 

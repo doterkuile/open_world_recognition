@@ -16,6 +16,10 @@ class_ratio:
   encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
+
+feature_scaling: normal #sigmoid max_value
+
+
 train_samples_per_cls: 500
 randomize_samples: True
 

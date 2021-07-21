@@ -7,6 +7,7 @@ dataset_class: TinyImageNetDataset
 image_resize: 224
 model_class: ResNet50
 feature_layer: avgpool
+feature_scaling: normal #sigmoid max_value
 unfreeze_layer: 62    #62 62 6 8
 pretrained: True
 
@@ -16,6 +17,8 @@ class_ratio:
   encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
+
+
 train_samples_per_cls: 500
 randomize_samples: True
 

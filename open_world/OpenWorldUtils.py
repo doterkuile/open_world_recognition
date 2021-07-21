@@ -74,10 +74,11 @@ def parseConfigFile(device, multiple_gpu):
     image_resize = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
     test_class_selection = config['test_class_selection']
-    dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_{test_class_selection}.npz'
+    feature_scaling = config['feature_scaling']
+    dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_{test_class_selection}.npz'
     dataset_class = config['dataset_class']
     enable_training = True
-    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
+    dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n   , top_k, train_classes, train_samples_per_cls
                                                       ,enable_training,  same_class_reverse, same_class_extend_entries)
 
     features_size = len(dataset.trn_memory[0])
