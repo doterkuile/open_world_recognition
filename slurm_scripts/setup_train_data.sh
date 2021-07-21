@@ -34,14 +34,13 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=image_resize
-array_1=(224)	
-#array_1=(4 4 4 4)
+array_1=(224 224 224)	
 var_2=unfreeze_layer
-array_2=(62)
-#array_2=(avgpool avgpool features _avg_pooling)
+array_2=(62 62 62)
 var_3=top_n
-array_3=(1)
-#array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
+array_3=(1 1 1)
+var_4=feature_scaling
+array_4=(normal sigmoid max_value)
 len=${#array_1[@]}
 
 
