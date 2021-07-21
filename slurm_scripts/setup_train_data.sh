@@ -61,10 +61,13 @@ do
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
+    echo "$var_4 = ${array_4[$i]}"
+
 
 	sed -i "s/$var_1:.*/$var_1: ${array_1[$i]}/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 
 
 	python $python_script_1 $config_file
