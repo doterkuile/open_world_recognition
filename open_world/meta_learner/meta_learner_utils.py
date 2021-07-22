@@ -54,6 +54,19 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
                   'F1': best_F1,
                   'epoch': best_epoch, }
 
+    # Calculate metrics before training has started
+    trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw = validate_model(train_loader, model,
+                                                                                      criterion, device,
+                                                                                      probability_treshold)
+    calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
+
+    # Calculate metrics before training has started
+    tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model,
+                                                                                      test_criterion, device,
+                                                                                      probability_treshold)
+    calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
+
+
     for i in range(epochs):
         trn_corr = 0
         trn_y_pred = []
