@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=20gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=15gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
 #SBATCH --time=02:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
@@ -34,13 +34,17 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=image_resize
-array_1=(224 224 224)	
+array_1=(224 224 224 224)	
 var_2=unfreeze_layer
-array_2=(62 62 62)
+array_2=(62 62 10 30)
 var_3=top_n
-array_3=(1 1 1)
+array_3=(9 9 9 9)
 var_4=feature_scaling
-array_4=(normal sigmoid max_value)
+array_4=(max_value max_value max_value max_value)
+var_5=l2ac_train
+array_5=(20 20 20 20)
+var_6=model_class
+array_6=(ResNet50 ResNet152 AlexNet EfficientNet)
 len=${#array_1[@]}
 
 
@@ -62,12 +66,17 @@ do
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
     echo "$var_4 = ${array_4[$i]}"
+    echo "$var_5 = ${array_5[$i]}"
+    echo "$var_6 = ${array_6[$i]}"
+
 
 
 	sed -i "s/$var_1:.*/$var_1: ${array_1[$i]}/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+    sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
+    sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
 
 
 	python $python_script_1 $config_file

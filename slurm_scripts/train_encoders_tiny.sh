@@ -26,23 +26,23 @@ module load miniconda/3.7
 
 # configuration variables
 python_script=train_encoder.py
-config_file=encoder_train_tiny.yaml
+base_config_file=encoder_train_tiny.yaml
 conda_env=l2acenv
 
 
 
 # Loop variables
 var_1=name
-array_1=(e_t_0005 e_t_0006 e_t_0007 e_t_0008)	
+array_1=(e_t_0001 e_t_0002 e_t_0003e_t_0004)
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
-array_2=(ResNet50 ResNet50 ResNet50 ResNet50)
-var_3=feature_layer 
-array_3=(avgpool avgpool avgpool avgpool)
+array_2=(ResNet50 ResNet152 AlexNet EfficientNet)
+var_3=feature_layer
+array_3=(avgpool avgpool features _avg_pooling)
 var_4=image_resize
 array_4=(224 224 224 224)
 var_5=unfreeze_layer
-array_5=(2 62 176 320) #176 320)
+array_5=(62 62 10 30) #176 320)
 len=${#array_1[@]}
 
 
@@ -68,7 +68,7 @@ do
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
-        echo "$var_3 = ${array_3[$i]}"
+    echo "$var_3 = ${array_3[$i]}"
 	echo "$var_4 = ${array_4[$i]}"
 	echo "$var_5 = ${array_5[$i]}"
 
@@ -76,7 +76,7 @@ do
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
-        sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+    sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 
 

@@ -7,6 +7,7 @@ dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 224
 model_class: EfficientNet
 feature_layer: _avg_pooling
+feature_scaling: max_value #sigmoid max_value
 unfreeze_layer: 330
 pretrained: True
 
@@ -19,7 +20,7 @@ epochs: 50
   
 ## L2AC parameters
 class_ratio: 
-  encoder: 100
+  encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
 
