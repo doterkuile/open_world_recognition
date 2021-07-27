@@ -106,15 +106,20 @@ def main():
             else:
                 param.requires_grad = True
 
-            # Plot metrics
-            plot_utils.plot_losses(trn_metrics_ml['loss'], tst_metrics_ml['loss'], ml_figure_path)
-            plot_utils.plot_accuracy(trn_metrics_ml['accuracy'], tst_metrics_ml['accuracy'], ml_figure_path)
-            plot_utils.plot_precision(trn_metrics_ml['precision'], tst_metrics_ml['precision'], ml_figure_path)
-            plot_utils.plot_recall(trn_metrics_ml['recall'], tst_metrics_ml['recall'], ml_figure_path)
-            plot_utils.plot_F1(trn_metrics_ml['F1'], tst_metrics_ml['F1'], ml_figure_path)
-            plot_utils.plot_mean_prediction(trn_metrics_ml['mean_pred'], trn_metrics_ml['mean_true'],
-                                            tst_metrics_ml['mean_pred'],
-                                            tst_metrics_ml['mean_true'], ml_figure_path)
+
+        optimizer = eval('torch.optim.' + config['optimizer'])(
+            filter(lambda p: p.requires_grad, model.parameters()),
+            lr=learning_rate, weight_decay=1e-5)
+
+        # Plot metrics
+        plot_utils.plot_losses(trn_metrics_ml['loss'], tst_metrics_ml['loss'], ml_figure_path)
+        plot_utils.plot_accuracy(trn_metrics_ml['accuracy'], tst_metrics_ml['accuracy'], ml_figure_path)
+        plot_utils.plot_precision(trn_metrics_ml['precision'], tst_metrics_ml['precision'], ml_figure_path)
+        plot_utils.plot_recall(trn_metrics_ml['recall'], tst_metrics_ml['recall'], ml_figure_path)
+        plot_utils.plot_F1(trn_metrics_ml['F1'], tst_metrics_ml['F1'], ml_figure_path)
+        plot_utils.plot_mean_prediction(trn_metrics_ml['mean_pred'], trn_metrics_ml['mean_true'],
+                                        tst_metrics_ml['mean_pred'],
+                                        tst_metrics_ml['mean_true'], ml_figure_path)
 
 
 
