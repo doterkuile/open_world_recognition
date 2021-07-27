@@ -54,6 +54,7 @@ def main():
         os.makedirs(gif_path)
 
     figure_path = exp_folder + '/' + exp_name
+
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
@@ -71,6 +72,37 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
     test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
+
+    two_step_training = False
+
+
+    if two_step_training:
+
+        param_keys = 'matching_layer'
+        for name , param in model.named_parameters():
+            if 'matching_layer' not in name:
+                param.requires_grad = False
+        optimizer = eval('torch.optim.' + config['optimizer'])(filter(lambda p: p.requires_grad, model.parameters()),
+                                                               lr=learning_rate, weight_decay=1e-5)
+
+        trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMatchingLayer(
+            model,
+            train_loader,
+            test_loader,
+            epochs,
+            criterion,
+            test_criterion,
+            optimizer,
+            device,
+            probability_threshold,
+            gif_path)
+
+        for name, param in model.named_parameters():
+            if 'matching_layer' in name:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
+
 
 
     trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMetaModel(model,

@@ -11,7 +11,7 @@ unfreeze_layer: 62    #62 62 6 8
 pretrained: True
 
 ## L2AC parameters
-top_n: 1
+top_n: 4
 class_ratio: 
   encoder_train: 100
   l2ac_train: 20

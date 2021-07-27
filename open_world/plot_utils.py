@@ -7,6 +7,8 @@ from scipy import stats
 from open_world import OpenWorldUtils
 import torch
 from torch.utils.data import DataLoader
+import imageio
+import os
 
 
 def plot_losses(train_losses, test_losses, figure_path):
@@ -109,6 +111,39 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     plt.legend()
     fig.savefig(figure_path + '_final_similarity')
     return
+
+def create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true, trn_y_raw, tst_y_raw, epoch, gif_path):
+    fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
+    fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
+    title = f'Intermediate similarity score\n Epoch = {epoch + 1}'
+    # Make gif of similarity function score
+    plot_prob_density(fig_sim, axs_sim, trn_ml_out, trn_y_true, tst_ml_out, tst_y_true,
+                                 title)
+    fig_sim.savefig(f'{gif_path}/sim_{epoch}.png')
+    plt.close(fig_sim)
+    fig_ml_name = f'{gif_path}/sim_{epoch}.png'
+
+    title = f'Final similarity score\n Epoch = {epoch + 1}'
+    # Make gif of similarity function score
+    plot_prob_density(fig_final, axs_final, trn_y_raw, trn_y_true, tst_y_raw, tst_y_true,
+                                 title)
+    fig_final.savefig(f'{gif_path}/final_{epoch}.png')
+    fig_al_name = f'{gif_path}/final_{epoch}.png'
+    plt.close(fig_final)
+
+    return fig_ml_name, fig_al_name
+
+
+def save_gif_file(fig_list, gif_path):
+    images_sim = []
+    for filename in fig_list:
+        images_sim.append(imageio.imread(filename))
+        os.remove(filename)
+
+    imageio.mimsave(gif_path, images_sim, fps=2, loop=1)
+
+
+
 
 
 def plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title, figure_path=None):

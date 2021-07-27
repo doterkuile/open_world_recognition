@@ -11,7 +11,6 @@ from celluloid import Camera
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import os
-import imageio
 import copy
 
 
@@ -44,35 +43,30 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
                              'intermediate_diff_cls': [],
                              }
 
-    fig_sim_list = []
-    fig_final_list = []
+    ml_fig_list = []
+    al_fig_list = []
 
-    best_model = copy.deepcopy(model.state_dict())
-    best_F1 = -2.0
-    best_epoch = 0
-    best_state = {'model': best_model,
-                  'F1': best_F1,
-                  'epoch': best_epoch, }
+    best_state = {'model': copy.deepcopy(model.state_dict()),
+                  'F1': -1.0,
+                  'epoch': 0, }
 
     # Calculate metrics before training has started
-    trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw = validate_model(train_loader, model,
-                                                                                      criterion, device,
-                                                                                      probability_treshold)
+    trn_y_pred, trn_y_true, trn_loss, trn_ml_out, trn_y_pred_raw = validate_model(train_loader, model,
+                                                                                  criterion, device,
+                                                                                  probability_treshold)
     calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
 
     # Calculate metrics before training has started
-    tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model,
-                                                                                      test_criterion, device,
-                                                                                      probability_treshold)
+    tst_y_pred, tst_y_true, tst_loss, tst_ml_out, tst_y_pred_raw = validate_model(test_loader, model,
+                                                                                  test_criterion, device,
+                                                                                  probability_treshold)
     calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
-
-    for i in range(epochs):
-        trn_corr = 0
+    for epoch in range(epochs):
         trn_y_pred = []
-        trn_y_pred_raw = []
+        trn_y_raw = []
         trn_y_true = []
-        trn_sim_scores = []
+        trn_ml_out = []
         trn_loss = []
 
         model.train()
@@ -80,8 +74,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
         # Run the training batches
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader),
                                                                                total=len(train_loader)):
-
-            optimizer.zero_grad()
 
             X0_train = X0_train.to(device)
             X1_train = X1_train.to(device)
@@ -91,154 +83,126 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             if b == (len(train_loader)):
                 break
             b += 1
-
-            # Apply the model
-            y_out, sim_score = model(X0_train, X1_train)
-
-            batch_loss = criterion(y_out, y_train)
-
-            # Apply probability threshold
-            predicted = y_out.detach().clone().sigmoid()
-
-            predicted[predicted <= probability_treshold] = 0
-            predicted[predicted > probability_treshold] = 1
-
-            batch_corr = (predicted == y_train).sum()
-            trn_corr += batch_corr
-
+            y_pred, matching_layer_output, batch_loss, predicted = train_batch_step(X0_train, X1_train, y_train,
+                                                                                    model, criterion,
+                                                                                    probability_treshold, optimizer)
             trn_y_pred.extend(predicted.cpu())
             trn_y_true.extend(y_train.cpu())
-            trn_y_pred_raw.extend(y_out.sigmoid().cpu())
-            trn_sim_scores.extend(sim_score.cpu())
-
-            # Update parameters
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
-            batch_loss.backward()
-            optimizer.step()
+            trn_y_raw.extend(y_pred.sigmoid().cpu())
+            trn_ml_out.extend(matching_layer_output.cpu())
             trn_loss.append(batch_loss.cpu().item())
 
         trn_loss = np.array(trn_loss).mean()
 
-        # Print epoch results
-        print(
-            f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
-            f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b):7.3f}%')
-
         # Training metrics
         trn_y_pred = np.array(torch.cat(trn_y_pred))
-        trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw).detach())
+        trn_y_raw = np.array(torch.cat(trn_y_raw).detach())
         trn_y_true = np.array(torch.cat(trn_y_true))
-        trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=1).detach()).transpose(1, 0)
+        trn_ml_out = np.array(torch.cat(trn_ml_out, dim=1).detach()).transpose(1, 0)
         calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
 
+        trn_corr = (trn_y_true == trn_y_pred).nonzero()[0].shape[0]
+
+        # Print epoch results
+        print(
+            f'epoch: {epoch:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader.dataset)}]'
+            f'  loss: {trn_loss:10.8f} accuracy: {trn_corr * 100 / (train_loader.batch_size * b):7.3f}%')
+
         # Run the testing batches
-        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validate_model(test_loader, model,
-                                                                                          test_criterion, device,
-                                                                                          probability_treshold)
+        tst_y_pred, tst_y_true, tst_loss, tst_ml_out, tst_y_raw = validate_model(test_loader, model,
+                                                                                 test_criterion, device,
+                                                                                 probability_treshold)
         calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
 
-        if tst_metrics_dict['F1'][-1] > best_F1:
-            best_F1 = tst_metrics_dict['F1'][-1]
-            best_epoch = i + 1
-            best_model = copy.deepcopy(model.state_dict())
-            best_state = {'model': best_model,
-                          'F1': best_F1,
-                          'epoch': best_epoch, }
+        if tst_metrics_dict['F1'][-1] > best_state['F1']:
+            best_state['F1'] = tst_metrics_dict['F1'][-1]
+            best_state['epoch'] = epoch + 1
+            best_state['model'] = copy.deepcopy(model.state_dict())
 
         if gif_path is not None:
-            fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
-            fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
-            title = f'Intermediate similarity score\n Epoch = {i + 1}'
-            # Make gif of similarity function score
-            plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
-                                         title)
-            fig_sim.savefig(f'{gif_path}/sim_{i}.png')
-            plt.close(fig_sim)
-            fig_sim_list.append(f'{gif_path}/sim_{i}.png')
-
-            title = f'Final similarity score\n Epoch = {i + 1}'
-            # Make gif of similarity function score
-            plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
-                                         title)
-            fig_final.savefig(f'{gif_path}/final_{i}.png')
-            fig_final_list.append(f'{gif_path}/final_{i}.png')
-            plt.close(fig_final)
+            ml_image_name, al_image_name = plot_utils.create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true,
+                                                                       trn_y_raw, tst_y_raw, epoch, gif_path)
+            ml_fig_list.append(ml_image_name)
+            al_fig_list.append(al_image_name)
 
         validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
         validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
 
     if gif_path is not None:
-
-        images_sim = []
-        for filename in fig_sim_list:
-            images_sim.append(imageio.imread(filename))
-            os.remove(filename)
-
-        imageio.mimsave(gif_path + '_intermediate_similarity.gif', images_sim, fps=2, loop=1)
-
-        images_final = []
-        for filename in fig_final_list:
-            images_final.append(imageio.imread(filename))
-            os.remove(filename)
-
-        imageio.mimsave(gif_path + '_final_similarity.gif', images_final, fps=2, loop=1)
+        ml_gif_path = f"{gif_path}_matching_layer.gif"
+        plot_utils.save_gif_file(ml_fig_list, ml_gif_path)
+        al_gif_path = f"{gif_path}_final_similarity.gif"
+        plot_utils.save_gif_file(al_fig_list, al_gif_path)
 
     return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
 
 
-def validate_model(loader, model, criterion, device, probability_threshold):
-    num_correct = 0
-    num_samples = 0
+def train_batch_step(X0, X1, y_true, model, criterion, threshold, optimizer=None):
+    if optimizer is not None:
+        optimizer.zero_grad()
 
+    # Apply the model
+    y_pred, matching_layer_output = model(X0, X1)
+
+    batch_loss = criterion(y_pred, y_true)
+
+    # Apply probability threshold
+    predicted = y_pred.detach().clone().sigmoid()
+
+    predicted[predicted <= threshold] = 0
+    predicted[predicted > threshold] = 1
+
+    # Update parameters
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
+    if optimizer is not None:
+        batch_loss.backward()
+        optimizer.step()
+
+    return y_pred, matching_layer_output, batch_loss, predicted
+
+
+def validate_model(loader, model, criterion, device, probability_threshold):
     # Set model to eval
     model.eval()
 
     y_true = []
     y_pred = []
     y_pred_raw = []
-    sim_scores = []
+    ml_out = []
     tst_loss = []
 
     with torch.no_grad():
-        for b, ([X0_test, X1_test], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
+        for b, ([X0, X1], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
 
-            X0_test = X0_test.to(device)
-            X1_test = X1_test.to(device)
+            X0 = X0.to(device)
+            X1 = X1.to(device)
             y_test = y_test.view(-1, 1).to(device)
 
             if b == (len(loader)):
                 break
-
-            # Apply the model
-            y_val, sim_score = model(X0_test, X1_test)
-
-            batch_loss = criterion(y_val, y_test)
-            tst_loss.append(batch_loss.cpu())
-
-            predicted = y_val.sigmoid()
-            predicted[predicted <= probability_threshold] = 0
-            predicted[predicted > probability_threshold] = 1
-
+            y_out, matching_layer_output, batch_loss, predicted = train_batch_step(X0, X1, y_test,
+                                                                                   model, criterion,
+                                                                                   probability_threshold)
             y_pred.extend(predicted.cpu())
-            y_pred_raw.extend(y_val.sigmoid().cpu())
+            y_pred_raw.extend(y_out.sigmoid().cpu())
             y_true.extend(y_test.cpu())
-            sim_scores.extend(sim_score.cpu())
-
-            num_correct += (predicted == y_test).sum()
-            num_samples += predicted.size(0)
+            ml_out.extend(matching_layer_output.cpu())
+            tst_loss.append(batch_loss.cpu())
             b += 1
 
     # Toggle model back to train
     model.train()
     tst_loss = np.array(torch.stack(tst_loss)).mean()
-    test_acc = num_correct.item() * 100 / (num_samples)
-    print(f'test accuracy: {test_acc:7.3f}%  test loss: {tst_loss:10.8f} ')
 
     y_pred = np.array(torch.cat(y_pred))
     y_pred_raw = np.array(torch.cat(y_pred_raw))
     y_true = np.array(torch.cat(y_true))
-    sim_scores = np.array(torch.cat(sim_scores, dim=1).detach()).transpose(1, 0)
-    return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
+    ml_out = np.array(torch.cat(ml_out, dim=1).detach()).transpose(1, 0)
+
+    test_acc = (y_true == y_pred).nonzero()[0].shape[0] * 100 / (len(loader.dataset))
+    print(f'test accuracy: {test_acc:7.3f}%  test loss: {tst_loss:10.8f} ')
+
+    return y_pred, y_true, tst_loss, ml_out, y_pred_raw
 
 
 def validate_similarity_scores(similarity_dict, model, data_loader, device):
@@ -287,6 +251,231 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
 
     model.train()
     return
+
+
+def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device,
+                       probability_treshold, gif_path=None):
+    trn_metrics_dict = {'loss': [],
+                        'accuracy': [],
+                        'precision': [],
+                        'recall': [],
+                        'F1': [],
+                        'mean_pred': [],
+                        'mean_true': []}
+
+    tst_metrics_dict = {'loss': [],
+                        'accuracy': [],
+                        'precision': [],
+                        'recall': [],
+                        'F1': [],
+                        'mean_pred': [],
+                        'mean_true': []}
+
+    trn_similarity_scores = {'final_same_cls': [],
+                             'intermediate_same_cls': [],
+                             'final_diff_cls': [],
+                             'intermediate_diff_cls': [],
+                             }
+    tst_similarity_scores = {'final_same_cls': [],
+                             'intermediate_same_cls': [],
+                             'final_diff_cls': [],
+                             'intermediate_diff_cls': [],
+                             }
+
+    fig_sim_list = []
+    fig_final_list = []
+
+    best_model = copy.deepcopy(model.state_dict())
+    best_F1 = -2.0
+    best_epoch = 0
+    best_state = {'model': best_model,
+                  'F1': best_F1,
+                  'epoch': best_epoch, }
+
+    # Calculate metrics before training has started
+    trn_y_pred, trn_y_true, trn_loss, trn_sim_scores, trn_y_pred_raw = validateMatchingLayer(train_loader, model,
+                                                                                             criterion, device,
+                                                                                             probability_treshold)
+    calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
+
+    # Calculate metrics before training has started
+    tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validateMatchingLayer(test_loader, model,
+                                                                                             test_criterion, device,
+                                                                                             probability_treshold)
+    calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
+
+    for i in range(epochs):
+        trn_corr = 0
+        trn_y_pred = []
+        trn_y_pred_raw = []
+        trn_y_true = []
+        trn_sim_scores = []
+        trn_loss = []
+
+        model.train()
+
+        # Run the training batches
+        for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader),
+                                                                               total=len(train_loader)):
+
+            optimizer.zero_grad()
+
+            X0_train = X0_train.to(device)
+            X1_train = X1_train.to(device)
+            y_train = y_train.view(-1, 1).to(device)
+            y_train = y_train.repeat_interleave(X1_train.shape[1], dim=1)
+
+            # Limit the number of batches
+            if b == (len(train_loader)):
+                break
+            b += 1
+
+            # Apply the model
+            _, sim_score = model(X0_train, X1_train)
+            y_train = y_train.view(-1, 1)
+            sim_score = sim_score.view(-1, 1)
+
+            batch_loss = criterion(sim_score, y_train)
+
+            # Apply probability threshold
+            predicted = sim_score.detach().clone().sigmoid()
+
+            predicted[predicted <= probability_treshold] = 0
+            predicted[predicted > probability_treshold] = 1
+
+            batch_corr = (predicted == y_train).sum()
+            trn_corr += batch_corr
+
+            trn_y_pred.extend(predicted.cpu())
+            trn_y_true.extend(y_train.cpu())
+            trn_y_pred_raw.extend(sim_score.sigmoid().cpu())
+            trn_sim_scores.extend(sim_score.cpu())
+
+            # Update parameters
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
+            batch_loss.backward()
+            optimizer.step()
+            trn_loss.append(batch_loss.cpu().item())
+
+        trn_loss = np.array(trn_loss).mean()
+
+        # Print epoch results
+        print(
+            f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
+            f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b * X1_train.shape[1]):7.3f}%')
+
+        # Training metrics
+        trn_y_pred = np.array(torch.cat(trn_y_pred))
+        trn_y_pred_raw = np.array(torch.cat(trn_y_pred_raw).detach())
+        trn_y_true = np.array(torch.cat(trn_y_true))
+        trn_sim_scores = np.array(torch.cat(trn_sim_scores, dim=0).detach())
+
+        calculate_metrics(trn_metrics_dict, trn_y_pred, trn_y_true, trn_loss)
+
+        # Run the testing batches
+        tst_y_pred, tst_y_true, tst_loss, tst_sim_scores, tst_y_pred_raw = validateMatchingLayer(test_loader, model,
+                                                                                                 test_criterion, device,
+                                                                                                 probability_treshold)
+        calculate_metrics(tst_metrics_dict, tst_y_pred, tst_y_true, tst_loss)
+
+        if tst_metrics_dict['F1'][-1] > best_F1:
+            best_F1 = tst_metrics_dict['F1'][-1]
+            best_epoch = i + 1
+            best_model = copy.deepcopy(model.state_dict())
+            best_state = {'model': best_model,
+                          'F1': best_F1,
+                          'epoch': best_epoch, }
+
+        if gif_path is not None:
+            fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
+            fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
+            title = f'Intermediate similarity score\n Epoch = {i + 1}'
+            # Make gif of similarity function score
+            plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
+                                         title)
+            fig_sim.savefig(f'{gif_path}/sim_{i}.png')
+            plt.close(fig_sim)
+            fig_sim_list.append(f'{gif_path}/sim_{i}.png')
+
+            title = f'Matching layer output\n Epoch = {i + 1}'
+            # Make gif of similarity function score
+            plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
+                                         title)
+            fig_final.savefig(f'{gif_path}/matching_only_{i}.png')
+            fig_final_list.append(f'{gif_path}/matching_only_{i}.png')
+            plt.close(fig_final)
+
+        validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
+        validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
+
+    if gif_path is not None:
+
+        images_final = []
+        for filename in fig_final_list:
+            images_final.append(imageio.imread(filename))
+            os.remove(filename)
+
+        imageio.mimsave(gif_path + '_matching_layer_only.gif', images_final, fps=2, loop=1)
+
+    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
+
+
+def validateMatchingLayer(loader, model, criterion, device, probability_threshold):
+    num_correct = 0
+    num_samples = 0
+
+    # Set model to eval
+    model.eval()
+
+    y_true = []
+    y_pred = []
+    y_pred_raw = []
+    sim_scores = []
+    tst_loss = []
+
+    with torch.no_grad():
+        for b, ([X0_test, X1_test], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
+
+            X0_test = X0_test.to(device)
+            X1_test = X1_test.to(device)
+            y_test = y_test.view(-1, 1).to(device)
+            y_test = y_test.repeat_interleave(X1_test.shape[1], dim=1)
+
+            if b == (len(loader)):
+                break
+
+            # Apply the model
+            _, sim_score = model(X0_test, X1_test)
+            y_test = y_test.view(-1, 1)
+            sim_score = sim_score.view(-1, 1)
+
+            batch_loss = criterion(sim_score, y_test)
+            tst_loss.append(batch_loss.cpu())
+
+            predicted = sim_score.sigmoid()
+            predicted[predicted <= probability_threshold] = 0
+            predicted[predicted > probability_threshold] = 1
+
+            y_pred.extend(predicted.cpu())
+            y_pred_raw.extend(sim_score.sigmoid().cpu())
+            y_true.extend(y_test.cpu())
+            sim_scores.extend(sim_score.cpu())
+
+            num_correct += (predicted == y_test).sum()
+            num_samples += predicted.size(0)
+            b += 1
+
+    # Toggle model back to train
+    model.train()
+    tst_loss = np.array(torch.stack(tst_loss)).mean()
+    test_acc = num_correct.item() * 100 / (num_samples)
+    print(f'test accuracy: {test_acc:7.3f}%  test loss: {tst_loss:10.8f} ')
+
+    y_pred = np.array(torch.cat(y_pred))
+    y_pred_raw = np.array(torch.cat(y_pred_raw))
+    y_true = np.array(torch.cat(y_true))
+    sim_scores = np.array(torch.cat(sim_scores, dim=0).detach())
+    return y_pred, y_true, tst_loss, sim_scores, y_pred_raw
 
 
 def calculate_metrics(metrics_dict, y_pred, y_true, loss):

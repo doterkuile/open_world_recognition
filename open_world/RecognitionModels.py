@@ -285,7 +285,7 @@ class L2AC(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                        nn.Sigmoid(),
+                                       nn.Sigmoid(),
                                        )
         return matching_layer
 

@@ -1,8 +1,8 @@
 ## Experiment
-name: '0004'
+name: '0006'
 
 ## Paths and classes
-dataset_path: CIFAR100
+dataset_path: TinyImageNet
 dataset_class: MetaDataset
 model_class: L2AC
 encoder: ResNet50
@@ -19,15 +19,15 @@ epochs: 20
 
 ## L2AC parametersd
 top_k: 5
-top_n: 1
+top_n: 4
 
 class_ratio: 
-  encoder_train: 50
+  encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
 
 test_class_selection: same_cls
-feature_scaling: max_value #sigmoid max_value
+feature_scaling: normal #sigmoid max_value
 
 train_samples_per_cls: 500
 probability_threshold: 0.5
