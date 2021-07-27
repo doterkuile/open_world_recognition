@@ -5,10 +5,10 @@ name: 'e_t_0012'
 dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
 dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 224
-model_class: EfficientNet
-feature_layer: _avg_pooling
+model_class: AlexNet
+feature_layer: features
 feature_scaling: max_value #sigmoid max_value
-unfreeze_layer: 330
+unfreeze_layer: 10
 pretrained: True
 
 ## Training hyperparameters

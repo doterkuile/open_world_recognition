@@ -4,7 +4,7 @@ name: 'e_c_0004'
 ## Paths and classes
 dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
 dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
-image_resize: 64
+image_resize: 224
 model_class: EfficientNet
 feature_layer: _avg_pooling
 feature_scaling: max_value #sigmoid max_value

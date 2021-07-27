@@ -187,7 +187,7 @@ class AlexNet_modified(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), 256 * 1 * 1)
+        x = x.view(x.size(0), 256 * 6 * 6)
         x = self.classifier(x)
         return x
 
@@ -205,7 +205,7 @@ def alexnet(pretrained=False, out_classes=200, **kwargs):
     model = AlexNet_modified(**kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['alexnet']))
-    model.classifier[1] = nn.Linear(256 * 1 * 1, 4096)
+    model.classifier[1] = nn.Linear(256 * 6 * 6, 4096)
     model.classifier[6] = nn.Linear(4096, out_classes)
     return model
 
