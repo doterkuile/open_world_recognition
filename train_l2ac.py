@@ -53,8 +53,11 @@ def main():
     if not os.path.exists(gif_path):
         os.makedirs(gif_path)
 
-    figure_path = exp_folder + '/' + exp_name
+    if not os.path.exists(exp_folder + '/matching_layer'):
+        os.makedirs(exp_folder + '/matching_layer')
 
+    figure_path = exp_folder + '/' + exp_name
+    ml_figure_path = exp_folder + '/matching_layer/' + exp_name
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     sim_path = exp_folder + '/' + exp_name + '_similarities.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
@@ -73,7 +76,7 @@ def main():
 
     test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
-    two_step_training = False
+    two_step_training = config['two_step_training']
 
 
     if two_step_training:
@@ -85,7 +88,7 @@ def main():
         optimizer = eval('torch.optim.' + config['optimizer'])(filter(lambda p: p.requires_grad, model.parameters()),
                                                                lr=learning_rate, weight_decay=1e-5)
 
-        trn_metrics, trn_similarity_scores, tst_metrics, tst_similarity_scores, best_state, = meta_utils.trainMatchingLayer(
+        trn_metrics_ml, trn_similarity_scores_ml, tst_metrics_ml, tst_similarity_scores_ml, best_state_ml, = meta_utils.trainMatchingLayer(
             model,
             train_loader,
             test_loader,
@@ -102,6 +105,16 @@ def main():
                 param.requires_grad = False
             else:
                 param.requires_grad = True
+
+            # Plot metrics
+            plot_utils.plot_losses(trn_metrics_ml['loss'], tst_metrics_ml['loss'], ml_figure_path)
+            plot_utils.plot_accuracy(trn_metrics_ml['accuracy'], tst_metrics_ml['accuracy'], ml_figure_path)
+            plot_utils.plot_precision(trn_metrics_ml['precision'], tst_metrics_ml['precision'], ml_figure_path)
+            plot_utils.plot_recall(trn_metrics_ml['recall'], tst_metrics_ml['recall'], ml_figure_path)
+            plot_utils.plot_F1(trn_metrics_ml['F1'], tst_metrics_ml['F1'], ml_figure_path)
+            plot_utils.plot_mean_prediction(trn_metrics_ml['mean_pred'], trn_metrics_ml['mean_true'],
+                                            tst_metrics_ml['mean_pred'],
+                                            tst_metrics_ml['mean_true'], ml_figure_path)
 
 
 

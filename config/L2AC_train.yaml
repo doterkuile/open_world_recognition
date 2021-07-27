@@ -1,5 +1,5 @@
 ## Experiment
-name: '0006'
+name: '0007'
 
 ## Paths and classes
 dataset_path: TinyImageNet
@@ -15,7 +15,7 @@ criterion: BCEWithLogitsLoss
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 20
+epochs: 100
 
 ## L2AC parametersd
 top_k: 5
@@ -28,6 +28,7 @@ class_ratio:
 
 test_class_selection: same_cls
 feature_scaling: normal #sigmoid max_value
+two_step_training: True
 
 train_samples_per_cls: 500
 probability_threshold: 0.5

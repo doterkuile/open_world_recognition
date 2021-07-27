@@ -20,6 +20,7 @@ def plot_losses(train_losses, test_losses, figure_path):
     plt.title('Losses')
     plt.legend()
     fig.savefig(figure_path + '_losses')
+    plt.close(fig)
     return
 
 
@@ -32,6 +33,7 @@ def plot_accuracy(train_acc, test_acc, figure_path):
     plt.title('Accuracy')
     plt.legend()
     fig.savefig(figure_path + '_accuracy')
+    plt.close(fig)
     return
 
 
@@ -44,6 +46,7 @@ def plot_precision(train_precision, test_precision, figure_path):
     plt.title('Precision')
     plt.legend()
     fig.savefig(figure_path + '_precision')
+    plt.close(fig)
     return
 
 
@@ -56,6 +59,7 @@ def plot_recall(train_recall, test_recall, figure_path):
     plt.title('Recall')
     plt.legend()
     fig.savefig(figure_path + '_recall')
+    plt.close(fig)
     return
 
 
@@ -68,6 +72,7 @@ def plot_F1(train_F1, test_F1, figure_path):
     plt.title('F1 ')
     plt.legend()
     fig.savefig(figure_path + '_F1')
+    plt.close(fig)
     return
 
 
@@ -82,6 +87,8 @@ def plot_mean_prediction(trn_pred, trn_true, tst_pred, tst_true, figure_path):
     plt.title('Mean prediction score')
     plt.legend()
     fig.savefig(figure_path + '_mean_pred')
+    plt.close(fig)
+
     return
 
 
@@ -96,6 +103,7 @@ def plot_intermediate_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_d
     plt.title('Intermediate similarity_score')
     plt.legend()
     fig.savefig(figure_path + '_intermediate_similarity')
+    plt.close(fig)
     return
 
 
@@ -110,6 +118,7 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     plt.title('Final similarity_score')
     plt.legend()
     fig.savefig(figure_path + '_final_similarity')
+    plt.close(fig)
     return
 
 def create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true, trn_y_raw, tst_y_raw, epoch, gif_path):
@@ -204,6 +213,9 @@ def plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title, figur
     if figure_path is not None:
         fig.savefig(figure_path)
 
+    plt.close(fig)
+
+
 
 def plot_best_F1(F1, loop_variable, figure_path):
     fig = plt.figure()
@@ -215,6 +227,8 @@ def plot_best_F1(F1, loop_variable, figure_path):
     plt.xticks(rotation=45)
     plt.legend()
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
+    plt.close(fig)
+
     return
 
 
@@ -229,6 +243,8 @@ def plot_best_loss(loss, loop_variable, figure_path):
 
     plt.legend()
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
+    plt.close(fig)
+
     return
 
 
@@ -243,6 +259,8 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
 
     plt.legend()
     fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
+    plt.close(fig)
+
     return
 
 def plot_feature_vector(vector, title,figure_path, y_max):
@@ -258,6 +276,7 @@ def plot_feature_vector(vector, title,figure_path, y_max):
 
     # plt.show()
     fig.savefig(figure_path, bbox_inches='tight')
+    plt.close(fig)
 
     pass
 

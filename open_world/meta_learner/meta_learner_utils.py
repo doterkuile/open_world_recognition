@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import os
 import copy
+import imageio
 
 
 def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device,
@@ -106,7 +107,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
         # Print epoch results
         print(
             f'epoch: {epoch:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader.dataset)}]'
-            f'  loss: {trn_loss:10.8f} accuracy: {trn_corr * 100 / (train_loader.batch_size * b):7.3f}%')
+            f'  loss: {trn_loss:10.8f} accuracy: {trn_corr * 100 / len(train_loader.dataset):7.3f}%')
 
         # Run the testing batches
         tst_y_pred, tst_y_true, tst_loss, tst_ml_out, tst_y_raw = validate_model(test_loader, model,
@@ -338,7 +339,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             batch_loss = criterion(sim_score, y_train)
 
             # Apply probability threshold
-            predicted = sim_score.detach().clone().sigmoid()
+            predicted = sim_score.detach().clone()
 
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
@@ -348,7 +349,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
 
             trn_y_pred.extend(predicted.cpu())
             trn_y_true.extend(y_train.cpu())
-            trn_y_pred_raw.extend(sim_score.sigmoid().cpu())
+            trn_y_pred_raw.extend(sim_score.cpu())
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
@@ -362,7 +363,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
         # Print epoch results
         print(
             f'epoch: {i:2}  batch: {b:4} [{train_loader.batch_size * b:6}/{len(train_loader) * train_loader.batch_size}]'
-            f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (train_loader.batch_size * b * X1_train.shape[1]):7.3f}%')
+            f'  loss: {trn_loss.item():10.8f} accuracy: {trn_corr.item() * 100 / (len(train_loader.dataset) * X1_train.shape[1]):7.3f}%')
 
         # Training metrics
         trn_y_pred = np.array(torch.cat(trn_y_pred))
@@ -387,16 +388,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
                           'epoch': best_epoch, }
 
         if gif_path is not None:
-            fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
             fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
-            title = f'Intermediate similarity score\n Epoch = {i + 1}'
-            # Make gif of similarity function score
-            plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, trn_y_true, tst_sim_scores, tst_y_true,
-                                         title)
-            fig_sim.savefig(f'{gif_path}/sim_{i}.png')
-            plt.close(fig_sim)
-            fig_sim_list.append(f'{gif_path}/sim_{i}.png')
-
             title = f'Matching layer output\n Epoch = {i + 1}'
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
@@ -452,12 +444,12 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
             batch_loss = criterion(sim_score, y_test)
             tst_loss.append(batch_loss.cpu())
 
-            predicted = sim_score.sigmoid()
+            predicted = sim_score
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
 
             y_pred.extend(predicted.cpu())
-            y_pred_raw.extend(sim_score.sigmoid().cpu())
+            y_pred_raw.extend(sim_score.cpu())
             y_true.extend(y_test.cpu())
             sim_scores.extend(sim_score.cpu())
 
