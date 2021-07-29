@@ -262,6 +262,7 @@ class L2AC_base(torch.nn.Module):
     def forward(self, x0, x1):
         x = self.similarity_function(x0, x1)
         x = self.matching_layer(x)
+        x = x.sigmoid()
         if self.has_lstm:
 
             self.reset_hidden(x0.shape[0])
@@ -285,7 +286,7 @@ class L2AC(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                       # nn.Sigmoid(),
                                        )
         return matching_layer
 

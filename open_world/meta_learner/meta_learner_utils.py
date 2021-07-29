@@ -89,7 +89,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
                                                                                     probability_treshold, optimizer)
             trn_y_pred.extend(predicted.cpu())
             trn_y_true.extend(y_train.cpu())
-            trn_y_raw.extend(y_pred.sigmoid().cpu())
+            trn_y_raw.extend(y_pred.cpu())
             trn_ml_out.extend(matching_layer_output.cpu())
             trn_loss.append(batch_loss.cpu().item())
 
@@ -159,6 +159,9 @@ def train_batch_step(X0, X1, y_true, model, criterion, threshold, optimizer=None
         batch_loss.backward()
         optimizer.step()
 
+    y_pred = y_pred.sigmoid()
+    matching_layer_output = matching_layer_output.sigmoid()
+
     return y_pred, matching_layer_output, batch_loss, predicted
 
 
@@ -185,7 +188,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
                                                                                    model, criterion,
                                                                                    probability_threshold)
             y_pred.extend(predicted.cpu())
-            y_pred_raw.extend(y_out.sigmoid().cpu())
+            y_pred_raw.extend(y_out.cpu())
             y_true.extend(y_test.cpu())
             ml_out.extend(matching_layer_output.cpu())
             tst_loss.append(batch_loss.cpu())
@@ -216,39 +219,30 @@ def validate_similarity_scores(similarity_dict, model, data_loader, device):
         X0 = X0.to(device)
         X1 = X1.to(device)
 
-        X0_extend = X0.repeat_interleave(X1.shape[1], dim=1)
-
-        # Get final similarity score output for same identical sample
-        y_out_same, sim_score = model(X0, X0_extend)
-        final_same_cls = y_out_same.sigmoid().mean()
-
-        # Get intermediate similarity score for same identical sample
-        intermediate_same_cls = sim_score.mean()
-
         # make sure to select only x1 samples of a different class
         idx_diff_class = (y_true == 0).nonzero().squeeze()
         idx_same_class = (y_true == 1).nonzero().squeeze()
 
         # Get final similarity score output for different class sample
-        y_out, sim_score = model(X0, X1)
+        y_out, ml_out = model(X0, X1)
 
-        y_out_diff = sim_score[idx_diff_class].squeeze()
-        intermediate_diff_cls = y_out_diff.mean()
+        ml_out_diff = ml_out[idx_diff_class].sigmoid().squeeze()
+        ml_diff_cls = ml_out_diff.mean()
 
-        y_out_diff = y_out[idx_diff_class].squeeze()
+        y_out_diff = y_out[idx_diff_class].sigmoid().squeeze()
         final_diff_cls = y_out_diff.mean()
 
         # Get intermediate similarity score for different class sample
-        y_out_same = sim_score[idx_same_class].squeeze()
-        intermediate_same_cls = y_out_same.mean()
+        ml_out_same = ml_out[idx_same_class].sigmoid().squeeze()
+        ml_same_cls = ml_out_same.mean()
 
-        y_out_same = y_out[idx_same_class].squeeze().sigmoid()
+        y_out_same = y_out[idx_same_class].sigmoid().squeeze()
         final_same_cls = y_out_same.mean()
 
     similarity_dict['final_same_cls'].append(final_same_cls.item())
-    similarity_dict['intermediate_same_cls'].append(intermediate_same_cls.item())
+    similarity_dict['intermediate_same_cls'].append(ml_same_cls.item())
     similarity_dict['final_diff_cls'].append(final_diff_cls.item())
-    similarity_dict['intermediate_diff_cls'].append(intermediate_diff_cls.item())
+    similarity_dict['intermediate_diff_cls'].append(ml_diff_cls.item())
 
     model.train()
     return
@@ -324,6 +318,8 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             X0_train = X0_train.to(device)
             X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
+
+            # y_train = torch.abs(y_train -1)
             y_train = y_train.repeat_interleave(X1_train.shape[1], dim=1)
 
             # Limit the number of batches
@@ -339,7 +335,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             batch_loss = criterion(sim_score, y_train)
 
             # Apply probability threshold
-            predicted = sim_score.detach().clone()
+            predicted = sim_score.detach().clone().sigmoid()
 
             predicted[predicted <= probability_treshold] = 0
             predicted[predicted > probability_treshold] = 1
@@ -444,7 +440,7 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
             batch_loss = criterion(sim_score, y_test)
             tst_loss.append(batch_loss.cpu())
 
-            predicted = sim_score
+            predicted = sim_score.sigmoid()
             predicted[predicted <= probability_threshold] = 0
             predicted[predicted > probability_threshold] = 1
 

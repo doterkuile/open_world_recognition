@@ -68,11 +68,11 @@ def main():
     train_samples_per_cls = config['train_samples_per_cls']
     probability_threshold = config['probability_threshold']
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
                                               test_classes, train_samples_per_cls, train=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
     test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
@@ -100,11 +100,13 @@ def main():
             probability_threshold,
             gif_path)
 
+        model.load_state_dict(best_state_ml['model'])
+
         for name, param in model.named_parameters():
-            if 'matching_layer' in name:
-                param.requires_grad = False
-            else:
-                param.requires_grad = True
+            # if 'matching_layer' in name:
+            #     param.requires_grad = False
+            # else:
+            param.requires_grad = True
 
 
         optimizer = eval('torch.optim.' + config['optimizer'])(
@@ -149,20 +151,6 @@ def main():
     plot_utils.plot_F1(trn_metrics['F1'], tst_metrics['F1'], figure_path)
     plot_utils.plot_mean_prediction(trn_metrics['mean_pred'], trn_metrics['mean_true'], tst_metrics['mean_pred'],
                                     tst_metrics['mean_true'], figure_path)
-
-    plot_utils.plot_intermediate_similarity(
-        trn_similarity_scores['intermediate_same_cls'],
-        trn_similarity_scores['intermediate_diff_cls'],
-        tst_similarity_scores['intermediate_same_cls'],
-        tst_similarity_scores['intermediate_diff_cls'],
-        figure_path)
-
-    plot_utils.plot_final_similarity(
-        trn_similarity_scores['final_same_cls'],
-        trn_similarity_scores['final_diff_cls'],
-        tst_similarity_scores['final_same_cls'],
-        tst_similarity_scores['final_diff_cls'],
-        figure_path)
 
 
     trn_y_pred, trn_y_true, trn_losses, trn_sim_scores, trn_y_pred_raw = meta_utils.validate_model(
