@@ -77,9 +77,9 @@ def main():
     test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
     two_step_training = config['two_step_training']
+    train_matching_layer_only = config['train_matching_layer_only']
 
-
-    if two_step_training:
+    if two_step_training or train_matching_layer_only:
 
         param_keys = 'matching_layer'
         for name , param in model.named_parameters():
@@ -120,6 +120,11 @@ def main():
         plot_utils.plot_mean_prediction(trn_metrics_ml['mean_pred'], trn_metrics_ml['mean_true'],
                                         tst_metrics_ml['mean_pred'],
                                         tst_metrics_ml['mean_true'], ml_figure_path)
+
+        if train_matching_layer_only:
+            print('Trained only matching layer')
+            print(f'\nTotal duration: {time.time() - start_time:.0f} seconds')
+            return
 
 
 

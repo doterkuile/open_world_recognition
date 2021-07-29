@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=6        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=8gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=10gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=07:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=06:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,16 +33,21 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_0001 l_t_0002 l_t_0003)
+array_1=(l_t_l_0013 l_t_l_0014)
 var_2=top_n
-array_2=(1 4 9)
+array_2=(9 9)
 var_3=test_class_selection
-array_3=(same_cls same_cls same_cls)
+array_3=(same_cls diff_cls)
+var_4=feature_scaling
+array_4=(max_value max_value)
+var_5=two_step_training
+array_5=(True True)
+
 len=${#array_1[@]}
 
 
 var_e=epochs
-value_e=2
+value_e=20
 
 conda activate $conda_env
 
@@ -62,11 +67,15 @@ do
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
-        echo "$var_3 = ${array_3[$i]}"
+    echo "$var_3 = ${array_3[$i]}"
+    echo "$var_4 = ${array_4[$i]}"
+    echo "$var_5 = ${array_5[$i]}"
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 
 
 	python $python_script $config_file

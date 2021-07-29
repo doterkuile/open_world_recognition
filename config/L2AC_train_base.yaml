@@ -29,6 +29,8 @@ class_ratio:
 test_class_selection: same_cls
 feature_scaling: normal #sigmoid max_value
 two_step_training: False
+train_matching_layer_only: True
+
 
 
 train_samples_per_cls: 500
