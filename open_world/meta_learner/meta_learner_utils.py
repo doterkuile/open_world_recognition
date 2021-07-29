@@ -33,17 +33,6 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
                         'mean_pred': [],
                         'mean_true': []}
 
-    trn_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
-    tst_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
-
     ml_fig_list = []
     al_fig_list = []
 
@@ -126,8 +115,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
             ml_fig_list.append(ml_image_name)
             al_fig_list.append(al_image_name)
 
-        validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
-        validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
+
 
     if gif_path is not None:
         ml_gif_path = f"{gif_path}_matching_layer.gif"
@@ -135,7 +123,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
         al_gif_path = f"{gif_path}_final_similarity.gif"
         plot_utils.save_gif_file(al_fig_list, al_gif_path)
 
-    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
+    return trn_metrics_dict, tst_metrics_dict, best_state
 
 
 def train_batch_step(X0, X1, y_true, model, criterion, threshold, optimizer=None):
@@ -209,44 +197,6 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     return y_pred, y_true, tst_loss, ml_out, y_pred_raw
 
 
-def validate_similarity_scores(similarity_dict, model, data_loader, device):
-    # Set model to eval
-    model.eval()
-
-    with torch.no_grad():
-        for b, ([X0, X1], y_true, [X0_labels, X1_labels]) in enumerate(data_loader):
-            break
-        X0 = X0.to(device)
-        X1 = X1.to(device)
-
-        # make sure to select only x1 samples of a different class
-        idx_diff_class = (y_true == 0).nonzero().squeeze()
-        idx_same_class = (y_true == 1).nonzero().squeeze()
-
-        # Get final similarity score output for different class sample
-        y_out, ml_out = model(X0, X1)
-
-        ml_out_diff = ml_out[idx_diff_class].sigmoid().squeeze()
-        ml_diff_cls = ml_out_diff.mean()
-
-        y_out_diff = y_out[idx_diff_class].sigmoid().squeeze()
-        final_diff_cls = y_out_diff.mean()
-
-        # Get intermediate similarity score for different class sample
-        ml_out_same = ml_out[idx_same_class].sigmoid().squeeze()
-        ml_same_cls = ml_out_same.mean()
-
-        y_out_same = y_out[idx_same_class].sigmoid().squeeze()
-        final_same_cls = y_out_same.mean()
-
-    similarity_dict['final_same_cls'].append(final_same_cls.item())
-    similarity_dict['intermediate_same_cls'].append(ml_same_cls.item())
-    similarity_dict['final_diff_cls'].append(final_diff_cls.item())
-    similarity_dict['intermediate_diff_cls'].append(ml_diff_cls.item())
-
-    model.train()
-    return
-
 
 def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device,
                        probability_treshold, gif_path=None):
@@ -266,16 +216,6 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
                         'mean_pred': [],
                         'mean_true': []}
 
-    trn_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
-    tst_similarity_scores = {'final_same_cls': [],
-                             'intermediate_same_cls': [],
-                             'final_diff_cls': [],
-                             'intermediate_diff_cls': [],
-                             }
 
     fig_sim_list = []
     fig_final_list = []
@@ -393,9 +333,6 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             fig_final_list.append(f'{gif_path}/matching_only_{i}.png')
             plt.close(fig_final)
 
-        validate_similarity_scores(trn_similarity_scores, model, train_loader, device)
-        validate_similarity_scores(tst_similarity_scores, model, test_loader, device)
-
     if gif_path is not None:
 
         images_final = []
@@ -405,7 +342,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
 
         imageio.mimsave(gif_path + '_matching_layer_only.gif', images_final, fps=2, loop=1)
 
-    return trn_metrics_dict, trn_similarity_scores, tst_metrics_dict, trn_similarity_scores, best_state
+    return trn_metrics_dict, tst_metrics_dict, best_state
 
 
 def validateMatchingLayer(loader, model, criterion, device, probability_threshold):
