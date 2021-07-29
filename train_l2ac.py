@@ -68,11 +68,11 @@ def main():
     train_samples_per_cls = config['train_samples_per_cls']
     probability_threshold = config['probability_threshold']
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
                                               test_classes, train_samples_per_cls, train=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
 
     test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
 
