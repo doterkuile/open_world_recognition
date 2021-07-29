@@ -33,14 +33,14 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_l_0013 l_t_l_0014)
+array_1=(l_t0017 l_t_0018)
 var_2=top_n
 array_2=(9 9)
 var_3=test_class_selection
 array_3=(same_cls diff_cls)
-var_4=feature_scaling
-array_4=(max_value max_value)
-var_5=two_step_training
+var_4=model_class
+array_4=(L2AC_extended_similarity L2AC_extended_similarity)
+var_5=train_matching_layer_only
 array_5=(True True)
 
 len=${#array_1[@]}
