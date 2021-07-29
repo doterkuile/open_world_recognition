@@ -331,10 +331,17 @@ def main():
 
     x = torch.arange(0, 1, 0.01)
     # y = torch.nn.functional.leaky_relu(x-0.5)*-torch.log(1-x)
-    y = -torch.log(x)*torch.nn.functional.leaky_relu(0.5-x)
 
+    y2 = - 2 * torch.log(x)
+    y3 =1 + 2 * torch.nn.functional.leaky_relu(0.5 - x)
+    y = y2 * y3
     fig = plt.figure()
-    plt.plot(x.numpy(), y.numpy())
+    plt.plot(x.numpy(), y.numpy(), 'r', label="log*relu")
+    # plt.plot(x.numpy(), y2.numpy(), 'b', label="log")
+    # plt.plot(x.numpy(), y3.numpy(), 'g', label="relu")
+    plt.legend()
+
+
     plt.show()
 
 

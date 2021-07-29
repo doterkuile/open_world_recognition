@@ -285,7 +285,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
 
             trn_y_pred.extend(predicted.cpu())
             trn_y_true.extend(y_train.cpu())
-            trn_y_pred_raw.extend(sim_score.cpu())
+            trn_y_pred_raw.extend(sim_score.sigmoid().cpu())
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
@@ -382,9 +382,9 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
             predicted[predicted > probability_threshold] = 1
 
             y_pred.extend(predicted.cpu())
-            y_pred_raw.extend(sim_score.cpu())
+            y_pred_raw.extend(sim_score.sigmoid().cpu())
             y_true.extend(y_test.cpu())
-            sim_scores.extend(sim_score.cpu())
+            sim_scores.extend(sim_score.sigmoid().cpu())
 
             num_correct += (predicted == y_test).sum()
             num_samples += predicted.size(0)

@@ -99,7 +99,7 @@ def main():
             probability_threshold,
             gif_path)
 
-        model.load_state_dict(best_state_ml['model'])
+        # model.load_state_dict(best_state_ml['model'])
 
         for name, param in model.named_parameters():
             # if 'matching_layer' in name:
