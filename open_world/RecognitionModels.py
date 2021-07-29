@@ -315,7 +315,8 @@ class L2AC_cosine(L2AC_base):
         return
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Sigmoid()
+        matching_layer = nn.Sequential(
+            # nn.Sigmoid()
                                        )
         return matching_layer
 
@@ -347,7 +348,7 @@ class L2AC_no_lstm(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                       # nn.Sigmoid(),
                                        )
         return matching_layer
 
@@ -399,7 +400,8 @@ class L2AC_extended_similarity(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.1),
                                        nn.Linear(128, 1),
-                                       nn.Sigmoid())
+                                       # nn.Sigmoid()
+                                       )
         return matching_layer
 
     def setAggregationLayer(self):
@@ -435,7 +437,7 @@ class L2AC_smaller_fc(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                       # nn.Sigmoid(),
                                        )
         return matching_layer
 
@@ -468,7 +470,7 @@ class L2AC_abssub(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                       # nn.Sigmoid(),
                                        )
         return matching_layer
 
@@ -494,7 +496,7 @@ class L2AC_concat(L2AC_base):
                                        nn.ReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
-                                       nn.Sigmoid(),
+                                       # nn.Sigmoid(),
                                        )
         return matching_layer
 

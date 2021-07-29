@@ -283,53 +283,59 @@ def plot_feature_vector(vector, title,figure_path, y_max):
 
 def main():
 
-    multiple_gpu = True if torch.cuda.device_count() > 1 else False
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # Parse config file
-    (train_dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
-        device, multiple_gpu)
+    # multiple_gpu = True if torch.cuda.device_count() > 1 else False
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # # Parse config file
+    # (train_dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
+    #     device, multiple_gpu)
+    #
+    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    #
+    # dataset_name = 'cifar'
+    # figure_path = f'figures/{dataset_name}'
+    # for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
+    #
+    #     optimizer.zero_grad()
+    #
+    #     # X0_train = X0_train.to(device)
+    #     # X1_train = X1_train.to(device)
+    #     # y_train = y_train.view(-1, 1).to(device)
+    #
+    #     # Limit the number of batches
+    #     if b == 0:
+    #         break
+    #
+    #
+    #
+    # versions = ['same', 'diff']
+    #
+    # for version in versions:
+    #
+    #     if version == 'same':
+    #         idx = (y_train == 1).nonzero()[0]
+    #     if version == 'diff':
+    #         idx = (y_train == 0).nonzero()[0]
+    #
+    #     x0 = X0_train[idx].view(-1)
+    #     x1 = X1_train[idx][0][0].view(-1)
+    #
+    #     x_abssub = x0.sub((x1))
+    #     x_abssub.abs_()
+    #     x_add = x0.add(x1)
+    #     similarity_vector = torch.cat((x_abssub, x_add))
+    #     plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}', 4)
+    #     plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}', 4)
+    #     plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}', 4)
+    #     plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
+    #     plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    x = torch.arange(0, 1, 0.01)
+    # y = torch.nn.functional.leaky_relu(x-0.5)*-torch.log(1-x)
+    y = -torch.log(x)*torch.nn.functional.leaky_relu(0.5-x)
 
-    dataset_name = 'cifar'
-    figure_path = f'figures/{dataset_name}'
-    for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
-
-        optimizer.zero_grad()
-
-        # X0_train = X0_train.to(device)
-        # X1_train = X1_train.to(device)
-        # y_train = y_train.view(-1, 1).to(device)
-
-        # Limit the number of batches
-        if b == 0:
-            break
-
-
-
-    versions = ['same', 'diff']
-
-    for version in versions:
-
-        if version == 'same':
-            idx = (y_train == 1).nonzero()[0]
-        if version == 'diff':
-            idx = (y_train == 0).nonzero()[0]
-
-        x0 = X0_train[idx].view(-1)
-        x1 = X1_train[idx][0][0].view(-1)
-
-        x_abssub = x0.sub((x1))
-        x_abssub.abs_()
-        x_add = x0.add(x1)
-        similarity_vector = torch.cat((x_abssub, x_add))
-        plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}', 4)
-        plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}', 4)
-        plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}', 4)
-        plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
-        plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
-
-
+    fig = plt.figure()
+    plt.plot(x.numpy(), y.numpy())
+    plt.show()
 
 
     return
