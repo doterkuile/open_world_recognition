@@ -11,7 +11,7 @@ image_resize: 224
 unfreeze_layer: 62    #62 62 6 8
 
 ## Training hyperparameters
-criterion: BCEWithLogitsLoss
+criterion: bce_loss_default
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256

@@ -1,5 +1,5 @@
 ## Experiment
-name: '0001'
+name: '0007'
 
 ## Paths and classes
 dataset_path: TinyImageNet
@@ -8,16 +8,16 @@ model_class: L2AC
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
-unfreeze_layer: 62    #62 62 6 8
+unfreeze_layer: 62   #62 62 6 8
 
 ## Training hyperparameters
-criterion: BCEWithLogitsLoss
+criterion: bce_loss_custom
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 4
+epochs: 50
 
-## L2AC parametersd
+## L2AC parameters
 top_k: 5
 top_n: 4
 

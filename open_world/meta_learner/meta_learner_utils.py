@@ -127,8 +127,7 @@ def trainMetaModel(model, train_loader, test_loader, epochs, criterion, test_cri
 
 
 def train_batch_step(X0, X1, y_true, model, criterion, threshold, optimizer=None):
-    if optimizer is not None:
-        optimizer.zero_grad()
+    # if optimizer is not None:
 
     # Apply the model
     y_pred, matching_layer_output = model(X0, X1)
@@ -144,8 +143,10 @@ def train_batch_step(X0, X1, y_true, model, criterion, threshold, optimizer=None
     # Update parameters
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
     if optimizer is not None:
+        optimizer.zero_grad()
         batch_loss.backward()
         optimizer.step()
+
 
     y_pred = y_pred.sigmoid()
     matching_layer_output = matching_layer_output.sigmoid()
@@ -253,13 +254,12 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
         for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in tqdm(enumerate(train_loader),
                                                                                total=len(train_loader)):
 
-            optimizer.zero_grad()
 
             X0_train = X0_train.to(device)
             X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
 
-            # y_train = torch.abs(y_train -1)
+            y_train = torch.abs(y_train -1)
             y_train = y_train.repeat_interleave(X1_train.shape[1], dim=1)
 
             # Limit the number of batches
@@ -289,9 +289,11 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             trn_sim_scores.extend(sim_score.cpu())
 
             # Update parameters
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.5)
+            optimizer.zero_grad()
             batch_loss.backward()
             optimizer.step()
+
             trn_loss.append(batch_loss.cpu().item())
 
         trn_loss = np.array(trn_loss).mean()
@@ -364,6 +366,8 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
             X0_test = X0_test.to(device)
             X1_test = X1_test.to(device)
             y_test = y_test.view(-1, 1).to(device)
+            y_test = torch.abs(y_test -1)
+
             y_test = y_test.repeat_interleave(X1_test.shape[1], dim=1)
 
             if b == (len(loader)):

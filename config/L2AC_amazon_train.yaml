@@ -11,11 +11,11 @@ image_resize: 224
 unfreeze_layer: 62    #62 62 6 8
 
 ## Training hyperparameters
-criterion: BCEWithLogitsLoss
+criterion: bce_loss_default
 optimizer: Adam
 learning_rate: 0.0001
-batch_size: 256
-epochs: 1
+batch_size: 50
+epochs: 50
 
 
 ## L2AC parameters
@@ -28,6 +28,8 @@ class_ratio:
 
 test_class_selection: diff_cls
 feature_scaling: normal #sigmoid max_value
+two_step_training: True
+train_matching_layer_only: False
 
 train_samples_per_cls: 100
 probability_threshold: 0.5

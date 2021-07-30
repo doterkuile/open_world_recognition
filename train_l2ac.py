@@ -67,14 +67,16 @@ def main():
     train_samples_per_cls = config['train_samples_per_cls']
     probability_threshold = config['probability_threshold']
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)  # , num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
                                               test_classes, train_samples_per_cls, train=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)  # , num_workers=4)
-
-    test_criterion = eval('torch.nn.' + config['criterion'])(reduction='mean')
-
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
+    pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
+    ml_weight = torch.tensor(config['top_n']).to(device).to(dtype=torch.float)
+    test_criterion = eval('loss_functions.' + config['criterion'])(pos_weight)
+    ml_criterion = loss_functions.matching_layer_loss(ml_weight)
+    ml_criterion_test = loss_functions.matching_layer_loss(pos_weight)
     two_step_training = config['two_step_training']
     train_matching_layer_only = config['train_matching_layer_only']
 
@@ -92,8 +94,8 @@ def main():
             train_loader,
             test_loader,
             epochs,
-            criterion,
-            test_criterion,
+            ml_criterion,
+            ml_criterion_test,
             optimizer,
             device,
             probability_threshold,
@@ -102,10 +104,10 @@ def main():
         model.load_state_dict(best_state_ml['model'])
 
         for name, param in model.named_parameters():
-            # if 'matching_layer' in name:
-            #     param.requires_grad = False
-            # else:
-            param.requires_grad = True
+            if 'matching_layer' in name:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
 
         optimizer = eval('torch.optim.' + config['optimizer'])(
             filter(lambda p: p.requires_grad, model.parameters()),

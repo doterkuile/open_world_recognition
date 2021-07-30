@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import DataLoader
 import imageio
 import os
+import torch.nn as nn
 
 
 def plot_losses(train_losses, test_losses, figure_path):
@@ -329,18 +330,24 @@ def main():
     #     plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
     #     plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
 
-    x = torch.arange(0, 1, 0.01)
+    x = torch.tensor(np.arange(0, 1, 0.01)).view(-1,1)
     # y = torch.nn.functional.leaky_relu(x-0.5)*-torch.log(1-x)
-
-    y2 = - 2 * torch.log(x)
-    y3 =1 + 2 * torch.nn.functional.leaky_relu(0.5 - x)
-    y = y2 * y3
+    targets = [0, 1]
     fig = plt.figure()
-    plt.plot(x.numpy(), y.numpy(), 'r', label="log*relu")
-    # plt.plot(x.numpy(), y2.numpy(), 'b', label="log")
-    # plt.plot(x.numpy(), y3.numpy(), 'g', label="relu")
-    plt.legend()
+    f1 = lambda x: - 1 * x.log()
+    # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
+    f2 = lambda x: 20 * nn.functional.relu(0.5 - x)
+    losses= []
+    for target in targets:
 
+        logloss = target * f1(x) + (1-target) * f1(1-x)
+        y = target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
+        losses.append(y)
+        plt.plot(x.numpy(), y.numpy(), 'r', label=f"log*relu_{target}")
+        plt.plot(x.numpy(), logloss.numpy(), 'b', label=f"log_{target}")
+        # plt.plot(x.numpy(), f2(x), 'g', label="relu")
+
+    plt.legend()
 
     plt.show()
 

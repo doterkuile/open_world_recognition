@@ -345,7 +345,7 @@ class L2AC_no_lstm(L2AC_base):
     def setMatchingLayer(self):
 
         matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),
@@ -388,16 +388,16 @@ class L2AC_extended_similarity(L2AC_base):
 
     def setMatchingLayer(self):
         matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1024),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(1024, 512),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.25),
                                        nn.Linear(512, 128),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.1),
                                        nn.Linear(128, 1),
                                        # nn.Sigmoid()
