@@ -16,13 +16,42 @@ class bce_loss_default(nn.Module):
 
     def forward(self, input, target):
         
-        # epsilon = 10 ** -44
-        # x = input.sigmoid().clamp(epsilon, 1 - epsilon)
-        # f1 = lambda x: - x.log()
-        #
-        # loss = self.positive_weight * target * f1(x) + (1-target) * f1(1 - x)
-        loss = self.criterion(input, target)
-        return loss.sum()
+        epsilon = 10 ** -7
+        x = input.sigmoid().clamp(epsilon, 1 - epsilon)
+        f1 = lambda x: - x.log()
+
+        loss = self.positive_weight * target * f1(x) + (1-target) * f1(1 - x)
+        # loss = self.criterion(input, target)
+
+        idx0 = len((target == 0).nonzero())
+        idx1 = len((target == 1).nonzero())
+
+        lossmean = loss.sum() / (idx1 * int(self.positive_weight) + idx0)
+
+        return lossmean
+
+
+class bce_loss_matching_layer(nn.Module):
+
+    def __init__(self, weight=None):
+        super(bce_loss_matching_layer, self).__init__()
+        self.positive_weight = weight
+        self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight, reduction='mean')
+
+    def forward(self, input, target):
+        epsilon = 10 ** -7
+        x = input.sigmoid().clamp(epsilon, 1 - epsilon)
+        f1 = lambda x: - x.log()
+
+        loss = target * f1(x) + self.positive_weight * (1 - target) * f1(1 - x)
+        # loss = self.criterion(input, target)
+
+        idx0 = len((target == 0).nonzero())
+        idx1 = len((target == 1).nonzero())
+
+        lossmean = loss.sum() / (idx1 + idx0 * int(self.positive_weight))
+
+        return lossmean
 
 
 class bce_loss_custom(nn.Module):
