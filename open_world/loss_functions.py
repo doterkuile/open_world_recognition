@@ -47,7 +47,7 @@ class bce_loss_custom(nn.Module):
 
         lossmean = loss.sum()/(idx1 * int(self.positive_weight) + idx0)
 
-        return loss.mean()
+        return lossmean
 
 class matching_layer_loss(nn.Module):
 
@@ -69,23 +69,10 @@ class matching_layer_loss(nn.Module):
         idx0 = len((target == 0).nonzero())
         idx1 = len((target == 1).nonzero())
 
-        # lossmean = loss.sum()/(idx1 * int(self.positive_weight) + idx0)
+        lossmean = loss.sum()/(idx1 + idx0* int(self.weight) )
 
-        return loss.mean()
+        return lossmean
 
-
-class Regress_Loss(torch.nn.Module):
-
-    def __init__(self):
-        super(Regress_Loss, self).__init__()
-
-    def forward(self, x, y):
-        y_shape = y.size()[1]
-        x_added_dim = x.unsqueeze(1)
-        x_stacked_along_dimension1 = x_added_dim.repeat(1, 5, 1)
-        diff = torch.sum((y - x_stacked_along_dimension1) ** 2, 2)
-        totloss = torch.sum(torch.sum(torch.sum(diff)))
-        return totloss
 
 
 def main():

@@ -104,10 +104,10 @@ def main():
         model.load_state_dict(best_state_ml['model'])
 
         for name, param in model.named_parameters():
-            if 'matching_layer' in name:
-                param.requires_grad = False
-            else:
-                param.requires_grad = True
+            # if 'matching_layer' in name:
+            #     param.requires_grad = False
+            # else:
+            param.requires_grad = True
 
         optimizer = eval('torch.optim.' + config['optimizer'])(
             filter(lambda p: p.requires_grad, model.parameters()),
