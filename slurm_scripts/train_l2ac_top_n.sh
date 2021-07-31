@@ -33,18 +33,22 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(0029 0030 0031 0032)
+array_1=(l_t_0002)
 var_2=top_n
-array_2=(2 4 9 15)
+array_2=(9)
 var_3=model_class
-array_3=(L2AC L2AC L2AC L2AC)
+array_3=(L2AC_concat)
+var_4=two_step_training
+array_4=(True)
+var_5=criterion
+array_5=(bce_loss_custom)
 len=${#array_1[@]}
 
 
 
 
-var_4=epochs
-value_4=200
+var_e=epochs
+value_e=5
 
 conda activate $conda_env
 
@@ -57,17 +61,22 @@ do
 	mkdir -p output/${array_1[$i]}
 	cp -r config/$base_config_file $config_file
 
-    echo "$var_4 = ${value_4}"
-    sed -i "s/$var_4:.*/$var_4: ${value_4}/" $config_file
+    echo "$var_e = ${value_e}"
+    sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
 	
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
+    echo "$var_4 = ${array_4[$i]}"
+    echo "$var_5 = ${array_5[$i]}"
+
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 
 
 	python $python_script $config_file
