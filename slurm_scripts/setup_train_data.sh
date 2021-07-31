@@ -34,17 +34,17 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=image_resize
-array_1=(224 224 224 224)	
+array_1=(224)	
 var_2=unfreeze_layer
-array_2=(62 62 10 30)
+array_2=(62)
 var_3=top_n
-array_3=(9 9 9 9)
+array_3=(4)
 var_4=feature_scaling
-array_4=(max_value max_value max_value max_value)
+array_4=(max_value)
 var_5=l2ac_train
-array_5=(20 20 20 20)
+array_5=(80)
 var_6=model_class
-array_6=(ResNet50 ResNet152 AlexNet EfficientNet)
+array_6=(ResNet50)
 len=${#array_1[@]}
 
 
