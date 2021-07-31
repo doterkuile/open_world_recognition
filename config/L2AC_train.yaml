@@ -4,7 +4,7 @@ name: '0012'
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: MetaDataset
-model_class: L2AC
+model_class: L2AC_extended_similarity
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224

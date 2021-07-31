@@ -393,10 +393,10 @@ class L2AC_extended_similarity(L2AC_base):
                                        nn.Linear(self.input_size, 1024),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
-                                       nn.Linear(1024, 512),
+                                       nn.Linear(1024, 1024),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.25),
-                                       nn.Linear(512, 128),
+                                       nn.Linear(1024, 128),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.1),
                                        nn.Linear(128, 1),
@@ -412,10 +412,7 @@ class L2AC_extended_similarity(L2AC_base):
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
-        x_abssub = x.sub(x1)
-        x_abssub.abs_()
-        x_add = x.add(x1)
-        x = torch.cat((x_abssub, x_add), dim=2)
+        x = torch.cat((x, x1), dim=2)
         return x
 
 
