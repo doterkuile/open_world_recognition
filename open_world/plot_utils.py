@@ -127,6 +127,11 @@ def create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true, trn_y_raw, 
     fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
     title = f'Intermediate similarity score\n Epoch = {epoch + 1}'
     # Make gif of similarity function score
+
+    ml_trn_same_idx = (y_trn == 0).nonzero()[0].squeeze()
+    ml_trn_diff_idx = (y_trn == 1).nonzero()[0].squeeze()
+
+
     plot_prob_density(fig_sim, axs_sim, trn_ml_out, trn_y_true, tst_ml_out, tst_y_true,
                                  title)
     fig_sim.savefig(f'{gif_path}/sim_{epoch}.png')
@@ -156,7 +161,7 @@ def save_gif_file(fig_list, gif_path):
 
 
 
-def plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title, figure_path=None):
+def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score, tst_same_idx, tst_diff_idx, title, figure_path=None):
     if len(axs) != 2:
         print('Axes not correct, no prob density plotted')
         return
@@ -168,16 +173,15 @@ def plot_prob_density(fig, axs, trn_score, y_trn, tst_score, y_tst, title, figur
     trn_idx_diff_class = (y_trn == 0).nonzero()[0].squeeze()
     trn_idx_same_class = (y_trn == 1).nonzero()[0].squeeze()
 
-    trn_score_same = trn_score[trn_idx_same_class].reshape(-1)
-    trn_score_diff = trn_score[trn_idx_diff_class].reshape(-1)
+    trn_score_same = trn_score[trn_same_idx].reshape(-1)
+    trn_score_diff = trn_score[trn_diff_idx].reshape(-1)
     trn_label = np.full((len(trn_score_same)), 'train')
     trn_label2 = np.full((len(trn_score_diff)), 'train')
 
-    tst_idx_diff_class = (y_tst == 0).nonzero()[0].squeeze()
-    tst_idx_same_class = (y_tst == 1).nonzero()[0].squeeze()
 
-    tst_score_same = tst_score[tst_idx_same_class].reshape(-1)
-    tst_score_diff = tst_score[tst_idx_diff_class].reshape(-1)
+
+    tst_score_same = tst_score[tst_same_idx].reshape(-1)
+    tst_score_diff = tst_score[tst_diff_idx].reshape(-1)
 
     tst_label = np.full((len(tst_score_same)), 'test')
     tst_label2 = np.full((len(tst_score_diff)), 'test')
