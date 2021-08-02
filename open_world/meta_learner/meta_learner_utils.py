@@ -328,11 +328,16 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
         if gif_path is not None:
             fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
             title = f'Matching layer output\n Epoch = {i + 1}'
+            fig_path = f'{gif_path}/matching_only_{i}.png'
+
+            ml_trn_same_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+            ml_trn_diff_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+            ml_tst_same_idx = (tst_y_true == 0).nonzero()[0].squeeze()
+            ml_tst_diff_idx = (tst_y_true == 1).nonzero()[0].squeeze()
             # Make gif of similarity function score
-            plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, trn_y_true, tst_y_pred_raw, tst_y_true,
-                                         title)
-            fig_final.savefig(f'{gif_path}/matching_only_{i}.png')
-            fig_final_list.append(f'{gif_path}/matching_only_{i}.png')
+            plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, ml_trn_same_idx, ml_trn_diff_idx, tst_y_pred_raw, ml_tst_same_idx,
+                                         ml_tst_diff_idx, title, fig_path)
+            fig_final_list.append(fig_path)
             plt.close(fig_final)
 
     if gif_path is not None:

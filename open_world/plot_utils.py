@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import imageio
 import os
 import torch.nn as nn
+import open_world.loss_functions as loss_func
 
 
 def plot_losses(train_losses, test_losses, figure_path):
@@ -122,28 +123,36 @@ def plot_final_similarity(trn_same_cls, trn_diff_cls, tst_same_cls, tst_diff_cls
     plt.close(fig)
     return
 
+
 def create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true, trn_y_raw, tst_y_raw, epoch, gif_path):
     fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
     fig_final, axs_final = plt.subplots(2, 1, figsize=(15, 10))
     title = f'Intermediate similarity score\n Epoch = {epoch + 1}'
+    fig_ml_name = f'{gif_path}/sim_{epoch}.png'
     # Make gif of similarity function score
 
-    ml_trn_same_idx = (y_trn == 0).nonzero()[0].squeeze()
-    ml_trn_diff_idx = (y_trn == 1).nonzero()[0].squeeze()
+    ml_trn_same_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+    ml_trn_diff_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+    ml_tst_same_idx = (tst_y_true == 0).nonzero()[0].squeeze()
+    ml_tst_diff_idx = (tst_y_true == 1).nonzero()[0].squeeze()
 
 
-    plot_prob_density(fig_sim, axs_sim, trn_ml_out, trn_y_true, tst_ml_out, tst_y_true,
-                                 title)
-    fig_sim.savefig(f'{gif_path}/sim_{epoch}.png')
+    plot_prob_density(fig_sim, axs_sim, trn_ml_out, ml_trn_same_idx, ml_trn_diff_idx, tst_ml_out, ml_tst_same_idx,
+                      ml_tst_diff_idx, title, fig_ml_name)
     plt.close(fig_sim)
-    fig_ml_name = f'{gif_path}/sim_{epoch}.png'
 
     title = f'Final similarity score\n Epoch = {epoch + 1}'
-    # Make gif of similarity function score
-    plot_prob_density(fig_final, axs_final, trn_y_raw, trn_y_true, tst_y_raw, tst_y_true,
-                                 title)
-    fig_final.savefig(f'{gif_path}/final_{epoch}.png')
     fig_al_name = f'{gif_path}/final_{epoch}.png'
+
+    al_trn_same_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+    al_trn_diff_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+    al_tst_same_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+    al_tst_diff_idx = (tst_y_true == 0).nonzero()[0].squeeze()
+
+
+    # Make gif of similarity function score
+    plot_prob_density(fig_final, axs_final, trn_y_raw, al_trn_same_idx, al_trn_diff_idx, tst_y_raw, al_tst_same_idx,
+                      al_tst_diff_idx, title, fig_al_name)
     plt.close(fig_final)
 
     return fig_ml_name, fig_al_name
@@ -158,10 +167,8 @@ def save_gif_file(fig_list, gif_path):
     imageio.mimsave(gif_path, images_sim, fps=2, loop=1)
 
 
-
-
-
-def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score, tst_same_idx, tst_diff_idx, title, figure_path=None):
+def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score, tst_same_idx, tst_diff_idx, title,
+                      figure_path=None):
     if len(axs) != 2:
         print('Axes not correct, no prob density plotted')
         return
@@ -169,16 +176,10 @@ def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score
     x_label = 'Output score'
     legend_label = 'Dataset'
 
-    # make sure to select only x1 samples of a different class
-    trn_idx_diff_class = (y_trn == 0).nonzero()[0].squeeze()
-    trn_idx_same_class = (y_trn == 1).nonzero()[0].squeeze()
-
     trn_score_same = trn_score[trn_same_idx].reshape(-1)
     trn_score_diff = trn_score[trn_diff_idx].reshape(-1)
     trn_label = np.full((len(trn_score_same)), 'train')
     trn_label2 = np.full((len(trn_score_diff)), 'train')
-
-
 
     tst_score_same = tst_score[tst_same_idx].reshape(-1)
     tst_score_diff = tst_score[tst_diff_idx].reshape(-1)
@@ -193,7 +194,7 @@ def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score
     same_scores[x_label] = same_scores[x_label].astype(float)
     same_scores[legend_label] = same_scores[legend_label].astype(str)
 
-    diff_score_dict = {x_label:  np.concatenate([trn_score_diff, tst_score_diff], axis=0),
+    diff_score_dict = {x_label: np.concatenate([trn_score_diff, tst_score_diff], axis=0),
                        legend_label: np.concatenate([trn_label2, tst_label2], axis=0)}
 
     diff_scores = pd.DataFrame.from_dict(diff_score_dict)
@@ -208,18 +209,18 @@ def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score
     axs[0].set_ylabel('Density')
     axs[1].set_ylabel('Density')
 
-
-    sns.histplot(ax=axs[0], data=same_scores, x=x_label, hue=legend_label, stat='probability', kde=False, common_norm=False,
+    sns.histplot(ax=axs[0], data=same_scores, x=x_label, hue=legend_label, stat='probability', kde=False,
+                 common_norm=False,
                  element='bars', binrange=(0, 1), binwidth=0.005)
 
-    sns.histplot(ax=axs[1], data=diff_scores, x=x_label, hue=legend_label, stat='probability', kde=False, common_norm=False,
+    sns.histplot(ax=axs[1], data=diff_scores, x=x_label, hue=legend_label, stat='probability', kde=False,
+                 common_norm=False,
                  element='bars', binrange=(0, 1), binwidth=0.005)
 
     if figure_path is not None:
         fig.savefig(figure_path)
 
     plt.close(fig)
-
 
 
 def plot_best_F1(F1, loop_variable, figure_path):
@@ -268,12 +269,13 @@ def plot_best_accuracy(accuracy, loop_variable, figure_path):
 
     return
 
-def plot_feature_vector(vector, title,figure_path, y_max):
+
+def plot_feature_vector(vector, title, figure_path, y_max):
     fig = plt.figure()
     y = vector.view(-1).numpy()
-    x = np.arange(0,vector.shape[0])
+    x = np.arange(0, vector.shape[0])
 
-    data = pd.DataFrame({'indices': x,'values': y})
+    data = pd.DataFrame({'indices': x, 'values': y})
 
     ax = sns.barplot(x='indices', y='values', data=data)
     ax.set_title(title)
@@ -287,7 +289,6 @@ def plot_feature_vector(vector, title,figure_path, y_max):
 
 
 def main():
-
     # multiple_gpu = True if torch.cuda.device_count() > 1 else False
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # # Parse config file
@@ -334,27 +335,29 @@ def main():
     #     plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
     #     plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
 
-    x = torch.tensor(np.arange(0, 1, 0.01)).view(-1,1)
+    x = torch.tensor(np.arange(0, 1, 0.01)).view(-1, 1)
     # y = torch.nn.functional.leaky_relu(x-0.5)*-torch.log(1-x)
     targets = [0, 1]
     fig = plt.figure()
     f1 = lambda x: - 1 * x.log()
     # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
-    f2 = lambda x: 20 * nn.functional.relu(0.5 - x)
-    losses= []
+    f2 = lambda x: nn.functional.relu(0.5 - x)
+    f3 = lambda x: 1/(x)
+    losses = []
     for target in targets:
+        logloss = target * f1(x) + (1 - target) * f1(1 - x)
+        # logloss = target * f1(x+0.001) + (1 - target) * f1(1 - (x - 0.001))
 
-        logloss = target * f1(x) + (1-target) * f1(1-x)
-        y = target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
+        y = target * (f2(x) * f3(x)) + (1 - target) * (f2(1 - x) * f3(1 - x))
         losses.append(y)
         plt.plot(x.numpy(), y.numpy(), 'r', label=f"log*relu_{target}")
         plt.plot(x.numpy(), logloss.numpy(), 'b', label=f"log_{target}")
+        plt.plot(x.numpy(), f3(x).numpy())
         # plt.plot(x.numpy(), f2(x), 'g', label="relu")
 
     plt.legend()
 
     plt.show()
-
 
     return
 

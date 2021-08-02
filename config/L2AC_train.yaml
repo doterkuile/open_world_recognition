@@ -1,10 +1,10 @@
 ## Experiment
-name: '0012'
+name: '0015'
 
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: MetaDataset
-model_class: L2AC_extended_similarity
+model_class: L2AC_concat
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
@@ -26,7 +26,7 @@ class_ratio:
   l2ac_train: 20
   l2ac_test: 20
 
-test_class_selection: same_cls
+test_class_selection: diff_cls
 feature_scaling: max_value #sigmoid max_value
 two_step_training: True
 train_matching_layer_only: False
