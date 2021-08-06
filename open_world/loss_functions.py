@@ -91,7 +91,7 @@ class matching_layer_loss(nn.Module):
 
         f1 = lambda x: - 1 * x.log()
         # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
-        f2 = lambda x: 10 * nn.functional.relu(0.55 - x)
+        f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
 
         loss = self.weight *  target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
 
