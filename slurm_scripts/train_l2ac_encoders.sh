@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
-#SBATCH --gres=gpu:p100:1             		# number of gpus per node
-#SBATCH --time=07:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --gres=gpu:1             		# number of gpus per node
+#SBATCH --time=14:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -32,25 +32,35 @@ conda_env=l2acenv
 
 
 # Loop variables
-var_1=name	
-array_1=(l_t_e_0001 l_t_e_0002 l_t_e_0003 l_t_e_0004)
+var_1=name
+array_1=(l_t_0008) #l_t_e_0002 l_t_e_0003 l_t_e_0004)
 var_2=feature_layer
-array_2=(avgpool avgpool features _avg_pooling)
+array_2=(avgpool) #avgpool features _avg_pooling)
 var_3=encoder
-array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
-var_4=unfreeze_layer
-array_4=(62 62 10 30)
-var_5=two_step_training
-array_5=(True True True True)
-var_6=top_n
-array_6=(9 9 9 9)
+array_3=(ResNet50) #ResNet152 AlexNet EfficientNet)
+var_4=(unfreeze_layer)
+array_4=(2) #62 10 30)
+var_5=criterion
+array_5=(bce_loss_custom) #bce_loss_custom bce_loss_custom bce_loss_custom)
+var_6=two_step_training
+array_6=(True) #True True True)
+var_7=feature_scaling
+array_7=(max_value) # normal normal)
+var_8=top_n
+array_8=(9) # 9 9)
+var_9=model_class
+array_9=(L2AC_concat) # L2AC_concat L2AC_concat)
+var_10=encoder_train
+array_10=(5)
+var_11=l2ac_train
+array_11=(80)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=2
+value_e=400
 
 conda activate $conda_env
 
@@ -65,7 +75,7 @@ do
 
         echo "$var_e = ${value_e}"
         sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
-	
+
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
@@ -73,6 +83,12 @@ do
     echo "$var_4 = ${array_4[$i]}"
     echo "$var_5 = ${array_5[$i]}"
     echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
+    echo "$var_8 = ${array_8[$i]}"
+    echo "$var_9 = ${array_9[$i]}"
+    echo "$var_10 = ${array_10[$i]}"
+    echo "$var_11 = ${array_11[$i]}"
+
 
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
@@ -81,7 +97,11 @@ do
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
-
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
+	sed -i "s/$var_9:.*/$var_9: ${array_9[$i]}/" $config_file
+	sed -i "s/$var_10:.*/$var_10: ${array_10[$i]}/" $config_file
+	sed -i "s/$var_11:.*/$var_11: ${array_11[$i]}/" $config_file
 
 
 	python $python_script $config_file

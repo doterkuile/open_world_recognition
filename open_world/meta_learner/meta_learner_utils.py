@@ -259,7 +259,7 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             X1_train = X1_train.to(device)
             y_train = y_train.view(-1, 1).to(device)
 
-            y_train = torch.abs(y_train -1)
+            # y_train = torch.abs(y_train -1)
             y_train = y_train.repeat_interleave(X1_train.shape[1], dim=1)
 
             # Limit the number of batches
@@ -330,10 +330,10 @@ def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test
             title = f'Matching layer output\n Epoch = {i + 1}'
             fig_path = f'{gif_path}/matching_only_{i}.png'
 
-            ml_trn_same_idx = (trn_y_true == 0).nonzero()[0].squeeze()
-            ml_trn_diff_idx = (trn_y_true == 1).nonzero()[0].squeeze()
-            ml_tst_same_idx = (tst_y_true == 0).nonzero()[0].squeeze()
-            ml_tst_diff_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+            ml_trn_same_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+            ml_trn_diff_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+            ml_tst_same_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+            ml_tst_diff_idx = (tst_y_true == 0).nonzero()[0].squeeze()
             # Make gif of similarity function score
             plot_utils.plot_prob_density(fig_final, axs_final, trn_y_pred_raw, ml_trn_same_idx, ml_trn_diff_idx, tst_y_pred_raw, ml_tst_same_idx,
                                          ml_tst_diff_idx, title, fig_path)
@@ -371,7 +371,7 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
             X0_test = X0_test.to(device)
             X1_test = X1_test.to(device)
             y_test = y_test.view(-1, 1).to(device)
-            y_test = torch.abs(y_test -1)
+            # y_test = torch.abs(y_test -1)
 
             y_test = y_test.repeat_interleave(X1_test.shape[1], dim=1)
 

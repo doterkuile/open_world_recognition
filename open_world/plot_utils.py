@@ -131,10 +131,10 @@ def create_gif_image(trn_ml_out, trn_y_true, tst_ml_out, tst_y_true, trn_y_raw, 
     fig_ml_name = f'{gif_path}/sim_{epoch}.png'
     # Make gif of similarity function score
 
-    ml_trn_same_idx = (trn_y_true == 0).nonzero()[0].squeeze()
-    ml_trn_diff_idx = (trn_y_true == 1).nonzero()[0].squeeze()
-    ml_tst_same_idx = (tst_y_true == 0).nonzero()[0].squeeze()
-    ml_tst_diff_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+    ml_trn_same_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+    ml_trn_diff_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+    ml_tst_same_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+    ml_tst_diff_idx = (tst_y_true == 0).nonzero()[0].squeeze()
 
 
     plot_prob_density(fig_sim, axs_sim, trn_ml_out, ml_trn_same_idx, ml_trn_diff_idx, tst_ml_out, ml_tst_same_idx,
@@ -341,20 +341,22 @@ def main():
     fig = plt.figure()
     f1 = lambda x: - 1 * x.log()
     # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
-    f2 = lambda x: nn.functional.relu(0.5 - x)
+    f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
     f3 = lambda x: 1/(x)
     losses = []
+    color = ['b', 'r']
+
     for target in targets:
         logloss = target * f1(x) + (1 - target) * f1(1 - x)
         # logloss = target * f1(x+0.001) + (1 - target) * f1(1 - (x - 0.001))
 
-        y = target * (f2(x) * f3(x)) + (1 - target) * (f2(1 - x) * f3(1 - x))
+        y = target * (f2(x) + f1(x)) + (1 - target) * (f2(1 - x) + f1(1 - x))
         losses.append(y)
-        plt.plot(x.numpy(), y.numpy(), 'r', label=f"log*relu_{target}")
-        plt.plot(x.numpy(), logloss.numpy(), 'b', label=f"log_{target}")
-        plt.plot(x.numpy(), f3(x).numpy())
+        # plt.plot(x.numpy(), y.numpy(), 'r', label=f"log*relu_{target}")
+        plt.plot(x.numpy(),y.numpy(), color[target], label=f"y_true = {target}")
+        # plt.plot(x.numpy(), f3(x).numpy())
         # plt.plot(x.numpy(), f2(x), 'g', label="relu")
-
+    plt.title('Custom loss function')
     plt.legend()
 
     plt.show()

@@ -89,7 +89,7 @@ def main():
         optimizer = eval('torch.optim.' + config['optimizer'])(filter(lambda p: p.requires_grad, model.parameters()),
                                                                lr=learning_rate, weight_decay=1e-5)
 
-        trn_metrics_ml, tst_metrics_ml, best_state_ml, = meta_utils.trainMatchingLayer(
+        trn_metrics_ml, tst_metrics_ml, best_state_ml = meta_utils.trainMatchingLayer(
             model,
             train_loader,
             test_loader,
@@ -129,7 +129,7 @@ def main():
             print(f'\nTotal duration: {time.time() - start_time:.0f} seconds')
             return
 
-    trn_metrics, tst_metrics, best_state, = meta_utils.trainMetaModel(model,
+    trn_metrics, tst_metrics, best_state = meta_utils.trainMetaModel(model,
                                                                       train_loader,
                                                                       test_loader,
                                                                       epochs,
@@ -164,10 +164,10 @@ def main():
     title = 'Intermediate similarity score'
     fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
 
-    ml_trn_same_idx = (trn_y_true == 0).nonzero()[0].squeeze()
-    ml_trn_diff_idx = (trn_y_true == 1).nonzero()[0].squeeze()
-    ml_tst_same_idx = (tst_y_true == 0).nonzero()[0].squeeze()
-    ml_tst_diff_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+    ml_trn_same_idx = (trn_y_true == 1).nonzero()[0].squeeze()
+    ml_trn_diff_idx = (trn_y_true == 0).nonzero()[0].squeeze()
+    ml_tst_same_idx = (tst_y_true == 1).nonzero()[0].squeeze()
+    ml_tst_diff_idx = (tst_y_true == 0).nonzero()[0].squeeze()
 
     plot_utils.plot_prob_density(fig_sim, axs_sim, trn_sim_scores, ml_trn_same_idx, ml_trn_diff_idx, tst_sim_scores, ml_tst_same_idx,
                       ml_tst_diff_idx, title, figure_path + '_intermediate_similarity')
@@ -184,7 +184,7 @@ def main():
                                  al_tst_same_idx, al_tst_diff_idx, title, figure_path + '_final_similarity')
 
     OpenWorldUtils.saveModel(model, model_path)
-    print(f'Saving the final model of epoch {best_state_ml["epoch"]}, with F1 score: {best_state_ml["F1"]} ')
+    print(f'Saving the final model of epoch {best_state["epoch"]}, with F1 score: {best_state["F1"]} ')
     best_state['model_class'] = config['model_class']
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 

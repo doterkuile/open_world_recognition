@@ -67,7 +67,7 @@ class bce_loss_custom(nn.Module):
 
         f1 = lambda x: - 1 * x.log()
         # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
-        f2 = lambda x: 10 * nn.functional.relu(0.55 - x)
+        f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
 
         loss = self.positive_weight * target * (f2(x) + f1(x)) +  (1-target) * (f2(1-x) + f1(1 - x))
 
@@ -93,12 +93,12 @@ class matching_layer_loss(nn.Module):
         # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
         f2 = lambda x: 10 * nn.functional.relu(0.55 - x)
 
-        loss = target * (f2(x) + f1(x)) + self.weight * (1-target) * (f2(1-x) + f1(1 - x))
+        loss = self.weight *  target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
 
         idx0 = len((target == 0).nonzero())
         idx1 = len((target == 1).nonzero())
 
-        lossmean = loss.sum()/(idx1 + idx0* int(self.weight) )
+        lossmean = loss.sum()/( int(self.weight) *idx1 + idx0 )
 
         return lossmean
 
