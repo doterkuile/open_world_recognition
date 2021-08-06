@@ -259,6 +259,24 @@ class L2AC_base(torch.nn.Module):
             self.selected_out[layer_name] = output
         return hook
 
+    def initialize_weights(self):
+
+
+        for m in self.modules():
+            if isinstance(m, nn.LSTM):
+                nn.init.orthogonal_(self.lstm.weight_ih_l0)
+                nn.init.orthogonal_(self.lstm.weight_hh_l0)
+                nn.init.orthogonal_(self.lstm.weight_ih_l0_reverse)
+                nn.init.orthogonal_(self.lstm.weight_hh_l0_reverse)
+
+                nn.init.zeros_(self.lstm.bias_ih_l0)
+                nn.init.ones_(self.lstm.bias_ih_l0[self.hidden_size:self.hidden_size * 2])
+                nn.init.zeros_(self.lstm.bias_hh_l0)
+                nn.init.ones_(self.lstm.bias_hh_l0[self.hidden_size:self.hidden_size * 2])
+            elif isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight.data, gain=1.0)
+
+
     def forward(self, x0, x1):
         x = self.similarity_function(x0, x1)
         x = self.matching_layer(x)
@@ -280,10 +298,12 @@ class L2AC(L2AC_base):
 
         super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.initialize_weights()
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
-                                       nn.ReLU(),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),
@@ -311,12 +331,13 @@ class L2AC_cosine(L2AC_base):
         super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.initialize_weights()
 
         return
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(
-            # nn.Sigmoid()
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       # nn.Sigmoid()
                                        )
         return matching_layer
 
@@ -338,13 +359,15 @@ class L2AC_no_lstm(L2AC_base):
         super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.has_lstm = False
+        self.initialize_weights()
 
         return
 
 
     def setMatchingLayer(self):
 
-        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
@@ -355,14 +378,14 @@ class L2AC_no_lstm(L2AC_base):
     def setAggregationLayer(self):
 
         aggregation_layer = nn.Sequential(nn.Linear(self.top_k, 256),
-                                          nn.ReLU(),
+                                          nn.LeakyReLU(),
                                           nn.Dropout(p=0.5),
                                           nn.Linear(256, 256),
-                                          nn.ReLU(),
-                                          nn.Dropout(p=0.25),
+                                          nn.LeakyReLU(),
+                                          nn.Dropout(p=0.5),
                                           nn.Linear(256, 64),
-                                          nn.ReLU(),
-                                          nn.Dropout(p=0.1),
+                                          nn.LeakyReLU(),
+                                          nn.Dropout(p=0.5),
                                           nn.Linear(64, 1))
 
         return aggregation_layer
@@ -383,11 +406,13 @@ class L2AC_extended_similarity(L2AC_base):
         super().__init__(num_classes, feature_size, batch_size, top_k)
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.initialize_weights()
 
         return
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1024),
@@ -395,10 +420,10 @@ class L2AC_extended_similarity(L2AC_base):
                                        nn.Dropout(p=0.5),
                                        nn.Linear(1024, 1024),
                                        nn.LeakyReLU(),
-                                       nn.Dropout(p=0.25),
+                                       nn.Dropout(p=0.5),
                                        nn.Linear(1024, 128),
                                        nn.LeakyReLU(),
-                                       nn.Dropout(p=0.1),
+                                       nn.Dropout(p=0.5),
                                        nn.Linear(128, 1),
                                        # nn.Sigmoid()
                                        )
@@ -427,11 +452,13 @@ class L2AC_smaller_fc(L2AC_base):
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.fc_reduce = nn.Linear(self.feature_size, self.input_size)
+        self.initialize_weights()
 
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Linear(2 * self.input_size, self.input_size),
-                                       nn.ReLU(),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(2 * self.input_size, self.input_size),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),
@@ -461,10 +488,12 @@ class L2AC_abssub(L2AC_base):
     def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.initialize_weights()
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Linear(self.feature_size, self.input_size),
-                                       nn.ReLU(),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(self.feature_size, self.input_size),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),
@@ -487,10 +516,12 @@ class L2AC_concat(L2AC_base):
     def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.initialize_weights()
 
     def setMatchingLayer(self):
-        matching_layer = nn.Sequential(nn.Linear(2 * self.feature_size, self.input_size),
-                                       nn.ReLU(),
+        matching_layer = nn.Sequential(nn.Dropout(p=0.5),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),
