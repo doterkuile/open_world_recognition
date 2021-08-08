@@ -84,6 +84,14 @@ class matching_layer_loss(nn.Module):
         super(matching_layer_loss, self).__init__()
         self.weight = weight
 
+    def sample_loss(self, input, target):
+        f1 = lambda x: - 1 * x.log()
+        # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
+        f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
+
+        loss = self.weight * target * (f2(input) + f1(input)) + (1 - target) * (f2(1 - input) + f1(1 - input))
+
+        return loss
 
     def forward(self, input, target):
         epsilon = 10 ** -7
@@ -93,8 +101,8 @@ class matching_layer_loss(nn.Module):
         # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
         f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
 
-        loss = self.weight *  target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
-
+        loss2 = self.weight *  target * (f2(x) + f1(x)) + (1-target) * (f2(1-x) + f1(1 - x))
+        loss = self.sample_loss(x, target)
         idx0 = len((target == 0).nonzero())
         idx1 = len((target == 1).nonzero())
 

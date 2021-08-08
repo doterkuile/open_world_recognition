@@ -287,6 +287,38 @@ def plot_feature_vector(vector, title, figure_path, y_max):
 
     pass
 
+def plot_loss_dist(y_pred, y_true, criterion, device):
+    fig = plt.figure()
+
+    y_pred = torch.tensor(y_pred,device=device)
+    y_true = torch.tensor(y_true,device=device)
+
+    loss = criterion.sample_loss(y_pred, y_true).cpu().numpy()
+    fraction = np.arange(0,y_true.shape[0]) / y_true.shape[0] * 100
+
+
+    idx = np.argsort(loss)
+    idx = np.arange(0, y_true.shape[0])
+
+    sort_loss = loss[idx]
+    cumsum_loss = np.cumsum(sort_loss) / sort_loss.sum()
+
+    predicted = y_pred[idx].cpu().numpy()
+    y_true = y_true[idx].cpu().numpy()
+    predicted[predicted <= 0.5] = 0
+    predicted[predicted > 0.5] = 1
+
+    pos_idx = (predicted == y_true)
+    neg_idx = (predicted != y_true)
+    plt.scatter(fraction[pos_idx], cumsum_loss[pos_idx], alpha=0.5, s=1)
+    plt.scatter(fraction[neg_idx], cumsum_loss[neg_idx], alpha=0.5, s=1)
+
+    # plt.plot(fraction, cumsum_loss)
+    # plt.fill_between(fraction[n], cumsum_loss[n], alpha=0.5)
+    plt.show()
+    pass
+
+
 
 def main():
     # multiple_gpu = True if torch.cuda.device_count() > 1 else False
