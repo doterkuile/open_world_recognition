@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_reverse_extend  	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=short						# select quality of service
+#SBATCH --qos=long						# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=4gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=01:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=18:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -50,7 +50,7 @@ len=${#array_1[@]}
 
 
 var_e=epochs
-value_e=5
+value_e=400
 
 conda activate $conda_env
 
