@@ -38,6 +38,10 @@ class bce_loss_matching_layer(nn.Module):
         self.positive_weight = weight
         self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight, reduction='mean')
 
+
+
+
+
     def forward(self, input, target):
         epsilon = 10 ** -7
         x = input.sigmoid().clamp(epsilon, 1 - epsilon)
@@ -59,6 +63,15 @@ class bce_loss_custom(nn.Module):
     def __init__(self, weight=None):
         super(bce_loss_custom, self).__init__()
         self.positive_weight = weight
+
+    def sample_loss(self, input, target):
+        f1 = lambda x: - 1 * x.log()
+        # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
+        f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
+
+        loss = self.positive_weight * target * (f2(input) + f1(input)) + (1 - target) * (f2(1 - input) + f1(1 - input))
+
+        return loss
 
 
     def forward(self, input, target):

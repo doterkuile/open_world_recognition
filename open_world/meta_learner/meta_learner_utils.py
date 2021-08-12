@@ -192,7 +192,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     y_pred_raw = np.array(torch.cat(y_pred_raw))
     y_true = np.array(torch.cat(y_true))
     ml_out = np.array(torch.cat(ml_out, dim=1).detach()).transpose(1, 0)
-    plot_utils.plot_loss_dist(y_pred, y_true, criterion)
+    # plot_utils.plot_loss_dist(y_pred, y_true, criterion)
 
     tst_loss = tst_loss.mean()
     test_acc = (y_true == y_pred).nonzero()[0].shape[0] * 100 / (len(loader.dataset))
@@ -412,7 +412,7 @@ def validateMatchingLayer(loader, model, criterion, device, probability_threshol
     y_pred_raw = np.array(torch.cat(y_pred_raw))
     y_true = np.array(torch.cat(y_true))
     sim_scores = np.array(torch.cat(sim_scores, dim=0).detach())
-    plot_utils.plot_loss_dist(y_pred_raw, y_true, criterion, device)
+    # plot_utils.plot_loss_dist(y_pred_raw, y_true, criterion, device)
 
     tst_loss = tst_loss.mean()
     return y_pred, y_true, tst_loss, sim_scores, y_pred_raw

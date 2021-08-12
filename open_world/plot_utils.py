@@ -287,7 +287,7 @@ def plot_feature_vector(vector, title, figure_path, y_max):
 
     pass
 
-def plot_loss_dist(y_pred, y_true, criterion, device):
+def plot_loss_dist(y_pred, y_true, criterion, device, fig_path):
     fig = plt.figure()
 
     y_pred = torch.tensor(y_pred,device=device)
@@ -298,7 +298,7 @@ def plot_loss_dist(y_pred, y_true, criterion, device):
 
 
     idx = np.argsort(loss)
-    idx = np.arange(0, y_true.shape[0])
+    # idx = np.arange(0, y_true.shape[0])
 
     sort_loss = loss[idx]
     cumsum_loss = np.cumsum(sort_loss) / sort_loss.sum()
@@ -314,8 +314,11 @@ def plot_loss_dist(y_pred, y_true, criterion, device):
     plt.scatter(fraction[neg_idx], cumsum_loss[neg_idx], alpha=0.5, s=1)
 
     # plt.plot(fraction, cumsum_loss)
-    # plt.fill_between(fraction[n], cumsum_loss[n], alpha=0.5)
+    plt.fill_between(fraction[pos_idx], cumsum_loss[pos_idx], alpha=0.5)
+    plt.fill_between(fraction[neg_idx], cumsum_loss[neg_idx], alpha=0.5)
     plt.show()
+    fig.savefig(fig_path, bbox_inches='tight')
+    plt.close(fig)
     pass
 
 

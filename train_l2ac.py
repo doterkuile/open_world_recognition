@@ -156,10 +156,15 @@ def main():
         criterion, device,
         probability_threshold)
 
+    plot_utils.plot_loss_dist(trn_y_pred, trn_y_true, criterion, device, figure_path + 'trn_loss_dist')
+
     tst_y_pred, tst_y_true, tst_losses, tst_sim_scores, tst_y_pred_raw = meta_utils.validate_model(
         test_loader, model,
         test_criterion, device,
         probability_threshold)
+
+    plot_utils.plot_loss_dist(tst_y_pred, tst_y_true, test_criterion, device, figure_path + 'tst_loss_dist')
+
 
     title = 'Intermediate similarity score'
     fig_sim, axs_sim = plt.subplots(2, 1, figsize=(15, 10))
