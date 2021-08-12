@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=4gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=04:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=01:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,17 +33,17 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_0001)
+array_1=(l_t_r_0001 l_t_r_0002)
 var_2=same_class_reverse
-array_2=(False)
+array_2=(False True)
 var_3=same_class_extend_entries
-array_3=(True)
+array_3=(True False)
 var_4=model_class
-array_4=(L2AC_concat)
+array_4=(L2AC_concat L2AC_concat)
 var_5=criterion
-array_5=(bce_loss_custom)
+array_5=(bce_loss_custom bce_loss_custom)
 var_6=two_step_training
-array_6=(True)
+array_6=(True True)
 len=${#array_1[@]}
 
 

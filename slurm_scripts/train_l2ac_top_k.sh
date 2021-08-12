@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_top_k	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=long						# select quality of service
+#SBATCH --qos=short						# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=6        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=5gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:p100:1             		# number of gpus per node
-#SBATCH --time=20:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=02:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,18 +33,22 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(0024 0025 0026 0027 0028)
+array_1=(l_t_k_0001 l_t_k_0002 l_t_k_0003 l_t_k_0004 l_t_k_0005 l_t_k_000_6)
 var_2=top_k
-array_2=(3 5 10 20 50)
+array_2=(1 3 5 10 20 50)
 var_3=model_class
-array_3=(L2AC L2AC L2AC L2AC L2AC)
+array_3=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
+var_4=criterion
+array_4=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
+var_5=two_step_training
+array_5=(True True True True True True True True)
 len=${#array_1[@]}
 
 
 
 
-var_4=epochs
-value_4=200
+var_e=epochs
+value_e=5
 
 conda activate $conda_env
 
@@ -63,12 +67,15 @@ do
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
-        echo "$var_3 = ${array_3[$i]}"
+    echo "$var_3 = ${array_3[$i]}"
+	echo "$var_4 = ${array_4[$i]}"
+    echo "$var_5 = ${array_5[$i]}"
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
-
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 
 	python $python_script $config_file
 

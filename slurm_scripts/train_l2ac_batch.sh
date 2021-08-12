@@ -33,18 +33,26 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(0009 0010 0011 0012 0013)
+array_1=(l_t_b_0001 l_t_b_0002 l_t_b_0003 l_t_b_0004 l_t_b_0005)
 var_2=top_n
 array_2=(4 4 4 4 4)
 var_3=batch_size
 array_3=(512 256 128 50 20)
+var_4=feature_scaling
+array_4=(max_value max_value max_value max_value)
+var_5=model_class
+array_5=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
+var_6=two_step_training
+array_6=(True True True True True)
+var_7=criterion
+array_7=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
 len=${#array_1[@]}
 
 
 
+var_e=epochs
+value_e=5
 
-var_4=epochs
-value_4=2
 
 conda activate $conda_env
 
@@ -57,18 +65,25 @@ do
 	mkdir -p output/${array_1[$i]}
 	cp -r config/$base_config_file $config_file	
 
-        echo "$var_4 = ${value_4}"
-        sed -i "s/$var_4:.*/$var_4: ${value_4}/" $config_file
+    echo "$var_e = ${value_e}"
+    sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
 	
 
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
-        echo "$var_3 = ${array_3[$i]}"
+ 	echo "$var_3 = ${array_3[$i]}"
+    echo "$var_4 = ${array_4[$i]}"
+    echo "$var_5 = ${array_5[$i]}"
+    echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
-
+	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
+	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
+	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
 
 	python $python_script $config_file
 

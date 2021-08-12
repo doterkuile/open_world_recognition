@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_top_n  	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=long						# select quality of service
+#SBATCH --qos=short						# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=4gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=7gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=20:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=02:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,15 +33,15 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_0002)
+array_1=(l_t_n_0001 l_t_n_0002 l_t_n_0003 l_t_n_0004 l_t_n_0005 l_t_n_0006)
 var_2=top_n
-array_2=(9)
+array_2=(1 2 4 9 10 15)
 var_3=model_class
-array_3=(L2AC_concat)
+array_3=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
 var_4=two_step_training
-array_4=(True)
+array_4=(True True True True True True True)
 var_5=criterion
-array_5=(bce_loss_custom)
+array_5=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
 len=${#array_1[@]}
 
 

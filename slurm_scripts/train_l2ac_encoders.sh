@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_encoders 	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=long						# select quality of service
+#SBATCH --qos=short					# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=14:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=01:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,34 +33,36 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_t_0008) #l_t_e_0002 l_t_e_0003 l_t_e_0004)
+array_1=(l_t_e_0001 l_t_e_0002 l_t_e_0003 l_t_e_0004)
 var_2=feature_layer
-array_2=(avgpool) #avgpool features _avg_pooling)
+array_2=(avgpool avgpool features _avg_pooling)
 var_3=encoder
-array_3=(ResNet50) #ResNet152 AlexNet EfficientNet)
+array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
 var_4=(unfreeze_layer)
-array_4=(2) #62 10 30)
+array_4=(62 62 10 30)
 var_5=criterion
-array_5=(bce_loss_custom) #bce_loss_custom bce_loss_custom bce_loss_custom)
+array_5=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
 var_6=two_step_training
-array_6=(True) #True True True)
+array_6=(True True True True)
 var_7=feature_scaling
-array_7=(max_value) # normal normal)
+array_7=(max_value max_value normal normal)
 var_8=top_n
-array_8=(9) # 9 9)
+array_8=(9 9 9 9)
 var_9=model_class
-array_9=(L2AC_concat) # L2AC_concat L2AC_concat)
-var_10=encoder_train
-array_10=(5)
+array_9=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
+var_10=batch_size
+array_10=(256 256 256 256)
+# var_11=same_class_extend_entries
+# array_11=(True)
 var_11=l2ac_train
-array_11=(80)
+array_11=(20 20 20 20)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=400
+value_e=2
 
 conda activate $conda_env
 
@@ -73,8 +75,8 @@ do
 	mkdir -p output/${array_1[$i]}
 	cp -r config/$base_config_file $config_file
 
-        echo "$var_e = ${value_e}"
-        sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
+    echo "$var_e = ${value_e}"
+    sed -i "s/$var_e:.*/$var_e: ${value_e}/" $config_file
 
 
 	echo "$var_1 = ${array_1[$i]}"
