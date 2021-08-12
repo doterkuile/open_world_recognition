@@ -316,7 +316,6 @@ def plot_loss_dist(y_pred, y_true, criterion, device, fig_path):
     # plt.plot(fraction, cumsum_loss)
     plt.fill_between(fraction[pos_idx], cumsum_loss[pos_idx], alpha=0.5)
     plt.fill_between(fraction[neg_idx], cumsum_loss[neg_idx], alpha=0.5)
-    plt.show()
     fig.savefig(fig_path, bbox_inches='tight')
     plt.close(fig)
     pass

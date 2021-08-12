@@ -15,7 +15,7 @@ criterion: bce_loss_custom
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 1
+epochs: 10
 
 ## L2AC parameters
 top_k: 5
@@ -28,7 +28,7 @@ class_ratio:
 
 test_class_selection: same_cls
 feature_scaling: max_value #sigmoid max_value
-two_step_training: False
+two_step_training: True
 train_matching_layer_only: False
 
 train_samples_per_cls: 500

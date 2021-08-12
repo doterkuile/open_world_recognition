@@ -87,7 +87,7 @@ def parseConfigFile(device, multiple_gpu):
  
     model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(train_classes,features_size, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(train_classes, dataset_path, features_size, batch_size, top_k).to(device)
 
     # If multiple gpu's available
     # if multiple_gpu:
