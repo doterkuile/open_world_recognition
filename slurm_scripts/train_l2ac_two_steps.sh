@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=train_l2ac_losses 	# create a short name for your job
+#SBATCH --job-name=train_l2ac_two_step 	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
 #SBATCH --qos=long						# select quality of service
@@ -29,19 +29,21 @@ python_script=train_l2ac.py
 base_config_file=L2AC_train_base.yaml
 conda_env=l2acenv
 
+
+
 # Loop variables
 var_1=name	
-array_1=(l_t_loss_0001 l_t_loss_0002)
+array_1=(l_t_step_0001 l_t_step_0002)
 var_2=top_n
-array_2=(9 9)
+array_2=(4 4)
 var_3=model_class
 array_3=(L2AC_concat L2AC_concat)
 #array_3=(L2AC L2AC_cosine L2AC_no_lstm L2AC_extended_similarity L2AC_smaller_fc L2AC_abssub L2AC_concat)
 
 var_4=criterion
-array_4=(bce_loss_default bce_loss_custom)
+array_4=(bce_loss_custom bce_loss_custom)
 var_5=two_step_training
-array_5=(True True)
+array_5=(False True)
 len=${#array_1[@]}
 
 
