@@ -78,9 +78,9 @@ def main():
     ml_criterion = loss_functions.matching_layer_loss(ml_weight)
     ml_criterion_test = loss_functions.matching_layer_loss(pos_weight)
     two_step_training = config['two_step_training']
-    train_matching_layer_only = config['train_matching_layer_only']
+    freeze_matching_layer = config['freeze_matching_layer']
 
-    if two_step_training or train_matching_layer_only:
+    if two_step_training or freeze_matching_layer:
 
         param_keys = 'matching_layer'
         for name, param in model.named_parameters():
@@ -105,10 +105,14 @@ def main():
         model.load_state_dict(best_state_ml['model'])
 
         for name, param in model.named_parameters():
-            # if 'matching_layer' in name:
-            #     param.requires_grad = False
-            # else:
-            param.requires_grad = True
+
+            if freeze_matching_layer:
+                if 'matching_layer' in name:
+                    param.requires_grad = False
+                else:
+                    param.requires_grad = True
+            else:
+                param.requires_grad = True
 
         optimizer = eval('torch.optim.' + config['optimizer'])(
             filter(lambda p: p.requires_grad, model.parameters()),
@@ -124,10 +128,6 @@ def main():
                                         tst_metrics_ml['mean_pred'],
                                         tst_metrics_ml['mean_true'], ml_figure_path)
 
-        if train_matching_layer_only:
-            print('Trained only matching layer')
-            print(f'\nTotal duration: {time.time() - start_time:.0f} seconds')
-            return
 
     trn_metrics, tst_metrics, best_state = meta_utils.trainMetaModel(model,
                                                                       train_loader,

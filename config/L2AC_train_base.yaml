@@ -29,7 +29,7 @@ class_ratio:
 test_class_selection: same_cls
 feature_scaling: max_value #sigmoid max_value
 two_step_training: False
-train_matching_layer_only: False
+freeze_matching_layer: False
 
 
 
