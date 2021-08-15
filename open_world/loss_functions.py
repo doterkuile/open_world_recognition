@@ -43,7 +43,7 @@ class bce_loss_matching_layer(nn.Module):
         x = input.sigmoid().clamp(epsilon, 1 - epsilon)
         f1 = lambda x: - x.log()
 
-        loss = self.positive_weight * Target * f1(x) +  (1 - target) * f1(1 - x)
+        loss = self.positive_weight * target * f1(x) +  (1 - target) * f1(1 - x)
         # loss = self.criterion(input, target)
 
         idx0 = len((target == 0).nonzero())
