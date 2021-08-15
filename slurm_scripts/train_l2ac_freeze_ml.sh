@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=6        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=7gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=25gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=18:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=48:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,19 +33,19 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_freeze_ml_0001 l_t_freeze_ml_0002)
+array_1=(l_t_freeze_ml_0004)
 var_2=top_n
-array_2=(9 9)
+array_2=(9)
 var_3=l2ac_train
-array_3=(20 20)
+array_3=(80)
 var_4=model_class
-array_4=(L2AC_concat L2AC_concat)
+array_4=(L2AC_concat)
 var_5=freeze_matching_layer
-array_5=(True False)
+array_5=(True)
 var_6=two_step_training
-array_6=(True True)
+array_6=(True)
 var_7=test_class_selection
-array_7=(same_cls same_cls)
+array_7=(diff_cls)
 len=${#array_1[@]}
 
 

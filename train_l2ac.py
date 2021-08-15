@@ -75,8 +75,8 @@ def main():
     pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
     ml_weight = torch.tensor(config['top_n']).to(device).to(dtype=torch.float)
     test_criterion = eval('loss_functions.' + config['criterion'])(pos_weight)
-    ml_criterion = loss_functions.matching_layer_loss(ml_weight)
-    ml_criterion_test = loss_functions.matching_layer_loss(pos_weight)
+    ml_criterion = loss_functions.bce_loss_matching_layer(ml_weight)
+    ml_criterion_test = loss_functions.bce_loss_matching_layer(pos_weight)
     two_step_training = config['two_step_training']
     freeze_matching_layer = config['freeze_matching_layer']
 
