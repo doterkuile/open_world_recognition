@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=15gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=25gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=02:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=04:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -34,17 +34,17 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=image_resize
-array_1=(224)	
+array_1=(224 224 224)	
 var_2=unfreeze_layer
-array_2=(62)
+array_2=(2 2 2)
 var_3=top_n
-array_3=(4)
+array_3=(9 9 9)
 var_4=feature_scaling
-array_4=(max_value)
+array_4=(max_value max_value max_value)
 var_5=l2ac_train
-array_5=(80)
+array_5=(160 160 160)
 var_6=model_class
-array_6=(ResNet50)
+array_6=(ResNet50 ResNet152 EfficientNet)
 len=${#array_1[@]}
 
 

@@ -226,7 +226,7 @@ class L2AC_base(torch.nn.Module):
         self.feature_size = feature_size
         self.input_size = 2048
         self.batch_size = batch_size
-        self.hidden_size = top_k
+        self.hidden_size = 1
         self.top_k = top_k
 
         self.matching_layer = self.setMatchingLayer()
