@@ -416,6 +416,7 @@ class L2AC_extended_similarity(L2AC_base):
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1024),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.2),
                                        nn.Linear(1024, 128),
                                        nn.LeakyReLU(),

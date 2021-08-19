@@ -28,8 +28,8 @@ class_ratio:
 
 test_class_selection: diff_cls
 feature_scaling: normal #sigmoid max_value
-two_step_training: True
-train_matching_layer_only: False
+two_step_training: False
+freeze_matching_layer: False
 
 train_samples_per_cls: 100
 probability_threshold: 0.5

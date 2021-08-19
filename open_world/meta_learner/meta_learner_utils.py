@@ -163,7 +163,6 @@ def validate_model(loader, model, criterion, device, probability_threshold):
     y_pred_raw = []
     ml_out = []
     tst_loss = []
-
     with torch.no_grad():
         for b, ([X0, X1], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
 
@@ -171,7 +170,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
             X1 = X1.to(device)
             y_test = y_test.view(-1, 1).to(device)
 
-            if b == (len(loader)):
+            if b == len(loader):
                 break
             y_out, matching_layer_output, batch_loss, predicted = train_batch_step(X0, X1, y_test,
                                                                                    model, criterion,
