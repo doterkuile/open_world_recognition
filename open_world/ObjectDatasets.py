@@ -111,7 +111,7 @@ class MetaDataset(data_utils.Dataset):
 
         self.train_X0 = np.repeat(data['train_X0'], self.top_n+1, axis=0)
         # Get indices non-similar classes (the above top_n in the second dim)
-        self.train_X1 = data['train_X1'][:, :self.top_n, -self.top_k:]
+        self.train_X1 = data['train_X1'][:, -self.top_n:, -self.top_k:]
 
         # Get indices of the same class samples
         if self.same_class_reverse:
