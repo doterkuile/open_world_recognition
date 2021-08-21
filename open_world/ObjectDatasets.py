@@ -96,7 +96,7 @@ class MetaDataset(data_utils.Dataset):
         y_extra = np.ones([len(y_train), self.top_n-1, ])
         self.train_Y = np.concatenate([y_train, y_extra], axis=1).reshape(-1, )
 
-        x1 = data['train_X1'][:, :self.top_n, -self.top_k:]
+        x1 = data['train_X1'][:, -(self.top_n+1):-1, -self.top_k:]
         x1_extra= data['train_X1'][:, -1, -self.top_n*self.top_k:].reshape(x1.shape[0],-1,self.top_k)
         x1_test = x1_extra
         self.train_X1 = np.concatenate([x1, x1_extra], axis=1).reshape(-1,self.top_k)
@@ -111,7 +111,7 @@ class MetaDataset(data_utils.Dataset):
 
         self.train_X0 = np.repeat(data['train_X0'], self.top_n+1, axis=0)
         # Get indices non-similar classes (the above top_n in the second dim)
-        self.train_X1 = data['train_X1'][:, -self.top_n:, -self.top_k:]
+        self.train_X1 = data['train_X1'][:, -(self.top_n+1):-1, -self.top_k:]
 
         # Get indices of the same class samples
         if self.same_class_reverse:
@@ -129,7 +129,7 @@ class MetaDataset(data_utils.Dataset):
     def load_valid_idx(self, data_path):
         data = np.load(data_path)
         self.valid_X0 = np.repeat(data['valid_X0'], 2, axis=0)  # the validation data is balanced.
-        self.valid_X1 = data['valid_X1'][:, 0, -self.top_k:].reshape(-1, 1, self.top_k)
+        self.valid_X1 = data['valid_X1'][:, -2, -self.top_k:].reshape(-1, 1, self.top_k)
 
         if self.same_class_reverse:
             valid_X1_sim = data['valid_X1'][:, -1, :self.top_k].reshape(-1, 1, self.top_k)
