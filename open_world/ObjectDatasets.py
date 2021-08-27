@@ -324,6 +324,22 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
         return im, label
 
+    def getImageFromClass(self, class_idx):
+
+        inv_normalize = transforms.Normalize(
+            mean=[-self.trn_mean_pixel[0] / self.trn_std_pixel[0], -self.trn_mean_pixel[1] / self.trn_std_pixel[1], -self.trn_mean_pixel[1] / self.trn_std_pixel[1]],
+            std=[1 / self.trn_std_pixel[0], 1 / self.trn_std_pixel[1], 1 / self.trn_std_pixel[2]]
+        )
+        image_idx = np.where(np.array(self.train_data.targets) == class_idx)[0][0]
+        im = self.train_data[image_idx][0]
+        im = inv_normalize(im)
+        # im =self.test_data[x][0]
+        label = self.train_data[image_idx][1]
+        im = np.transpose(im.numpy(), (1, 2, 0))
+
+
+        return im, label
+
 
 def main():
 

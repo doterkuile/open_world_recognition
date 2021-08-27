@@ -1,14 +1,19 @@
 ## Experiment
-name: '0020'
+object_name: 'object_1'
+
+experiment_name: 'l_t_e_0010'
+
 
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: MetaDataset
-model_class: L2AC_concat
+model_experiment_nr: 0001
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
 unfreeze_layer: 62   #62 62 6 8
+
+
 
 ## Training hyperparameters
 criterion: bce_loss_custom
@@ -21,7 +26,7 @@ epochs: 50
 top_k: 5
 top_n: 4
 
-class_ratio: 
+class_ratio:
   encoder_train: 100
   l2ac_train: 20
   l2ac_test: 20
