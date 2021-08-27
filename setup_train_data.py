@@ -112,7 +112,7 @@ def parseConfigFile(device, multiple_gpu):
     top_n = int(config['top_n'])
     train_samples_per_cls = config['train_samples_per_cls']  # Number of samples per class
     class_ratio = config['class_ratio']
-
+    encoder_classes = class_ratio['encoder_train']
     train_classes = class_ratio['l2ac_train']  # Classes used for training
     test_classes = class_ratio['l2ac_test']  # Classes used for validation
     randomize_samples = config['randomize_samples']
@@ -136,7 +136,7 @@ def parseConfigFile(device, multiple_gpu):
     feature_scaling = config['feature_scaling']
     unfreeze_layer = config['unfreeze_layer']
     model = eval('RecognitionModels.' + model_class)(model_class, num_classes, feature_layer, unfreeze_layer, feature_scaling, pretrained).to(device)
-    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_classes}.pt'
 
     model.load_state_dict(torch.load(encoder_file_path))
 

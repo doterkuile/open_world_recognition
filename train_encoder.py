@@ -47,6 +47,7 @@ def main():
     model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = f'datasets/{config["dataset_path"]}'
     train_data, test_data = train_dataset.getData()
+    encoder_train_classes = config['class_ratio']['encoder_train']
 
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
@@ -93,7 +94,7 @@ def main():
     # Save encoder in datasetfolder
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
-    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_train_classes}.pt'
     OpenWorldUtils.saveModel(model,encoder_file_path)
     torch.save(best_state, f'{exp_folder}/{exp_name}_best_state.pth')
 

@@ -194,6 +194,7 @@ def parseConfigFile(device):
     # L2AC Parameters
     top_k = int(config['top_k'])
     top_n = int(config['top_n'])
+    encoder_classes = config['class_ratio']['encoder_train']
     train_classes = config['class_ratio']['l2ac_train']
     test_classes = config['class_ratio']['l2ac_test']
     train_samples_per_cls = config['train_samples_per_cls']
@@ -225,7 +226,7 @@ def parseConfigFile(device):
     encoder_class = config['encoder']
     encoder = eval('RecognitionModels.' + encoder_class)(model_class, num_classes, feature_layer, unfreeze_layer,
                                                      feature_scaling, pretrained).to(device)
-    encoder_file_path = f'datasets/{config["dataset_path"]}/{encoder_class}/feature_encoder_{figure_size}_{unfreeze_layer}.pt'
+    encoder_file_path = f'datasets/{config["dataset_path"]}/{encoder_class}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_classes}.pt'
     encoder.load_state_dict(torch.load(encoder_file_path))
 
     class_ratio = config['class_ratio']
