@@ -228,7 +228,7 @@ class L2AC_base(torch.nn.Module):
         self.batch_size = batch_size
         self.hidden_size = top_k
         self.top_k = top_k
-
+        self.embedding_layer = self.setEmbeddingLayer(data_path)
         self.matching_layer = self.setMatchingLayer()
         self.aggregation_layer = self.setAggregationLayer()
 
@@ -259,6 +259,16 @@ class L2AC_base(torch.nn.Module):
             self.selected_out[layer_name] = output
         return hook
 
+    def setEmbeddingLayer(self, dataset_path):
+
+        features = torch.tensor(np.load(dataset_path)['train_rep'],dtype=torch.float)
+        features.requires_grad = False
+        # embed_layer = nn.Embedding(features.shape[0], features.shape[1],_weight=features)
+        embed_layer = nn.Embedding.from_pretrained(features, freeze=True)
+        return embed_layer
+
+
+
     def initialize_weights(self):
 
 
@@ -278,6 +288,10 @@ class L2AC_base(torch.nn.Module):
 
 
     def forward(self, x0, x1):
+
+        x0 = self.embedding_layer(x0)
+        x1 = self.embedding_layer(x1)
+
         x = self.similarity_function(x0, x1)
         x = self.matching_layer(x)
         x = x.sigmoid()
