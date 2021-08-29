@@ -10,6 +10,8 @@ from torch.utils.data import DataLoader
 import imageio
 import os
 import torch.nn as nn
+from torchvision.utils import make_grid
+
 import open_world.loss_functions as loss_func
 
 
@@ -286,6 +288,40 @@ def plot_feature_vector(vector, title, figure_path, y_max):
     plt.close(fig)
 
     pass
+
+
+def plot_final_classification(label_list, images, final_label):
+
+
+
+    im_grid = make_grid(images[0:-1], nrow=images.shape[0]-1)
+    im_grid_images = images.shape[0]-1
+    im_grid2 = make_grid(images[-1], nrow=1)
+    if final_label < 0 :
+
+        final_label_class: str = "Unknown"
+    else:
+    #     im_grid = make_grid(images[0:-1], nrow=images.shape[0]-2)
+    #     im_grid2 = make_grid(images[-2:], nrow=1)
+    #     im_grid_images = images.shape[0]-2
+        final_label_class = label_list[-1]
+
+
+    fig, axs = plt.subplots(2, 1, figsize=(15, 10))
+    axs[1].imshow(np.transpose(im_grid.numpy(), (1, 2, 0)))
+    axs[0].imshow(np.transpose(im_grid2.numpy(), (1, 2, 0)))
+
+    axs[0].set_title(f'input image = {final_label_class} ')
+    half_image_size = int(im_grid.shape[2]/im_grid_images/2)
+    axs[1].set_xticks(np.linspace(half_image_size, im_grid.shape[2] - half_image_size, im_grid_images))
+    label_list_2 = [" "]
+    label_list_2.extend(label_list[0:im_grid_images])
+    label_list_2.append(" ")
+    axs[1].set_xticklabels(label_list[0:im_grid_images])
+    plt.show()
+
+
+
 
 
 def main():

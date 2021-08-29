@@ -2,7 +2,7 @@
 object_name: 'object_1'
 
 experiment_name: 'l_t_e_0010'
-
+extend_memory: True
 
 ## Paths and classes
 dataset_path: TinyImageNet

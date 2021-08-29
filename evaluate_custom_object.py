@@ -7,6 +7,7 @@ from open_world import loss_functions
 import open_world.meta_learner.meta_learner_utils as meta_utils
 import open_world.plot_utils as plot_utils
 import yaml
+import json
 import torchvision
 from torchvision import transforms
 import sklearn
@@ -17,7 +18,6 @@ import argparse
 import os
 import shutil
 import matplotlib.pyplot as plt
-from torchvision.utils import make_grid
 
 import time
 
@@ -34,7 +34,8 @@ def main():
         print(f"Running with {torch.cuda.device_count()} GPUs")
 
 
-    model, memory,image_dataset, encoder, object_data_folder, image_resize, top_n, top_k = parseConfigFile(device)
+    model, memory,image_dataset, encoder, object_data_folder, image_resize, top_n, top_k, extend_memory = parseConfigFile(device)
+
 
     transform_train = transforms.Compose([
         transforms.Resize((image_resize,image_resize)),
@@ -44,35 +45,57 @@ def main():
 
     train_data_loader = torch.utils.data.DataLoader(object_dataset, batch_size=100, shuffle=False)
 
-    object_class = 0
-    sample_class = 1
+
     sample_rep, class_rep, labels = meta_utils.extract_features(train_data_loader, encoder, [0,1], device)
-    sample_rep = sample_rep.numpy()
-    sample = sample_rep[-1].reshape(1,-1)
-    labels = labels[0:-1]
-    sample_rep = sample_rep[0:-1]
+    memory_rep, memory_cls_rep, memory_labels, input_rep, input_labels = splitInputfromMemory(sample_rep, class_rep, labels)
+
     new_class = max(list(set(memory.trn_true_labels))) + 1
-    labels = labels.numpy() + new_class
+    labels = memory_labels.reshape(-1) + new_class
 
-    memory.trn_memory = np.concatenate([memory.trn_memory, sample_rep])
-    memory.trn_true_labels = np.concatenate([memory.trn_true_labels, labels])
+    if extend_memory:
+        memory.trn_memory = np.concatenate([memory.trn_memory, memory_rep])
+        memory.trn_true_labels = np.concatenate([memory.trn_true_labels, labels])
 
-    # sample = getSample(object_dataset, encoder, device)
-    top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels,top_n, top_k)
+    sample_idx = np.where(np.array(object_dataset.targets) == 1)[0]
+    ii = 0
+    for sample in input_rep:
 
-    final_label = classifySample(sample, model, x1, top_classes, device)
+        # sample = getSample(object_dataset, encoder, device)
+        sample = sample.reshape(1,-1)
+        top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels,top_n, top_k)
 
-    print(f"top classes are {top_classes}")
-    if final_label < 0:
-        print(f"The object cannot be identified")
-    else:
+        final_label, probabilities, top_classes_ordered = classifySample(sample, model, x1, top_classes, device)
 
-        print(f"the final label is {final_label}.")
 
-    sample_image = object_dataset[-1][0]
-    showResults(sample_image, image_dataset, object_dataset, top_classes, final_label)
+
+        sample_image = object_dataset[sample_idx[ii]][0]
+        ii = ii + 1
+        label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes, final_label)
+
+        print(f"top classes are {label_list}")
+        if final_label < 0:
+            print(f"the final label is {final_label_class}.")
+            print(f"The object cannot be identified")
+        else:
+
+            print(f"the final label is {final_label_class}.")
+
 
     return
+
+def splitInputfromMemory(data_rep, data_cls_rep, labels):
+
+    # data_rep = data_rep.view(data_rep.shape[0], data_rep.shape[2])
+    memory_idx = ((labels == 0).nonzero()).squeeze()
+    input_idx = ((labels == 1).nonzero()).squeeze()
+
+    memory_rep = data_rep[memory_idx]
+    input_rep = data_rep[input_idx]
+
+    memory_cls_rep = data_cls_rep[0]
+    memory_labels = labels[memory_idx]
+    input_labels = labels[input_idx]
+    return memory_rep.numpy(), memory_cls_rep.numpy(), memory_labels.numpy(), input_rep.numpy(), input_labels.numpy()
 
 
 
@@ -130,14 +153,17 @@ def classifySample(sample, model, x1, top_classes, device):
     with torch.no_grad():
 
         y, matching_layer = model(input_sample, x1.to(device))
-        predicted = y.detach().clone().sigmoid()
+        predicted = y.detach().clone().sigmoid().cpu().reshape(-1)
+
+    predicted = predicted[predicted.sort(dim=0)[1]]
+    top_classes_ordered = top_classes[predicted.sort(dim=0)[1]]
 
     if predicted.max() > 0.5:
         final_label = top_classes[predicted.argmax()]
     else:
         final_label = -1
 
-    return final_label
+    return final_label, predicted, top_classes_ordered
 
 
 def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_label):
@@ -149,22 +175,54 @@ def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_
         if cls in old_image_dataset.class_idx['l2ac_train']:
 
             im ,  label = old_image_dataset.getImageFromClass(cls)
+            object_label = wordnet_to_label(label, old_image_dataset)
+
 
         else:
             im, label = new_image_dataset[0]
             im = np.transpose(im.numpy(), (1, 2, 0))
+            object_label = new_image_dataset.classes[0]
+
 
         image_list.append(im)
-        label_list.append(im)
+
+        label_list.append(object_label)
+
     sample = sample.numpy().transpose(1,2,0)
     image_list.append(sample)
     images = torch.tensor(np.stack(image_list).transpose(0,3,1,2))
-    im_grid = make_grid(images, nrow=4)
-    plt.figure(figsize=(10, 4))
-    plt.imshow(np.transpose(im_grid.numpy(), (1, 2, 0)))
-    plt.show()
 
-    return
+
+    if final_label in old_image_dataset.class_idx['l2ac_train']:
+        final_label_class = wordnet_to_label(final_label, old_image_dataset)
+    elif final_label > 0:
+        final_label_class = new_image_dataset.classes[0]
+    else:
+        final_label_class = "unknown"
+    plot_utils.plot_final_classification(label_list, images, final_label)
+
+    return label_list, final_label_class
+
+
+def wordnet_to_label(label, dataset):
+
+
+    json_file = 'config/ImageNet_wordnet_to_label.json'
+
+    with open(json_file) as f:
+        data = list(json.load(f).items())
+
+    for word_net_id in dataset.train_data.class_to_idx:
+        if dataset.train_data.class_to_idx[word_net_id] == label:
+            word_net_id = word_net_id.split('n')[-1] + '-n'
+            break
+    for cls_entry in data:
+        if word_net_id == cls_entry[1]['id']:
+            object_class = cls_entry[1]['label']
+    # for entry in data:
+    #     if
+    return object_class
+
 
 
 def parseConfigFile(device):
@@ -178,6 +236,7 @@ def parseConfigFile(device):
 
 
     experiment_name = str(evaluation_config['experiment_name'])
+    extend_memory = evaluation_config['extend_memory']
     exp_folder = f'output/{experiment_name}'
     trn_config_file = f'{exp_folder}/{experiment_name}_config.yaml'
     object_name = evaluation_config['object_name']
@@ -235,7 +294,7 @@ def parseConfigFile(device):
     image_dataset = eval('ObjectDatasets.' + config['dataset_path'] + "Dataset")('datasets/' + config['dataset_path'], class_ratio, train_phase, figure_size)
 
 
-    return model, meta_dataset, image_dataset, encoder, object_data_folder, image_resize, top_n, top_k
+    return model, meta_dataset, image_dataset, encoder, object_data_folder, image_resize, top_n, top_k, extend_memory
 
 if __name__ == "__main__":
     main()
