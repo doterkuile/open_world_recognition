@@ -22,6 +22,12 @@ epochs: 50
 class_ratio: 
   encoder_train: 100
   l2ac_train: 20
+  l2ac_val: 20
   l2ac_test: 20
-
+  
+sample_ratio:
+  encoder_train: 500
+  l2ac_train: 350
+  l2ac_val: 100
+  l2ac_test: 100
 

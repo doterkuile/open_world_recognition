@@ -149,28 +149,63 @@ class ObjectDatasetBase(abc.ABC):
     @abc.abstractmethod
     def __init__(self, dataset_path: str, class_ratio, train_phase):
         self.dataset_path = dataset_path
-        self.class_idx = {key: [] for key in class_ratio.keys()}
-        self.class_idx['encoder_train'] = list(range(0, class_ratio['encoder_train']))
-        self.class_idx['l2ac_train'] = list(range(class_ratio['encoder_train'], class_ratio['encoder_train'] + class_ratio['l2ac_train']))
-        self.class_idx['l2ac_test'] = list(range(class_ratio['encoder_train'] + class_ratio['l2ac_train'], class_ratio['encoder_train'] + class_ratio['l2ac_train'] +class_ratio['l2ac_test']))
-        self.train_phase = train_phase
+        self.setTrainingPhaseIdx(class_ratio, train_phase)
+
         pass
 
     @abc.abstractmethod
     def getImage(self, x):
         pass
-    @abc.abstractmethod
-    def setupDataSplit(self, train_data, test_data, class_ratio, train_phase):
-        pass
+
+    def setupDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
+        if train_phase == "encoder_train":
+            self.encoderDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
+        else:
+            self.metaDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
 
     def getData(self):
-        return (self.train_data, self.test_data)
+        return (self.train_data, self.val_data, self.test_data)
 
     def getDataloaders(self, batch_size):
         self.train_loader = DataLoader(self.train_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+        self.val_loader = DataLoader(self.val_data, batch_size=batch_size, shuffle=True, pin_memory=True)
         self.test_loader = DataLoader(self.test_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
-        return (self.train_loader, self.test_loader)
+        return (self.train_loader, self.val_loader, self.test_loader)
+
+    def setTrainingPhaseIdx(self, class_ratio, train_phase):
+        self.class_idx = {key: [] for key in class_ratio.keys()}
+        self.class_idx['encoder_train'] = list(range(0, class_ratio['encoder_train']))
+
+        self.class_idx['l2ac_train'] = list(range(max(self.class_idx['encoder_train']) + 1,
+                                                  max(self.class_idx['encoder_train']) + class_ratio['l2ac_train'] + 1))
+
+        self.class_idx['l2ac_val'] = list(range(max(self.class_idx['l2ac_train']) + 1,
+                                                  max(self.class_idx['l2ac_train']) + class_ratio['l2ac_val'] + 1))
+        self.class_idx['l2ac_test'] = list(range(max(self.class_idx['l2ac_val']) + 1,
+                                                  max(self.class_idx['l2ac_val']) + class_ratio['l2ac_test'] + 1))
+        self.train_phase = train_phase
+
+    def setDataTransforms(self, image_resize):
+
+        self.transform_test = transforms.Compose([
+            transforms.Resize(image_resize),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
+
+        ])
+        if self.train_phase == 'encoder_train':
+            self.transform_train = transforms.Compose([
+                transforms.Resize(image_resize),
+                transforms.RandomRotation(20),
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
+            ])
+        else:
+            self.transform_train = self.transform_test
+
+        return
 
 
 
@@ -187,26 +222,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.tst_mean_pixel = [x / 255.0 for x in [129.7, 124.3, 112.7]]
         self.tst_std_pixel = [x / 255.0 for x in [68.4, 65.6, 70.7]]
 
-
-
-        self.transform_test = transforms.Compose([
-            transforms.Resize(image_resize),
-            transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
-
-        ])
-        if train_phase == 'l2ac_test':
-            self.transform_train = self.transform_test
-        else:
-            self.transform_train = transforms.Compose([
-                    transforms.Resize(image_resize),
-                    transforms.RandomRotation(20),
-                    transforms.RandomHorizontalFlip(0.5),
-                    transforms.ToTensor(),
-                    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
-            ])
+        self.setDataTransforms(image_resize)
 
         train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_train)
         test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=self.transform_test)
@@ -264,33 +280,20 @@ class TinyImageNetDataset(ObjectDatasetBase):
         self.tst_mean_pixel = [0.4802, 0.4481, 0.3975]
         self.tst_std_pixel = [0.2302, 0.2265, 0.2262]
 
-        self.transform_test = transforms.Compose([
-            transforms.Resize(image_resize),
-            transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
-
-        ])
-        if train_phase == 'l2ac_test':
-            self.transform_train = self.transform_test
-        else:
-            self.transform_train = transforms.Compose([
-                    transforms.Resize(image_resize),
-                    transforms.RandomRotation(20),
-                    transforms.RandomHorizontalFlip(0.5),
-                    transforms.ToTensor(),
-                    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    transforms.Normalize(mean=self.trn_mean_pixel, std=self.trn_std_pixel),
-            ])
+        self.setDataTransforms(image_resize)
 
         train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
         test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
-        self.setupDataSplit(train_data, test_data, class_ratio, train_phase)
+        val_data = datasets.ImageFolder(root=f'{dataset_path}/val', transform=self.transform_test)
+
+
+        self.setupDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
 
         self.image_shape = [1, 3, image_resize, image_resize]
-        self.classes = [i for i in range(len(self.train_data.classes))]
+        self.classes = [self.class_idx[train_phase]]
 
-    def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
+
+    def encoderDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
 
         train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
         train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
@@ -307,6 +310,46 @@ class TinyImageNetDataset(ObjectDatasetBase):
         test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]
 
         self.test_data = test_data
+
+        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase]]
+        val_data.class_to_idx = {i: val_data.class_to_idx[i] for i in val_data.classes}
+        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase]]
+        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase]]
+        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase]]
+
+        self.val_data = val_data
+
+        return
+
+    def metaDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
+        # Datasplitter for L2AC algorithm
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
+        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase]]
+        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase]]
+        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase]]
+
+        self.train_data = train_data
+
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
+        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase]]
+        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase]]
+        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]
+
+        self.test_data = test_data
+
+        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase]]
+        val_data.class_to_idx = {i: val_data.class_to_idx[i] for i in val_data.classes}
+        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase]]
+        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase]]
+        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase]]
+
+        self.val_data = val_data
+
+
+        return
+
 
     def getImage(self, x):
 

@@ -17,7 +17,19 @@ top_n: 1
 class_ratio: 
   encoder_train: 50
   l2ac_train: 20
+  l2ac_val: 20
   l2ac_test: 20
+
+
+sample_ratio:
+  enocer_train: 500
+  l2ac_train: 350
+  l2ac_val: 100
+  l2ac_test: 100
+
+
+feature_scaling: normal #sigmoid max_value
+
 
 
 

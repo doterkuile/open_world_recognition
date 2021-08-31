@@ -24,6 +24,13 @@ top_n: 9
 class_ratio: 
   encoder_train: 100
   l2ac_train: 900
+  l2ac_val: 150
+  l2ac_test: 100
+
+sample_ratio:
+  encoder_train: 100
+  l2ac_train: 100
+  l2ac_val: 100
   l2ac_test: 100
 
 test_class_selection: diff_cls

@@ -7,6 +7,7 @@ dataset_class: CIFAR100Dataset
 image_resize: 224
 model_class: ResNet50
 feature_layer: avgpool
+feature_scaling: normal #sigmoid max_value
 unfreeze_layer: 62     #62 62 10 30
 pretrained: True
 
@@ -16,9 +17,15 @@ top_n: 4
 class_ratio: 
   encoder_train: 50
   l2ac_train: 20
+  l2ac_val: 20
   l2ac_test: 20
 
-feature_scaling: normal #sigmoid max_value
+sample_ratio:
+  enocer_train: 500
+  l2ac_train: 350
+  l2ac_val: 100
+  l2ac_test: 100
+
 
 
 train_samples_per_cls: 500
