@@ -64,7 +64,7 @@ def main():
 
     # Get hyperparameters
     test_classes = config['class_ratio']['l2ac_test']
-    test_samples = config['sample_ratio']['l2ac_test']
+    test_samples = config['sample_ratio']['l2ac_test_samples']
     probability_threshold = config['probability_threshold']
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)

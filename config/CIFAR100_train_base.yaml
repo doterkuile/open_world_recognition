@@ -21,10 +21,10 @@ class_ratio:
   l2ac_test: 20
 
 sample_ratio:
-  enocer_train: 500
-  l2ac_train: 350
-  l2ac_val: 100
-  l2ac_test: 100
+  encoder_train_samples: 500
+  l2ac_train_samples: 350
+  l2ac_val_samples: 100
+  l2ac_test_samples: 100
 
 
 

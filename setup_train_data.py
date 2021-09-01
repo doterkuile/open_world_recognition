@@ -34,7 +34,7 @@ def main():
     image_resize = config['image_resize']
     feature_scaling = config['feature_scaling']
     trn_classes = class_ratio['l2ac_train']
-    trn_samples_per_cls = sample_ratio['l2ac_train']
+    trn_samples_per_cls = sample_ratio['l2ac_train_samples']
     memory_path = f'{dataset_path}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{trn_classes}_{trn_samples_per_cls}_{top_n}'
     feature_path = f'{dataset_path}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_features.npz'
     # If dataset folder does not exist make folder
@@ -69,14 +69,14 @@ def main():
     val_cls_idx = trn_dataset.class_idx['l2ac_val']
 
     ## Non-mutually exclusive classes variant uses same classes, but has to dived the samples in train, validation and test
-    input_sample_idx = np.arange(0, sample_ratio['l2ac_train'])
-    memory_sample_idx = np.arange(0, sample_ratio['l2ac_train'])
+    input_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
+    memory_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
     print("Rank training data, same class")
 
     X0_trn, X1_trn, Y_trn = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, trn_cls_idx, complete_cls_idx, top_n, randomize_samples)
 
-    input_sample_idx = np.arange(sample_ratio['l2ac_train'],sample_ratio['l2ac_train'] + sample_ratio['l2ac_val'])
+    input_sample_idx = np.arange(sample_ratio['l2ac_train_samples'],sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'])
     print("Rank validation data, same class")
 
     X0_val, X1_val, Y_val = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
@@ -90,7 +90,7 @@ def main():
              valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val)
 
     ## Mutually exclusive classes variant uses all samples available per class
-    total_samples = np.sum([sample_ratio[key] for key in sample_ratio.keys() if key not in 'encoder_train'])
+    total_samples = np.sum([sample_ratio[key] for key in sample_ratio.keys() if key not in 'encoder_train_samples'])
     input_sample_idx = np.arange(0, total_samples)
     memory_sample_idx = np.arange(0, total_samples)
     print("Rank train data, different class")

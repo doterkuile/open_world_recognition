@@ -49,7 +49,7 @@ def parseConfigFile(device, multiple_gpu):
     top_n = int(config['top_n'])
     train_classes = config['class_ratio']['l2ac_train']
     test_classes = config['class_ratio']['l2ac_test']
-    train_samples = config['sample_ratio']['l2ac_train']
+    train_samples = config['sample_ratio']['l2ac_train_samples']
 
     # Dataset preparation parameters:
     same_class_reverse = config['same_class_reverse']
