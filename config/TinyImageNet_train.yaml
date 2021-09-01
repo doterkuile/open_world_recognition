@@ -14,9 +14,9 @@ pretrained: True
 top_n: 4
 class_ratio: 
   encoder_train: 100
-  l2ac_train: 6
-  l2ac_val: 5
-  l2ac_test: 5
+  l2ac_train: 20
+  l2ac_val: 20
+  l2ac_test: 20
 
 sample_ratio:
   encoder_train: 500

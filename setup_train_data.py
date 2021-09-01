@@ -26,7 +26,7 @@ def main():
     trn_dataset, val_dataset, tst_dataset, encoder, class_ratio, sample_ratio, top_n, randomize_samples, config = parseConfigFile(
         device, multiple_gpu)
 
-    load_features = True
+    load_features = False
     feature_layer = config['feature_layer']
     encoder_class = config['model_class']
     dataset_path = f"datasets/{config['dataset_path']}/{encoder_class}"
@@ -47,6 +47,7 @@ def main():
                                   trn_dataset.class_idx['l2ac_test']])
 
     if not load_features:
+        print("Extracting features")
         trn_data_rep, trn_labels, trn_cls_rep = extract_all_features(trn_dataset, complete_cls_idx, encoder, device)
         val_data_rep, val_labels, val_cls_rep = extract_all_features(val_dataset, complete_cls_idx, encoder, device)
         tst_data_rep, tst_labels, tst_cls_rep = extract_all_features(tst_dataset, complete_cls_idx, encoder, device)
@@ -63,17 +64,21 @@ def main():
         labels = data['labels']
         cls_rep = data['cls_rep']
 
-
-
+    ## Mutually exclusive classes variant uses different classes in trianing and validaton
     trn_cls_idx = trn_dataset.class_idx['l2ac_train']
     val_cls_idx = trn_dataset.class_idx['l2ac_val']
 
-    input_sample_idx = np.arange(0, 350)
-    memory_sample_idx = np.arange(0, 350)
+    ## Non-mutually exclusive classes variant uses same classes, but has to dived the samples in train, validation and test
+    input_sample_idx = np.arange(0, sample_ratio['l2ac_train'])
+    memory_sample_idx = np.arange(0, sample_ratio['l2ac_train'])
+    print("Rank training data, same class")
+
     X0_trn, X1_trn, Y_trn = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, trn_cls_idx, complete_cls_idx, top_n, randomize_samples)
 
-    input_sample_idx = np.arange(350,450)
+    input_sample_idx = np.arange(sample_ratio['l2ac_train'],sample_ratio['l2ac_train'] + sample_ratio['l2ac_val'])
+    print("Rank validation data, same class")
+
     X0_val, X1_val, Y_val = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, trn_cls_idx, complete_cls_idx, top_n, randomize_samples)
 
@@ -84,12 +89,16 @@ def main():
              train_X0=X0_trn, train_X1=X1_trn, train_Y=Y_trn,
              valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val)
 
-    input_sample_idx = np.arange(0, 550)
-    memory_sample_idx = np.arange(0, 550)
+    ## Mutually exclusive classes variant uses all samples available per class
+    total_samples = np.sum([sample_ratio[key] for key in sample_ratio.keys() if key not in 'encoder_train'])
+    input_sample_idx = np.arange(0, total_samples)
+    memory_sample_idx = np.arange(0, total_samples)
+    print("Rank train data, different class")
+
     X0_trn, X1_trn, Y_trn = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, trn_cls_idx, complete_cls_idx, top_n, randomize_samples)
 
-
+    print("Rank validation data, different class")
     X0_val, X1_val, Y_val = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, val_cls_idx, complete_cls_idx, top_n, randomize_samples)
 

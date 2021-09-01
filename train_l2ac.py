@@ -64,13 +64,13 @@ def main():
 
     # Get hyperparameters
     test_classes = config['class_ratio']['l2ac_test']
-    train_samples_per_cls = config['train_samples_per_cls']
+    test_samples = config['sample_ratio']['l2ac_test']
     probability_threshold = config['probability_threshold']
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
-                                              test_classes, train_samples_per_cls, train=False)
+                                              test_classes, test_samples, train=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
     pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
     ml_weight = torch.tensor(config['top_n']).to(device).to(dtype=torch.float)
