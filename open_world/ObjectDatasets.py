@@ -53,21 +53,21 @@ class MetaDataset(data_utils.Dataset):
         if self.train:
             idx_X0 = self.train_X0[idx]
             idx_X1 = self.train_X1[idx,:]
-            # x0_rep = self.trn_memory[idx_X0,:]
-            # x1_rep = self.trn_memory[idx_X1,:]
+            x0_rep = self.trn_memory[idx_X0,:]
+            x1_rep = self.trn_memory[idx_X1,:]
             y = torch.tensor(self.train_Y[idx], dtype=torch.float)
             true_label_X0 = self.trn_true_labels[idx_X0]
             true_label_X1 = self.trn_true_labels[idx_X1]
         else:
             idx_X0 = self.valid_X0[idx]
             idx_X1 = self.valid_X1[idx,:]
-            # x0_rep = self.tst_memory[idx_X0, :]
-            # x1_rep = self.tst_memory[idx_X1, :]
+            x0_rep = self.tst_memory[idx_X0, :]
+            x1_rep = self.tst_memory[idx_X1, :]
             y = torch.tensor(self.valid_Y[idx], dtype=torch.float)
             true_label_X0 = self.tst_true_labels[idx_X0]
             true_label_X1 = self.tst_true_labels[idx_X1]
 
-        return [idx_X0, idx_X1], y, [true_label_X0, true_label_X1]
+        return [x0_rep, x1_rep], y, [true_label_X0, true_label_X1]
 
 
     def load_trn_memory(self, data_path):

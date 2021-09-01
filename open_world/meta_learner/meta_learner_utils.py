@@ -514,14 +514,14 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
                 # Output size = [1, memory_samples_per_class]
                 memory_cls_sample_idx = cls1_offset + memory_sample_idx
                 input_sample_offset = cls_offset + input_sample_idx.min()
-                sim1 = metrics.pairwise.cosine_similarity(input_rep[input_sample_offset  + jx].reshape(1, -1),
+                sim1 = metrics.pairwise.cosine_similarity(input_rep[input_sample_offset + jx].reshape(1, -1),
                                                           memory_rep[memory_cls_sample_idx])
                 # Sort indices and find most similar samples. Remove least similar example to make array of same
                 # length as similarity of same class samples
-                sim1_idx = sim1.argsort(axis=1)[0, 1:]
+                sim1_idx = sim1.argsort(axis=1)[0, 1:].reshape(1,-1)
                 sim1_idx += cls1_offset
-                # Give size a second dimension, useful for vstack i think
-                tmp_X1_batch.append(np.expand_dims(sim1_idx, 0))
+                # Give size a second dimension for vstack
+                tmp_X1_batch.append(np.expand_dims(sim1_idx, 1))
 
             tmp_X1_batch = np.vstack(tmp_X1_batch)
 
@@ -544,7 +544,7 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
             sim2_idx = sim2.argsort(axis=1)[:,:-1] + cls_offset
 
         # Append same class indices and labels to tmp_x1 and tmp_y
-        tmp_X1.append(sim2_idx)
+        tmp_X1.append(np.expand_dims(sim2_idx,1))
         tmp_Y.append(np.full((input_sample_idx.shape[0], 1), 1))
 
         # append all input samples indices
@@ -552,8 +552,8 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
 
 
         # make matrix with indices for all comparison samplles
-        X1.append(np.concatenate(tmp_X1, 0))
-        Y.append(np.concatenate(tmp_Y, axis=0))  # similar
+        X1.append(np.concatenate(tmp_X1, 1))
+        Y.append(np.concatenate(tmp_Y, axis=1))  # similar
 
     X0 = np.vstack(X0)
     X1 = np.vstack(X1)

@@ -228,7 +228,7 @@ class L2AC_base(torch.nn.Module):
         self.batch_size = batch_size
         self.hidden_size = top_k
         self.top_k = top_k
-        self.embedding_layer = self.setEmbeddingLayer(data_path)
+        # self.embedding_layer = self.setEmbeddingLayer(data_path)
         self.matching_layer = self.setMatchingLayer()
         self.aggregation_layer = self.setAggregationLayer()
 
@@ -289,8 +289,8 @@ class L2AC_base(torch.nn.Module):
 
     def forward(self, x0, x1):
 
-        x0 = self.embedding_layer(x0)
-        x1 = self.embedding_layer(x1)
+        # x0 = self.embedding_layer(x0)
+        # x1 = self.embedding_layer(x1)
 
         x = self.similarity_function(x0, x1)
         x = self.matching_layer(x)
