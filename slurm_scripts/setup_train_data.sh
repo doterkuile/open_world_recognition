@@ -40,11 +40,11 @@ array_2=(62 62 62 62 62 62)
 var_3=top_n
 array_3=(1 2 5 9 12 15)
 var_4=feature_scaling
-array_4=(max_value max_value max_value)
+array_4=(max_value max_value max_value max_value max_value max_value)
 var_5=l2ac_train
-array_5=(80 80 80 80 80 80)
-var_6=t
-array_6=(ResNet50 ResNet152 EfficientNet)
+array_5=(20 20 20 20 20 20)
+var_6=l2ac_test
+array_6=(20 20 20 20 20 20)
 len=${#array_1[@]}
 
 
