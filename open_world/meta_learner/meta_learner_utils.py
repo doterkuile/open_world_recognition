@@ -566,6 +566,94 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
         return X0, X1, Y
 
 
+def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cls_rep, input_sample_idx,
+                         memory_sample_idx, partial_cls_set, complete_cls_set, top_n, randomize_samples=False):
+    X0, X1, Y = [], [], []
+    # Use first class of class_set as offset
+    base_cls_offset = partial_cls_set[0]  # classes.index(class_set[0])  # -> gives index of first class of the list of c
+    for cls in tqdm(partial_cls_set):
+        tmp_X1 = []
+        tmp_Y = []
+
+        # index of class of interest
+        ix = np.where(complete_cls_set == cls)[0].item()
+
+        # Get index of first sample of class
+        cls_offset = np.where(input_labels == cls)[0].min()
+        # cls_offset = ix * train_per_cls  # Some kind of offset?
+
+        # Select all remaining classes that are not equal to the class of interest
+        rest_cls_idx = [np.where(complete_cls_set == cls1)[0].item() for cls1 in partial_cls_set if cls1 != cls]
+
+        # cosine similarity between train_per_class number of the class of interest and the mean feature vector of
+        # the rest of the classes
+        # Finds the most similar classes based on the mean value
+        # Cosine similarity between the input samples of cls of interest and the mean representation of
+        # the remaining classes. Output is of size [input_samples_per_class, len(class_set) -1]
+        cls_sample_idx = cls_offset + input_sample_idx
+        sim = metrics.pairwise.cosine_similarity(input_rep[cls_sample_idx],
+                                                memory_cls_rep[rest_cls_idx])
+
+        # Get indices of a sorted array
+        sim_idx = sim.argsort(axis=1)
+        # Add offset of the base class
+        sim_idx += base_cls_offset
+        # Plus one idx to correct for the removed class of interest
+        sim_idx[sim_idx >= cls] += 1
+
+        # Get the top classes from the sorted similarities
+        sim_idx = sim_idx[:, -top_n:]
+
+        # Loop over the n most similar classes based on the previous cosine similarity
+        for nx in range(-top_n, 0):
+            tmp_X1_batch = []
+            # Loop over the j input samples from the cls of interest
+            for jx in range(input_sample_idx.shape[0]):
+                # Select the nx th top n class for the jx th input sample of class of interest
+                cls1 = sim_idx[jx, nx]
+                # Find class offset in memory
+                cls1_offset = np.where(memory_labels == cls1)[0].min()
+
+                # Find cosine similarity between an input sample and all samples from same cls in memory
+                # Output size = [1, memory_samples_per_class]
+                memory_cls_sample_idx = cls1_offset + memory_sample_idx
+                input_sample_offset = cls_offset + input_sample_idx.min()
+                sim1 = metrics.pairwise.cosine_similarity(input_rep[input_sample_offset + jx].reshape(1, -1),
+                                                          memory_rep[memory_cls_sample_idx])
+                # Sort indices and find most similar samples. Remove least similar example to make array of same
+                # length as similarity of same class samples
+                sim1_idx = sim1.argsort(axis=1)[0, 1:].reshape(1,-1)
+                sim1_idx += cls1_offset
+                # Give size a second dimension for vstack
+                tmp_X1_batch.append(np.expand_dims(sim1_idx, 1))
+
+            tmp_X1_batch = np.vstack(tmp_X1_batch)
+
+            # Append indices and labels
+            tmp_X1.append(tmp_X1_batch)
+            tmp_Y.append(np.full((input_sample_idx.shape[0], 1), 0))
+
+        # put same class in the last dim
+
+        # append all input samples indices
+        X0.append(cls_sample_idx.reshape(-1, 1))
+
+
+        # make matrix with indices for all comparison samplles
+        X1.append(np.concatenate(tmp_X1, 1))
+        Y.append(np.concatenate(tmp_Y, axis=1))  # similar
+
+    X0 = np.vstack(X0)
+    X1 = np.vstack(X1)
+    Y = np.concatenate(Y)
+
+    if randomize_samples:
+        shuffle_idx = np.random.permutation(X0.shape[0])
+        return X0[shuffle_idx], X1[shuffle_idx], Y[shuffle_idx]
+    else:
+        return X0, X1, Y
+
+
 def rank_samples_from_memory(class_set, data_rep, data_cls_rep, labels_rep, classes, train_samples_per_cls, top_n,
                              randomize_samples=False, same_class_reverse=False, balance_same_class_entries=False):
     X0, X1, Y = [], [], []

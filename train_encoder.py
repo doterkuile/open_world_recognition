@@ -335,7 +335,7 @@ def parseConfigFile(device, multiple_gpu):
     model.to(device)
 
     criterion = eval('nn.' + config['criterion'])(reduction='mean')
-    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate, momentum=0.9)
+    optimizer = eval('torch.optim.' + config['optimizer'])(model.parameters(), lr=learning_rate)
 
     return dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config
 

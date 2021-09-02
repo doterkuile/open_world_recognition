@@ -6,9 +6,9 @@ dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
 dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 224
 model_class: AlexNet
-feature_layer: _avg_pooling
+feature_layer: fc7
 feature_scaling: max_value #sigmoid max_value
-unfreeze_layer: 10 
+unfreeze_layer: 8
 pretrained: True
 
 ## Training hyperparameters
@@ -16,7 +16,7 @@ criterion: CrossEntropyLoss
 optimizer: SGD
 learning_rate: 0.001
 batch_size: 100
-epochs: 20
+epochs: 50
   
 ## L2AC parameters
 class_ratio: 
