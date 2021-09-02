@@ -96,6 +96,7 @@ class ResNet50(EncoderBase):
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
 
+        # Freeze all layers until 62: conv 5 and up trained
 
     def getModel(self, pretrained):
         model = models.resnet50(pretrained=pretrained)
@@ -111,6 +112,7 @@ class ResNet152(EncoderBase):
         super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+        # Freeze all layers until 62: conv 5 and up trained
 
 
     def getModel(self, pretrained):
@@ -127,6 +129,7 @@ class AlexNet(EncoderBase):
         super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+        # Freeze all layers until 8: conv 5 and up trained
 
 
     def getModel(self, pretrained):
@@ -134,7 +137,9 @@ class AlexNet(EncoderBase):
         return model
 
     def reset_final_layer(self, output_classes):
-        self.model.classifier[-1] = torch.nn.Linear(in_features=self.model.classifier[-1].in_features, out_features=output_classes)
+
+        self.model.classifier = torch.nn.Linear(in_features=self.model.classifier.in_features, out_features=output_classes)
+        
         return
 
 class EfficientNet(EncoderBase):
@@ -143,6 +148,7 @@ class EfficientNet(EncoderBase):
         super().__init__(model_class,train_classes, feature_layer, unfreeze_layers,feature_scaling, pretrained)
 
         self.hook = getattr(self.model, feature_layer).register_forward_hook(self.feature_hook(feature_layer))
+         # Freeze all layers until 74: conv 13, 14 15 and up trained
 
 
     def getModel(self, pretrained):
@@ -175,6 +181,8 @@ class AlexNet_modified(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
+
+
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(256 * 6 * 6, 4096),
@@ -188,6 +196,7 @@ class AlexNet_modified(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), 256 * 6 * 6)
+        x = self.fc7(x)
         x = self.classifier(x)
         return x
 
@@ -205,8 +214,11 @@ def alexnet(pretrained=False, out_classes=200, **kwargs):
     model = AlexNet_modified(**kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['alexnet']))
-    model.classifier[1] = nn.Linear(256 * 6 * 6, 4096)
-    model.classifier[6] = nn.Linear(4096, out_classes)
+    # model.classifier[1] = nn.Linear(256 * 6 * 6, 4096)
+    model.fc7 = model.classifier[:-1]
+    del model.classifier
+
+    model.classifier = nn.Linear(4096, out_classes)
     return model
 
 

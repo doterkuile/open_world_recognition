@@ -154,15 +154,20 @@ class ObjectDatasetBase(abc.ABC):
 
     def setTrainingPhaseIdx(self, class_ratio, train_phase):
         self.class_idx = {key: [] for key in class_ratio.keys()}
-        self.class_idx['encoder_train'] = list(range(0, class_ratio['encoder_train']))
+        self.class_idx['encoder_train'] = np.arange(0, class_ratio['encoder_train'])
 
-        self.class_idx['l2ac_train'] = list(range(max(self.class_idx['encoder_train']) + 1,
-                                                  max(self.class_idx['encoder_train']) + class_ratio['l2ac_train'] + 1))
+        if self.class_idx['encoder_train'].size == 0:
+            l2ac_first_idx = 0
+        else:
+            l2ac_first_idx = self.class_idx['encoder_train'].max()
 
-        self.class_idx['l2ac_val'] = list(range(max(self.class_idx['l2ac_train']) + 1,
-                                                  max(self.class_idx['l2ac_train']) + class_ratio['l2ac_val'] + 1))
-        self.class_idx['l2ac_test'] = list(range(max(self.class_idx['l2ac_val']) + 1,
-                                                  max(self.class_idx['l2ac_val']) + class_ratio['l2ac_test'] + 1))
+        self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx + 1,
+                                                  l2ac_first_idx + class_ratio['l2ac_train'] + 1)
+
+        self.class_idx['l2ac_val'] = np.arange(self.class_idx['l2ac_train'].max() + 1,
+                                                  self.class_idx['l2ac_train'].max() + class_ratio['l2ac_val'] + 1)
+        self.class_idx['l2ac_test'] = np.arange(self.class_idx['l2ac_val'].max() + 1,
+                                                  self.class_idx['l2ac_val'].max() + class_ratio['l2ac_test'] + 1)
         self.train_phase = train_phase
 
     def setDataTransforms(self, image_resize):

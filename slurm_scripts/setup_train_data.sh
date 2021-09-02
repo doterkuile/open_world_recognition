@@ -36,13 +36,13 @@ module load cudnn/10.0-7.6.0.64
 var_1=model_class
 array_1=(ResNet50 ResNet50 ResNet50 ResNet50 ResNet50 ResNet50)	
 var_2=unfreeze_layer
-array_2=(62 62 62 62 62 62)
+array_2=(62 62 62 2 2 2)
 var_3=top_n
-array_3=(1 2 5 9 12 15)
+array_3=(4 9 9 4 9 9)
 var_4=feature_scaling
 array_4=(max_value max_value max_value max_value max_value max_value)
 var_5=l2ac_train
-array_5=(20 20 20 20 20 20)
+array_5=(20 20 80 20 20 80)
 var_6=l2ac_test
 array_6=(20 20 20 20 20 20)
 len=${#array_1[@]}

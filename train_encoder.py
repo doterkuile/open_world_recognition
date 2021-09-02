@@ -46,14 +46,22 @@ def main():
     results_path = exp_folder + '/' + exp_name + '_results.npz'
     model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = f'datasets/{config["dataset_path"]}'
-    train_data, test_data = train_dataset.getData()
+    train_data, val_data, test_data = train_dataset.getData()
     encoder_train_classes = config['class_ratio']['encoder_train']
+    figure_size = config['image_resize']
+    unfreeze_layer = config['unfreeze_layer']
+    encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_train_classes}.pt'
+
+    if encoder_train_classes == 0:
+        OpenWorldUtils.saveModel(model,encoder_file_path)
+        print("No finetuning of encoder, saving pretrained model only")
+        return
 
     # train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=train_dataset.transform_train)
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    test_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
 
     trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)
@@ -250,8 +258,8 @@ def validate_model(loader, model, criterion, device):
                 X0_test = X0_test.to(device)
                 y_test = y_test.to(device)
 
-                if b == (len(loader) - 1):
-                    break
+                # if b == (len(loader) - 1):
+                #     break
 
                 # Apply the model
                 y_val, feature_layer = model(X0_test)
