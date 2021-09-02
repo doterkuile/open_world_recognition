@@ -34,16 +34,16 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(e_t_0007 e_t_0007)	
+array_1=(e_t_0001 e_t_0002 e_t_0003 e_t_0004)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
-array_2=(EfficientNet ResNet50)
+array_2=(ResNet50 ResNet152 AlexNet EfficientNet)
 var_3=feature_layer 
-array_3=(_avg_pooling avgpool)
-var_4=image_resize
-array_4=(224 224)
+array_3=(avg_pool avg_pool fc7 _avg_pooling)
+var_4=encoder_train
+array_4=(50 50 50 50)
 var_5=unfreeze_layer
-array_5=(2 2) #176 320)
+array_5=(62 62 8 74) #176 320)
 len=${#array_1[@]}
 
 
