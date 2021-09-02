@@ -1,5 +1,5 @@
 ## Experiment
-name: '0020'
+name: '0021'
 
 ## Paths and classes
 dataset_path: TinyImageNet
@@ -15,7 +15,7 @@ criterion: bce_loss_custom
 optimizer: Adam
 learning_rate: 0.0001
 batch_size: 256
-epochs: 50
+epochs: 5
 
 ## L2AC parameters
 top_k: 5

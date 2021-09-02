@@ -8,7 +8,7 @@ import numpy as np
 
 class bce_loss_default(nn.Module):
 
-    def __init__(self, weight=None):
+    def __init__(self, weight=1):
         super(bce_loss_default, self).__init__()
         self.positive_weight = weight
         self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight, reduction='mean')
@@ -33,7 +33,7 @@ class bce_loss_default(nn.Module):
 
 class bce_loss_matching_layer(nn.Module):
 
-    def __init__(self, weight=None):
+    def __init__(self, weight=1):
         super(bce_loss_matching_layer, self).__init__()
         self.positive_weight = weight
         self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight, reduction='mean')
@@ -56,7 +56,7 @@ class bce_loss_matching_layer(nn.Module):
 
 class bce_loss_custom(nn.Module):
 
-    def __init__(self, weight=None):
+    def __init__(self, weight=1):
         super(bce_loss_custom, self).__init__()
         self.positive_weight = weight
 
@@ -80,7 +80,7 @@ class bce_loss_custom(nn.Module):
 
 class matching_layer_loss(nn.Module):
 
-    def __init__(self, weight=None):
+    def __init__(self, weight=1):
         super(matching_layer_loss, self).__init__()
         self.weight = weight
 

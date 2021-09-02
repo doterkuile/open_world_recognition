@@ -1,8 +1,9 @@
 ## Experiment
-name: '0020'
+name: ['0020', '0021']
 
 variable: model_class
-
+unknown_classes: [0, 5, 10]
+tst_memory_cls: 10
 figure_path: 'figures/L2AC_'
 
 

@@ -19,7 +19,7 @@ import abc
 class MetaDataset(data_utils.Dataset):
 
 
-    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train=True, same_class_reverse=False,
+    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase='trn', same_class_reverse=False,
                  same_class_extend_entries=False):
 
         self.n_cls = n_cls
@@ -29,34 +29,43 @@ class MetaDataset(data_utils.Dataset):
         self.data_path = data_path
         self.top_n = top_n
         self.top_k = top_k
-        self.train = train
+        self.train_phase = train_phase
         self.memory, self.true_labels = self.load_memory(self.data_path)
-
-        if same_class_extend_entries:
-            self.load_balanced_train_idx(self.data_path)
+        if self.train_phase == 'tst':
+            self.load_test_idx(self.data_path)
         else:
-            self.load_train_idx(self.data_path)
+            if same_class_extend_entries:
+                self.load_balanced_train_idx(self.data_path)
+            else:
+                self.load_train_idx(self.data_path)
 
-        self.load_valid_idx(self.data_path)
+            self.load_valid_idx(self.data_path)
+
         self.classes = [i for i in range(100)]
 
     #
     def __len__(self):
-        if self.train:
+        if self.train_phase == 'trn':
             return self.train_X0.shape[0]
-        else:
+        elif self.train_phase == 'val':
             return self.valid_X0.shape[0]
+        elif self.train_phase == 'tst':
+            return self.test_X0.shape[0]
 
     def __getitem__(self, idx):
         # idx_X0 = np.where(self.train_X0 == idx)
-        if self.train:
+        if self.train_phase == 'trn':
             idx_X0 = self.train_X0[idx]
             idx_X1 = self.train_X1[idx,:]
             y = torch.tensor(self.train_Y[idx], dtype=torch.float)
-        else:
+        elif self.train_phase == 'val':
             idx_X0 = self.valid_X0[idx]
             idx_X1 = self.valid_X1[idx,:]
             y = torch.tensor(self.valid_Y[idx], dtype=torch.float)
+        else:
+            idx_X0 = self.test_X0[idx]
+            idx_X1 = self.test_X1[idx,:]
+            y = torch.tensor(self.test_Y[idx], dtype=torch.float)
 
         x0_rep = self.memory[idx_X0,:]
         x1_rep = self.memory[idx_X1,:]
@@ -68,7 +77,7 @@ class MetaDataset(data_utils.Dataset):
     def load_memory(self, data_path):
         features = np.load(data_path)['data_rep']
         try:
-            labels = np.load(data_path)['labels']
+            labels = np.load(data_path)['data_labels']
         except KeyError:
             labels = np.zeros(features.shape[0])
         return features, labels
@@ -122,6 +131,12 @@ class MetaDataset(data_utils.Dataset):
             # Add same class to the non-similar classes
         self.valid_X1 = np.concatenate([self.valid_X1, valid_X1_sim], axis=1).reshape(-1, self.top_k)
         self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
+
+    def load_test_idx(self, data_path):
+        data = np.load(data_path)
+        self.test_X0 = np.repeat(data['test_X0'], self.top_n, axis=0)  # the validation data is balanced.
+        self.test_X1 = data['test_X1'][:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
+        self.test_Y = data['test_Y'][:, -self.top_n:].reshape(-1, )
 
 class ObjectDatasetBase(abc.ABC):
 

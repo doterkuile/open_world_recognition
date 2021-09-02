@@ -196,6 +196,39 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
     return y_pred, y_true, tst_loss, ml_out, y_pred_raw
 
+def test_model(loader, model, criterion, device, probability_threshold):
+    # Set model to eval
+    model.eval()
+
+    y_score = []
+    memory_labels = []
+    true_labels = []
+    with torch.no_grad():
+        for b, ([X0, X1], y_test, [X0_test_labels, X1_test_labels]) in enumerate(loader):
+
+            X0 = X0.to(device)
+            X1 = X1.to(device)
+            y_test = y_test.view(-1, 1).to(device)
+
+            y_out, matching_layer_output, batch_loss, predicted = train_batch_step(X0, X1, y_test,
+                                                                                   model, criterion,
+                                                                                   probability_threshold)
+            y_score.append(y_out.cpu().reshape(-1))
+            memory_labels.append(X1_test_labels[:,0])
+            true_labels.append(X0_test_labels[0])
+
+            b += 1
+
+    # Toggle model back to train
+    model.train()
+
+    memory_labels = np.array(torch.stack(memory_labels))
+    true_labels = np.array(torch.stack(true_labels))
+    y_score = np.array(torch.stack(y_score))
+
+    return y_score, memory_labels, true_labels
+
+
 
 
 def trainMatchingLayer(model, train_loader, test_loader, epochs, criterion, test_criterion, optimizer, device,
@@ -567,11 +600,11 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
 
 
 def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cls_rep, input_sample_idx,
-                         memory_sample_idx, partial_cls_set, complete_cls_set, top_n, randomize_samples=False):
+                         memory_sample_idx, input_cls_set, memory_cls_set, complete_cls_set, top_n, randomize_samples=False):
     X0, X1, Y = [], [], []
     # Use first class of class_set as offset
-    base_cls_offset = partial_cls_set[0]  # classes.index(class_set[0])  # -> gives index of first class of the list of c
-    for cls in tqdm(partial_cls_set):
+    base_cls_offset = input_cls_set[0]  # classes.index(class_set[0])  # -> gives index of first class of the list of c
+    for cls in tqdm(input_cls_set):
         tmp_X1 = []
         tmp_Y = []
 
@@ -583,8 +616,7 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
         # cls_offset = ix * train_per_cls  # Some kind of offset?
 
         # Select all remaining classes that are not equal to the class of interest
-        rest_cls_idx = [np.where(complete_cls_set == cls1)[0].item() for cls1 in partial_cls_set if cls1 != cls]
-
+        rest_cls_idx = [np.where(complete_cls_set == cls1)[0].item() for cls1 in memory_cls_set]
         # cosine similarity between train_per_class number of the class of interest and the mean feature vector of
         # the rest of the classes
         # Finds the most similar classes based on the mean value
@@ -599,7 +631,7 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
         # Add offset of the base class
         sim_idx += base_cls_offset
         # Plus one idx to correct for the removed class of interest
-        sim_idx[sim_idx >= cls] += 1
+        # sim_idx[sim_idx >= cls] += 1
 
         # Get the top classes from the sorted similarities
         sim_idx = sim_idx[:, -top_n:]
@@ -607,6 +639,7 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
         # Loop over the n most similar classes based on the previous cosine similarity
         for nx in range(-top_n, 0):
             tmp_X1_batch = []
+            tmp_Y_batch = []
             # Loop over the j input samples from the cls of interest
             for jx in range(input_sample_idx.shape[0]):
                 # Select the nx th top n class for the jx th input sample of class of interest
@@ -626,12 +659,13 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
                 sim1_idx += cls1_offset
                 # Give size a second dimension for vstack
                 tmp_X1_batch.append(np.expand_dims(sim1_idx, 1))
+                tmp_Y_batch.append([1 if cls == cls1 else 0])
 
             tmp_X1_batch = np.vstack(tmp_X1_batch)
-
+            tmp_Y_batch = np.vstack(tmp_Y_batch)
             # Append indices and labels
             tmp_X1.append(tmp_X1_batch)
-            tmp_Y.append(np.full((input_sample_idx.shape[0], 1), 0))
+            tmp_Y.append(tmp_Y_batch)
 
         # put same class in the last dim
 

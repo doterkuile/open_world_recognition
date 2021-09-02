@@ -70,7 +70,7 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
-                                              test_classes, test_samples, train=False)
+                                              test_classes, test_samples, train_phase='val')
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
     pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
     ml_weight = torch.tensor(config['top_n']).to(device).to(dtype=torch.float)

@@ -77,9 +77,9 @@ def parseConfigFile(device, multiple_gpu):
     feature_scaling = config['feature_scaling']
     dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{test_class_selection}.npz'
     dataset_class = config['dataset_class']
-    enable_training = True
+    train_phase = 'trn'
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples
-                                                      ,enable_training,  same_class_reverse, same_class_extend_entries)
+                                                      ,train_phase,  same_class_reverse, same_class_extend_entries)
 
     features_size = len(dataset.memory[0])
 
@@ -94,9 +94,6 @@ def parseConfigFile(device, multiple_gpu):
     #     print(f'The use of multiple gpus is enabled: using {torch.cuda.device_count()} gpus')
     #     batch_size = batch_size * torch.cuda.device_count()
     # model = nn.parallel.DistributedDataParallel(model)
-    if not enable_training:
-        print('Load model ' + model_path)
-        loadModel(model, model_path)
 
     # criterion = eval('nn.' + config['criterion'])(pos_weight=pos_weight, reduction='mean')
     # criterion = eval('nn.' + config['criterion'])()
