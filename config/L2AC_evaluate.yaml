@@ -1,14 +1,14 @@
 ## Experiment
-name: ['0020', '0021']
+name: ['l_t_e_0001']
 
-figure_labels: ['ResNet50', 'ResNet50 (fine tuned)']
+figure_labels: ['ResNet50']
 figure_title: 'Encoders'
 
 experiment_name: 'l2ac_encoders'
 
 variable: model_class
 unknown_classes: [0, 5, 10]
-tst_memory_cls: 10
+tst_memory_cls: 80
 figure_path: 'results/'
 
 

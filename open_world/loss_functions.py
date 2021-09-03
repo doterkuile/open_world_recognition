@@ -11,7 +11,7 @@ class bce_loss_default(nn.Module):
     def __init__(self, weight=1):
         super(bce_loss_default, self).__init__()
         self.positive_weight = weight
-        self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight, reduction='mean')
+        self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(weight), reduction='mean')
 
 
     def forward(self, input, target):
