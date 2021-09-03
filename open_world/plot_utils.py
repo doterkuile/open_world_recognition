@@ -225,18 +225,104 @@ def plot_prob_density(fig, axs, trn_score, trn_same_idx, trn_diff_idx, tst_score
     plt.close(fig)
 
 
-def plot_best_F1(F1, loop_variable, figure_path):
+def plot_final_weighted_F1(results, figure_labels, title, figure_path):
     fig = plt.figure()
-    var_name = list(loop_variable.keys())[0]
-    plt.plot(loop_variable[var_name], F1, '-o', label='F1 score')
-    plt.ylabel('F1')
-    plt.xlabel(f'{var_name}')
-    plt.title('F1 score')
-    plt.xticks(rotation=45)
-    plt.legend()
-    fig.savefig(figure_path + f'_{var_name}', bbox_inches='tight')
-    plt.close(fig)
 
+    shape = ['o', 'x']
+    ii = 0
+    for key in results.keys():
+        y = results[key]['weighted_f1']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-{shape[ii]}', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('F1-score')
+    plt.xlabel('Unknown classes')
+    plt.title('Weighted F1-score')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_w_f1')
+
+def plot_final_macro_F1(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    shape = ['o', 'x']
+    ii = 0
+    for key in results.keys():
+        y = results[key]['macro_f1']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-{shape[ii]}', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('F1-score')
+    plt.xlabel('Unknown classes')
+    plt.title('Macro F1-score')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_m_f1')
+
+def plot_final_accuracy(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    shape = ['o', 'x']
+    ii = 0
+    for key in results.keys():
+        y = results[key]['accuracy']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-{shape[ii]}', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('Accuracy')
+    plt.xlabel('Unknown classes')
+    plt.title('Accuracy')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_acc')
+
+
+    return
+
+def plot_final_open_world_error(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    shape = ['o', 'x']
+    ii = 0
+    for key in results.keys():
+        y = results[key]['open_world_error']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-{shape[ii]}', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('Open World Error')
+    plt.xlabel('Unknown classes')
+    plt.title('Open world error')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_e_ow')
+    return
+
+def plot_final_wilderness_impact(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    shape = ['o', 'x']
+    ii = 0
+    for key in results.keys():
+        y = results[key]['wilderness_impact']
+        x = results[key]['wilderness_ratio']
+        plt.plot(x, y, f'-{shape[ii]}', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('Wilderness Impact')
+    plt.xlabel('Wilderness Ratio')
+    plt.title('Wilderness Impact')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_WI')
     return
 
 
