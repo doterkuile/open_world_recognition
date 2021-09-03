@@ -8,7 +8,7 @@ experiment_name: 'l2ac_encoders'
 
 variable: model_class
 unknown_classes: [0, 5, 10]
-tst_memory_cls: 10
+tst_memory_cls: 80
 figure_path: 'results/'
 
 
