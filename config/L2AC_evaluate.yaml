@@ -1,10 +1,15 @@
 ## Experiment
 name: ['0020', '0021']
 
+figure_labels: ['ResNet50', 'ResNet50 (fine tuned)']
+figure_title: 'Encoders'
+
+experiment_name: 'l2ac_encoders'
+
 variable: model_class
 unknown_classes: [0, 5, 10]
 tst_memory_cls: 10
-figure_path: 'figures/L2AC_'
+figure_path: 'results/'
 
 
 

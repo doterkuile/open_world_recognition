@@ -48,7 +48,9 @@ def main():
     exp_nrs = config_evaluate['name']
     loop_variable_name = config_evaluate['variable']
     loop_variable = {loop_variable_name: []}
-    figure_path = config_evaluate['figure_path']
+    figure_path = config_evaluate['figure_path'] + config_evaluate['experiment_name']
+    figure_labels = config_evaluate['figure_labels']
+    figure_title = config_evaluate['figure_title']
     unknown_classes = config_evaluate['unknown_classes']
     tst_memory_cls = config_evaluate['tst_memory_cls']
 
@@ -60,6 +62,7 @@ def main():
                     'mean_pred': [],
                     'mean_true': []}
     results = {key: [] for key in exp_nrs}
+    figure_labels = {exp_nrs[ii]: figure_labels[ii] for ii in range(0,len(exp_nrs))}
     for exp in exp_nrs:
 
         exp_folder = f'output/{exp}'
@@ -93,7 +96,9 @@ def main():
                         'open_world_error': [],
                         'unknown_classes': [],
                         'true_labels': [],
-                        'final_labels': []
+                        'final_labels': [],
+                        'wilderness_impact': [],
+                        'wilderness_ratio': []
                         }
 
         for unknown_class in unknown_classes:
@@ -131,7 +136,7 @@ def main():
             final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
 
             # Set all final labels lower than threshold to unknown
-            final_label[np.where(y_score.max(axis=1) < probability_treshold)] = unknown_label
+            final_label[np.where(y_score.max(axis=1) < probability_treshold+0.02)] = unknown_label
 
 
             # Find all classes that are not in memory but only in input
@@ -139,7 +144,7 @@ def main():
             # Set all true input labels not in memory to unknown
             true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
 
-            macro_f1, weighted_f1, accuracy, open_world_error = calculateMetrics(true_labels, final_label, unknown_label)
+            macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(true_labels, final_label, unknown_label)
 
             results[exp]['macro_f1'].append(macro_f1)
             results[exp]['weighted_f1'].append(weighted_f1)
@@ -148,6 +153,9 @@ def main():
             results[exp]['unknown_classes'].append(unknown_class)
             results[exp]['true_labels'].append(true_labels)
             results[exp]['final_labels'].append(final_label)
+            results[exp]['wilderness_impact'].append(wilderness_impact)
+            results[exp]['wilderness_ratio'].append(wilderness_ratio)
+
 
         # TODO Calculate wilderness impact and wilderness
         # Adjust from paper, because paper does not take rejection into account
@@ -155,9 +163,12 @@ def main():
 
 
 
-    plot_utils.plot_best_F1(metrics_dict['F1'], loop_variable, f'{figure_path}_F1')
-    plot_utils.plot_best_loss(metrics_dict['loss'], loop_variable, f'{figure_path}_loss')
-    plot_utils.plot_best_accuracy(metrics_dict['accuracy'], loop_variable, f'{figure_path}_accuracy')
+    plot_utils.plot_final_macro_F1(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_weighted_F1(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_accuracy(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_wilderness_impact(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_open_world_error(results, figure_labels, figure_title, figure_path)
+
 
 
 
@@ -197,7 +208,9 @@ def calculateMetrics(true_labels, final_label, unknown_cls_label):
     weighted_f1 = sklearn.metrics.f1_score(true_labels, final_label, average='weighted')
     accuracy = sklearn.metrics.accuracy_score(true_labels, final_label)
     open_world_error = openWorldError(true_labels, final_label, unknown_cls_label)
-    return macro_f1, weighted_f1, accuracy, open_world_error
+    wilderness_impact = wildernessImpact(true_labels, final_label, unknown_cls_label)
+    wilderness_ratio = wildernessRatio(true_labels, unknown_cls_label)
+    return macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio
 
 def openWorldError(true_labels, final_labels, unknown_cls_label):
 
@@ -215,6 +228,37 @@ def openWorldError(true_labels, final_labels, unknown_cls_label):
         known_error = 0
     open_world_error = known_error + unknown_error
     return open_world_error
+
+def wildernessImpact(true_labels, final_labels, unknown_cls_label):
+
+    unknown_idx = np.where(true_labels == unknown_cls_label)[0]
+    known_idx = np.where(true_labels != unknown_cls_label)[0]
+    closed_set_idx = known_idx[final_labels[known_idx] !=unknown_cls_label]
+
+    try:
+        fp_o = (final_labels[unknown_idx] != true_labels[unknown_idx])[0, :].sum()
+    except IndexError:
+        fp_o = 0
+    try:
+        fp_c = (final_labels[closed_set_idx] != true_labels[closed_set_idx])[0, :].sum()
+    except IndexError:
+        fp_c = 0
+    try:
+        tp_c = (final_labels[known_idx] == true_labels[known_idx])[0, :].sum()
+    except IndexError:
+        tp_c = 0
+    wilderness_impact = fp_o/(fp_c + tp_c)
+    return wilderness_impact
+
+def wildernessRatio(true_labels, unknown_cls_label):
+
+    unknown_idx = np.where(true_labels == unknown_cls_label)[0]
+    known_idx = np.where(true_labels != unknown_cls_label)[0]
+
+    wilderness_ratio = unknown_idx.shape[0]/known_idx.shape[0]
+
+    return wilderness_ratio
+
 
 
 def getTestDataPath(config, unknown_classes):
