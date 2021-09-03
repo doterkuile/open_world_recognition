@@ -1,7 +1,7 @@
 ## Experiment
-name: ['0020', '0021']
+name: ['l_t_e_0003']
 
-figure_labels: ['ResNet50', 'ResNet50 (fine tuned)']
+figure_labels: ['Alexnet']
 figure_title: 'Encoders'
 
 experiment_name: 'l2ac_encoders'

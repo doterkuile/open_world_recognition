@@ -173,10 +173,14 @@ class ObjectDatasetBase(abc.ABC):
 
         if self.class_idx['encoder_train'].size == 0:
             l2ac_first_idx = 0
+
+            self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx,
+                                                     l2ac_first_idx + class_ratio['l2ac_train'])
+
         else:
             l2ac_first_idx = self.class_idx['encoder_train'].max()
 
-        self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx + 1,
+            self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx + 1,
                                                   l2ac_first_idx + class_ratio['l2ac_train'] + 1)
 
         self.class_idx['l2ac_val'] = np.arange(self.class_idx['l2ac_train'].max() + 1,
