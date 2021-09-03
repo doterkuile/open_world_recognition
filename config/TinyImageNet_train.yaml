@@ -13,7 +13,7 @@ pretrained: True
 ## L2AC parameters
 top_n: 4
 class_ratio: 
-  encoder_train: 100
+  encoder_train: 50
   l2ac_train: 20
   l2ac_val: 20
   l2ac_test: 20
