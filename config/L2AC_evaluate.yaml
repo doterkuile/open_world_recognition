@@ -1,7 +1,10 @@
 ## Experiment
-name: ['l_t_e_0003']
+name: ['l_t_e_0001', 'l_t_e_0002', 'l_t_e_0003','l_t_e_0004','l_t_e_0005', 'l_t_e_0006', 'l_t_e_0007','l_t_e_0008']
 
-figure_labels: ['Alexnet']
+
+
+figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
+
 figure_title: 'Encoders'
 
 experiment_name: 'l2ac_encoders'

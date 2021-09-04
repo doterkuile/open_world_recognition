@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=7gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=48:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=11:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,29 +33,29 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_t_e_0001 l_t_e_0002 l_t_e_0003 l_t_e_0004)
+array_1=(l_t_e_0004)
 var_2=feature_layer
-array_2=(avgpool avgpool features _avg_pooling)
+array_2=(_avg_pooling)
 var_3=encoder
-array_3=(ResNet50 ResNet152 AlexNet EfficientNet)
+array_3=(EfficientNet)
 var_4=(unfreeze_layer)
-array_4=(62 62 10 30)
+array_4=(0)
 var_5=criterion
-array_5=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
+array_5=(bce_loss_default)
 var_6=two_step_training
-array_6=(True True True True)
+array_6=(False)
 var_7=feature_scaling
-array_7=(max_value max_value normal normal)
+array_7=(max_value)
 var_8=top_n
-array_8=(9 9 9 9)
+array_8=(9)
 var_9=model_class
-array_9=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
-var_10=batch_size
-array_10=(256 256 256 256)
+array_9=(L2AC_extended_similarity)
+var_10=encoder_train
+array_10=(0)
 # var_11=same_class_extend_entries
 # array_11=(True)
 var_11=l2ac_train
-array_11=(20 20 20 20)
+array_11=(80)
 len=${#array_1[@]}
 
 
