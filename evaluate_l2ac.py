@@ -48,11 +48,15 @@ def main():
     exp_nrs = config_evaluate['name']
     loop_variable_name = config_evaluate['variable']
     loop_variable = {loop_variable_name: []}
-    figure_path = config_evaluate['figure_path'] + config_evaluate['experiment_name']
-    figure_labels = config_evaluate['figure_labels']
     figure_title = config_evaluate['figure_title']
+
+    figure_path = config_evaluate['figure_path'] + figure_title + '/' + config_evaluate['experiment_name']
+    figure_labels = config_evaluate['figure_labels']
     unknown_classes = config_evaluate['unknown_classes']
     tst_memory_cls = config_evaluate['tst_memory_cls']
+
+    if not os.path.exists(config_evaluate['figure_path'] + figure_title):
+        os.mkdir(config_evaluate['figure_path'] + figure_title)
 
     metrics_dict = {'loss': [],
                     'accuracy': [],
