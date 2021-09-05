@@ -312,9 +312,9 @@ def plot_final_known_precision(results, figure_labels, title, figure_path):
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
-    plt.ylabel('precision knowns')
+    plt.ylabel('E_k')
     plt.xlabel('Unknown classes')
-    plt.title('Precision knowns')
+    plt.title('Prediction error known classes E_K')
     plt.legend()
     # plt.show()
 
@@ -331,9 +331,9 @@ def plot_final_unknown_precision(results, figure_labels, title, figure_path):
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
-    plt.ylabel('precision unknowns')
+    plt.ylabel('E_U')
     plt.xlabel('Unknown classes')
-    plt.title('Precision knowns')
+    plt.title('Prediction error unknown classes E_U')
     plt.legend()
     # plt.show()
 

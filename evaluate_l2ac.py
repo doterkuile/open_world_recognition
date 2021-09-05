@@ -153,8 +153,8 @@ def main():
             true_unknowns = np.where(true_labels == unknown_label)[0]
             true_knowns = np.where(true_labels != unknown_label)[0]
 
-            correct_unknowns = np.where(final_label[true_unknowns] == unknown_label)[0]
-            correct_knowns = np.where(final_label[true_knowns] == true_labels[true_knowns].reshape(-1))[0]
+            correct_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
+            correct_knowns = np.where(final_label[true_knowns] != true_labels[true_knowns].reshape(-1))[0]
             try:
                 unknown_precision = correct_unknowns.shape[0]/true_unknowns.shape[0]
             except ZeroDivisionError:
