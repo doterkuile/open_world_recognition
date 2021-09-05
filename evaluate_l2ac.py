@@ -99,8 +99,8 @@ def main():
                         'accuracy': [],
                         'open_world_error': [],
                         'unknown_classes': [],
-                        'true_labels': [],
-                        'final_labels': [],
+                        'precision_knowns': [],
+                        'precision_unknowns': [],
                         'wilderness_impact': [],
                         'wilderness_ratio': []
                         }
@@ -140,7 +140,7 @@ def main():
             final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
 
             # Set all final labels lower than threshold to unknown
-            final_label[np.where(y_score.max(axis=1) < probability_treshold+0.02)] = unknown_label
+            final_label[np.where(y_score.max(axis=1) < probability_treshold)] = unknown_label
 
 
             # Find all classes that are not in memory but only in input
@@ -150,15 +150,29 @@ def main():
 
             macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(true_labels, final_label, unknown_label)
 
+            true_unknowns = np.where(true_labels == unknown_label)[0]
+            true_knowns = np.where(true_labels != unknown_label)[0]
+
+            correct_unknowns = np.where(final_label[true_unknowns] == unknown_label)[0]
+            correct_knowns = np.where(final_label[true_knowns] == true_labels[true_knowns].reshape(-1))[0]
+            try:
+                unknown_precision = correct_unknowns.shape[0]/true_unknowns.shape[0]
+            except ZeroDivisionError:
+                unknown_precision = 0
+            known_precision = correct_knowns.shape[0]/true_knowns.shape[0]
+
+
             results[exp]['macro_f1'].append(macro_f1)
             results[exp]['weighted_f1'].append(weighted_f1)
             results[exp]['accuracy'].append(accuracy)
             results[exp]['open_world_error'].append(open_world_error)
             results[exp]['unknown_classes'].append(unknown_class)
-            results[exp]['true_labels'].append(true_labels)
-            results[exp]['final_labels'].append(final_label)
+            # results[exp]['true_labels'].append(true_labels)
+            # results[exp]['final_labels'].append(final_label)
             results[exp]['wilderness_impact'].append(wilderness_impact)
             results[exp]['wilderness_ratio'].append(wilderness_ratio)
+            results[exp]['precision_knowns'].append(known_precision)
+            results[exp]['precision_unknowns'].append(unknown_precision)
 
 
         # TODO Calculate wilderness impact and wilderness
@@ -172,6 +186,9 @@ def main():
     plot_utils.plot_final_accuracy(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_wilderness_impact(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_open_world_error(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_known_precision(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_unknown_precision(results, figure_labels, figure_title, figure_path)
+
 
 
 

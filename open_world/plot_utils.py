@@ -302,6 +302,45 @@ def plot_final_open_world_error(results, figure_labels, title, figure_path):
     fig.savefig(f'{figure_path}_e_ow')
     return
 
+def plot_final_known_precision(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    ii = 0
+    for key in results.keys():
+        y = results[key]['precision_knowns']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('precision knowns')
+    plt.xlabel('Unknown classes')
+    plt.title('Precision knowns')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_p_known')
+    return
+
+def plot_final_unknown_precision(results, figure_labels, title, figure_path):
+    fig = plt.figure()
+
+    ii = 0
+    for key in results.keys():
+        y = results[key]['precision_unknowns']
+        x = results[key]['unknown_classes']
+        plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
+        ii = ii + 1
+
+    plt.ylabel('precision unknowns')
+    plt.xlabel('Unknown classes')
+    plt.title('Precision knowns')
+    plt.legend()
+    # plt.show()
+
+    fig.savefig(f'{figure_path}_p_unknown')
+    return
+
+
 def plot_final_wilderness_impact(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
