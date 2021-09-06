@@ -129,9 +129,9 @@ def main():
                                                                 train_phase, same_cls_reverse, same_cls_extend_entries, unknown_class)
 
 
-            test_loader = DataLoader(test_dataset, batch_size=top_n, shuffle=False, pin_memory=True)
+            test_loader = DataLoader(test_dataset, batch_size= 30 * top_n, shuffle=False, pin_memory=True)
 
-            y_score, memory_labels, true_labels = meta_utils.test_model(test_loader, model, criterion, device, probability_treshold)
+            y_score, memory_labels, true_labels = meta_utils.test_model(test_loader, model, criterion, device, probability_treshold, top_n)
 
             # Unknown label is set to max idx + 1
             unknown_label = complete_cls_set.max() + 1

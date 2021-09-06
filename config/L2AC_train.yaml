@@ -1,5 +1,5 @@
 ## Experiment
-name: '0021'
+name: '0020'
 
 ## Paths and classes
 dataset_path: TinyImageNet
@@ -33,7 +33,7 @@ sample_ratio:
   l2ac_val_samples: 100
   l2ac_test_samples: 100
 
-test_class_selection: same_cls
+test_class_selection: diff_cls
 feature_scaling: max_value #sigmoid max_value
 two_step_training: False
 freeze_matching_layer: False

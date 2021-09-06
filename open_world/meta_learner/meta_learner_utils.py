@@ -196,7 +196,7 @@ def validate_model(loader, model, criterion, device, probability_threshold):
 
     return y_pred, y_true, tst_loss, ml_out, y_pred_raw
 
-def test_model(loader, model, criterion, device, probability_threshold):
+def test_model(loader, model, criterion, device, probability_threshold, top_n):
     # Set model to eval
     model.eval()
 
@@ -213,18 +213,18 @@ def test_model(loader, model, criterion, device, probability_threshold):
             y_out, matching_layer_output, batch_loss, predicted = train_batch_step(X0, X1, y_test,
                                                                                    model, criterion,
                                                                                    probability_threshold)
-            y_score.append(y_out.cpu().reshape(-1))
-            memory_labels.append(X1_test_labels[:,0])
-            true_labels.append(X0_test_labels[0])
+            y_score.append(y_out.cpu().reshape(-1, top_n))
+            memory_labels.append(X1_test_labels[:,0].reshape(-1, top_n))
+            true_labels.append(X0_test_labels.reshape(-1, top_n)[:,0])
 
             b += 1
 
     # Toggle model back to train
     model.train()
 
-    memory_labels = np.array(torch.stack(memory_labels))
-    true_labels = np.array(torch.stack(true_labels))
-    y_score = np.array(torch.stack(y_score))
+    memory_labels = np.array(torch.cat(memory_labels))
+    true_labels = np.array(torch.cat(true_labels))
+    y_score = np.array(torch.cat(y_score))
 
     return y_score, memory_labels, true_labels
 
