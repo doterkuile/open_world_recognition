@@ -563,7 +563,7 @@ def rank_input_to_memory(input_rep, input_labels, memory_rep, memory_labels, mem
             tmp_Y.append(np.full((input_sample_idx.shape[0], 1), 0))
 
         # put same class in the last dim
-        memory_same_cls_sample_idx = cls_offset + memory_sample_idx
+        memory_same_cls_sample_idx = np.where(memory_labels == cls)[0].min() + memory_sample_idx
         sim2 = metrics.pairwise.cosine_similarity(input_rep[cls_sample_idx],
             memory_rep[memory_same_cls_sample_idx])  # Similarity between same class
 

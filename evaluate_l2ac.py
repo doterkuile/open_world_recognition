@@ -114,19 +114,19 @@ def main():
                                                                                                     unknown_class,
                                                                                                     tst_memory_cls)
             tst_data_path = getTestDataPath(config, unknown_class)
+
             if not os.path.exists(tst_data_path):
                 X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
                                           memory_samples, input_classes, memory_classes, complete_cls_set, top_n)
 
 
                 np.savez(f'{tst_data_path}',
-                         data_rep=data_rep, data_labels=labels, cls_rep=cls_rep,
                          test_X0=X0, test_X1=X1, test_Y=Y)
 
             train_phase = 'tst'
-            test_dataset = ObjectDatasets.MetaDataset(tst_data_path, top_n, top_k, train_classes,
+            test_dataset = ObjectDatasets.MetaDataset(dataset_path, top_n, top_k, train_classes,
                                                                 sample_ratio['l2ac_test_samples'],
-                                                                train_phase, same_cls_reverse, same_cls_extend_entries)
+                                                                train_phase, same_cls_reverse, same_cls_extend_entries, unknown_class)
 
 
             test_loader = DataLoader(test_dataset, batch_size=top_n, shuffle=False, pin_memory=True)
@@ -280,6 +280,28 @@ def wildernessRatio(true_labels, unknown_cls_label):
 
     return wilderness_ratio
 
+
+def testIdxExist(config, unknown_class):
+    encoder = config['encoder']
+    feature_layer = config['feature_layer']
+    image_resize = config['image_resize']
+    unfreeze_layer = config['unfreeze_layer']
+    tst_cls_selection = config['test_class_selection']
+    feature_scaling = config['feature_scaling']
+    top_n = config['top_n']
+    train_samples = config['sample_ratio']['l2ac_train_samples']
+    train_classes = config['class_ratio']['l2ac_train']
+
+    test_data_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}.npz'
+    data = np.load(test_data_path)
+
+    test_data = f'test_X1_{unknown_class}U'
+
+    if test_data in data.keys():
+        return True
+
+    else:
+        return False
 
 
 def getTestDataPath(config, unknown_classes):

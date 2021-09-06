@@ -5,16 +5,16 @@ name: 'e0000'
 dataset_path: TinyImageNet
 dataset_class: TinyImageNetDataset
 image_resize: 224
-model_class: AlexNet
-feature_layer: fc7
-unfreeze_layer: 0    #62 62 6 8
+model_class: ResNet50
+feature_layer: avgpool
+unfreeze_layer: 62    #62 62 6 8
 pretrained: True
 
 ## L2AC parameters
-top_n: 9
+top_n: 4
 class_ratio: 
-  encoder_train: 0
-  l2ac_train: 80
+  encoder_train: 50
+  l2ac_train: 20
   l2ac_val: 20
   l2ac_test: 20
 

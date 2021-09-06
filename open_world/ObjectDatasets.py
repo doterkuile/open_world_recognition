@@ -20,7 +20,7 @@ class MetaDataset(data_utils.Dataset):
 
 
     def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase='trn', same_class_reverse=False,
-                 same_class_extend_entries=False):
+                 same_class_extend_entries=False, unknown_classes=0):
 
         self.n_cls = n_cls
         self.n_smpl = n_smpl
@@ -30,6 +30,7 @@ class MetaDataset(data_utils.Dataset):
         self.top_n = top_n
         self.top_k = top_k
         self.train_phase = train_phase
+        self.unknown_classes = unknown_classes
         self.memory, self.true_labels = self.load_memory(self.data_path)
         if self.train_phase == 'tst':
             self.load_test_idx(self.data_path)
@@ -133,10 +134,13 @@ class MetaDataset(data_utils.Dataset):
         self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
 
     def load_test_idx(self, data_path):
-        data = np.load(data_path)
-        self.test_X0 = np.repeat(data['test_X0'], self.top_n, axis=0)  # the validation data is balanced.
-        self.test_X1 = data['test_X1'][:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
-        self.test_Y = data['test_Y'][:, -self.top_n:].reshape(-1, )
+        test_data_path = data_path.split('.')[0] + f'_{self.unknown_classes}_tst.npz'
+
+
+        data = np.load(test_data_path)
+        self.test_X0 = np.repeat(data[f'test_X0'], self.top_n, axis=0)  # the validation data is balanced.
+        self.test_X1 = data[f'test_X1'][:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
+        self.test_Y = data[f'test_Y'][:, -self.top_n:].reshape(-1, )
 
 class ObjectDatasetBase(abc.ABC):
 
