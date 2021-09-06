@@ -33,11 +33,11 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_t_e_test)
+array_1=(l_t_e_test_0001)
 var_2=feature_layer
 array_2=(avgpool)
 var_3=encoder
-array_3=(Resnet50)
+array_3=(ResNet50)
 var_4=(unfreeze_layer)
 array_4=(62)
 var_5=criterion
@@ -45,7 +45,7 @@ array_5=(bce_loss_default)
 var_6=l2ac_test
 array_6=(15)
 var_7=l2ac_val
-array_7=(1)
+array_7=(5)
 var_8=top_n
 array_8=(9)
 var_9=model_class

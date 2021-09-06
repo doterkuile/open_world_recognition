@@ -33,7 +33,7 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_m_0007)
+array_1=(l_t_m_0014)
 var_2=top_n
 array_2=(9)
 var_3=model_class
@@ -43,9 +43,9 @@ array_3=(L2AC_concat)
 var_4=encoder_train
 array_4=(0)
 var_5=feature_layer
-array_5=(_avg_pooling)
+array_5=(avgpool)
 var_6=encoder
-array_6=(EfficientNet)
+array_6=(ResNet50)
 var_7=unfreeze_layer
 array_7=(0)
 var_8=l2ac_train
