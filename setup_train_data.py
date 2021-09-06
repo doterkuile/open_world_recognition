@@ -26,7 +26,7 @@ def main():
     trn_dataset, val_dataset, tst_dataset, encoder, class_ratio, sample_ratio, top_n, randomize_samples, config = parseConfigFile(
         device, multiple_gpu)
 
-    load_features = True
+    load_features = False
     feature_layer = config['feature_layer']
     encoder_class = config['model_class']
     dataset_path = f"datasets/{config['dataset_path']}/{encoder_class}"

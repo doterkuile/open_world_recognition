@@ -11,4 +11,4 @@
 /output/*
 !/output/.gitignore
 .idea/
-/results/*.png
+/results/**.png

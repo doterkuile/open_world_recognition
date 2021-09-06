@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=15gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
 #SBATCH --time=4:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
@@ -36,7 +36,7 @@ module load cudnn/10.0-7.6.0.64
 var_1=model_class
 array_1=(EfficientNet)
 var_2=unfreeze_layer
-array_2=(0)
+array_2=(74)
 var_3=top_n
 array_3=(9)
 var_4=feature_layer
@@ -44,7 +44,11 @@ array_4=(_avg_pooling)
 var_5=l2ac_train
 array_5=(80)
 var_6=encoder_train
-array_6=(0)
+array_6=(100)
+var_7=l2ac_val
+array_7=(5)
+var_8=l2ac_test
+array_8=(15)
 len=${#array_1[@]}
 
 
@@ -68,6 +72,8 @@ do
     echo "$var_4 = ${array_4[$i]}"
     echo "$var_5 = ${array_5[$i]}"
     echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
+    echo "$var_8 = ${array_8[$i]}"
 
 
 
@@ -77,7 +83,9 @@ do
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
     sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
     sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+    sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
 
+    sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
 
 	python $python_script_1 $config_file
 
