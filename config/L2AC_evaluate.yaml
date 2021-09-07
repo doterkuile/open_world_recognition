@@ -1,7 +1,7 @@
 ## Experiment
 #name: ['l_t_e_0001', 'l_t_e_0002', 'l_t_e_0003','l_t_e_0004','l_t_e_0005', 'l_t_e_0006', 'l_t_e_0007','l_t_e_0008']
 # name: ['l_t_m_0001', 'l_t_m_0002', 'l_t_m_0003', 'l_t_m_0004', 'l_t_m_0005', 'l_t_m_0006', 'l_t_m_0007']
-name: ['0020']
+name: ['l_t_e_0005']
 # figure_labels: ['L2AC-default', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
 
 figure_labels: ['test']

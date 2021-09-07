@@ -240,11 +240,11 @@ def openWorldError(true_labels, final_labels, unknown_cls_label):
     unknown_samples = unknown_idx.shape[0]
     known_samples = known_idx.shape[0]
     try:
-        unknown_error = 1/unknown_samples * np.where(final_labels[unknown_idx] != unknown_cls_label)[0].shape[0]
+        unknown_error = 1/unknown_samples * (final_labels[unknown_idx] != unknown_cls_label).sum()
     except ZeroDivisionError:
         unknown_error = 0
     try:
-        known_error = 1/known_samples * (true_labels[known_idx] != final_labels[known_idx])[:, 0].sum()
+        known_error = 1/known_samples * (true_labels[known_idx] != final_labels[known_idx]).sum()
     except ZeroDivisionError:
         known_error = 0
     open_world_error = known_error + unknown_error
@@ -261,11 +261,11 @@ def wildernessImpact(true_labels, final_labels, unknown_cls_label):
     except IndexError:
         fp_o = 0
     try:
-        fp_c = (final_labels[closed_set_idx] != true_labels[closed_set_idx])[0, :].sum()
+        fp_c = (final_labels[closed_set_idx] != true_labels[closed_set_idx]).sum()
     except IndexError:
         fp_c = 0
     try:
-        tp_c = (final_labels[known_idx] == true_labels[known_idx])[0, :].sum()
+        tp_c = (final_labels[known_idx] == true_labels[known_idx]).sum()
     except IndexError:
         tp_c = 0
     wilderness_impact = fp_o/(fp_c + tp_c)
