@@ -19,13 +19,13 @@ epochs: 2
 
 ## L2AC parameters
 top_k: 5
-top_n: 4
+top_n: 9
 
 class_ratio: 
   encoder_train: 50
-  l2ac_train: 20
+  l2ac_train: 80
   l2ac_val: 20
-  l2ac_test: 20
+  l2ac_test: 80
 
 sample_ratio:
   encoder_train_samples: 500

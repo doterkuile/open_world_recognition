@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=5gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=4gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=10:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=12:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -34,23 +34,23 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(e_t_0001 e_t_0002 e_t_0003 e_t_0004)	
+array_1=(e_t_0010)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
-array_2=(ResNet50 ResNet152 AlexNet EfficientNet)
+array_2=(ResNet50)
 var_3=feature_layer 
-array_3=(avgpool avgpool fc7 _avg_pooling)
+array_3=(avgpool)
 var_4=encoder_train
-array_4=(50 50 50 50)
+array_4=(100)
 var_5=unfreeze_layer
-array_5=(62 62 8 74) #176 320)
+array_5=(62) #176 320)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=1
+value_e=50
 
 conda activate $conda_env
 

@@ -39,11 +39,15 @@ array_2=(False True)
 var_3=same_class_extend_entries
 array_3=(True False)
 var_4=model_class
-array_4=(L2AC_concat L2AC_concat)
-var_5=criterion
-array_5=(bce_loss_custom bce_loss_custom)
-var_6=two_step_training
-array_6=(True True)
+array_4=(L2AC_smaller_fc L2AC_smaller_fc)
+var_5=encoder
+array_5=(EfficientNet EfficientNet)
+var_6=feature_layer
+array_6=(_avg_pooling _avg_pooling)
+var_7=unfreeze_layer
+array_7=(0 0)
+var_8=encoder_train
+array_8=(0 0)
 len=${#array_1[@]}
 
 
@@ -73,6 +77,8 @@ do
     echo "$var_4 = ${array_4[$i]}"
     echo "$var_5 = ${array_5[$i]}"
     echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
+    echo "$var_8 = ${array_8[$i]}"
 
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
@@ -81,6 +87,8 @@ do
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
 	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
 
 
 	python $python_script $config_file
