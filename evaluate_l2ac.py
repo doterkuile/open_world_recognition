@@ -257,7 +257,7 @@ def wildernessImpact(true_labels, final_labels, unknown_cls_label):
     closed_set_idx = known_idx[final_labels[known_idx] !=unknown_cls_label]
 
     try:
-        fp_o = (final_labels[unknown_idx] != true_labels[unknown_idx])[0, :].sum()
+        fp_o = (final_labels[unknown_idx] != true_labels[unknown_idx]).sum()
     except IndexError:
         fp_o = 0
     try:
