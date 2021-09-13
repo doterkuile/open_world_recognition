@@ -46,7 +46,7 @@ var_6=feature_layer
 array_6=(_avg_pooling _avg_pooling)
 var_7=unfreeze_layer
 array_7=(0 0)
-var_8=encoder_train
+var_8=encoder_trn
 array_8=(0 0)
 len=${#array_1[@]}
 

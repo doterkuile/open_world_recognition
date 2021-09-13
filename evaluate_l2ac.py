@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 from open_world import OpenWorldUtils
 import open_world.meta_learner.meta_learner_utils as meta_utils
+from open_world.ObjectDatasets import TrainPhase
+
 from open_world import loss_functions
 import sklearn
 
@@ -82,7 +84,7 @@ def main():
         same_cls_extend_entries = config['same_class_extend_entries']
         top_n = config['top_n']
         top_k = config['top_k']
-        train_classes = config['class_ratio']['l2ac_train']
+        train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
         class_ratio = config['class_ratio']
         sample_ratio = config['sample_ratio']
         probability_treshold = config['probability_threshold']
@@ -123,7 +125,7 @@ def main():
                 np.savez(f'{tst_data_path}',
                          test_X0=X0, test_X1=X1, test_Y=Y)
 
-            train_phase = 'tst'
+            train_phase = TrainPhase.META_TST
             test_dataset = ObjectDatasets.MetaDataset(dataset_path, top_n, top_k, train_classes,
                                                                 sample_ratio['l2ac_test_samples'],
                                                                 train_phase, same_cls_reverse, same_cls_extend_entries, unknown_class)
@@ -198,29 +200,29 @@ def main():
 
 def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio, unknown_classes, tst_memory_cls):
     if tst_cls_selection == 'same_cls':
-        input_classes = np.arange(class_ratio['encoder_train'],
-                                  class_ratio['encoder_train'] + class_ratio['l2ac_train'] + unknown_classes)
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + unknown_classes)
         input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
                                   sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
                                   sample_ratio['l2ac_test_samples'])
-        memory_classes = np.arange(class_ratio['encoder_train'],
-                                   class_ratio['encoder_train'] + class_ratio['l2ac_train'])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value])
         memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
     else:
-        input_classes = np.arange(class_ratio['encoder_train'] + class_ratio['l2ac_train'] + class_ratio['l2ac_val'],
-                                  class_ratio['encoder_train'] + class_ratio['l2ac_train'] + class_ratio['l2ac_val'] +
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
                                   tst_memory_cls + unknown_classes)
         input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
                                   sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
                                   sample_ratio['l2ac_test_samples'])
-        memory_classes = np.arange(class_ratio['encoder_train'] + class_ratio['l2ac_train'] + class_ratio['l2ac_val'],
-                                  class_ratio['encoder_train'] + class_ratio['l2ac_train'] + class_ratio['l2ac_val'] +
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
                                   tst_memory_cls)
         memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
 
-    complete_cls_set = np.arange(class_ratio['encoder_train'],
-                                 class_ratio['encoder_train'] + class_ratio['l2ac_train'] + class_ratio['l2ac_val'] +
-                                 class_ratio['l2ac_test'])
+    complete_cls_set = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                 class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
+                                 class_ratio[TrainPhase.META_TST.value])
 
     return input_classes, input_samples, memory_classes, memory_samples, complete_cls_set
 
@@ -290,7 +292,7 @@ def testIdxExist(config, unknown_class):
     feature_scaling = config['feature_scaling']
     top_n = config['top_n']
     train_samples = config['sample_ratio']['l2ac_train_samples']
-    train_classes = config['class_ratio']['l2ac_train']
+    train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
 
     test_data_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}.npz'
     data = np.load(test_data_path)
@@ -313,7 +315,7 @@ def getTestDataPath(config, unknown_classes):
     feature_scaling = config['feature_scaling']
     top_n = config['top_n']
     train_samples = config['sample_ratio']['l2ac_train_samples']
-    train_classes = config['class_ratio']['l2ac_train']
+    train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
 
     test_data_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}_{unknown_classes}_tst.npz'
     return test_data_path
@@ -328,7 +330,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
 
     ## L2AC Parameters
     top_k = int(config['top_k'])
-    train_classes = config['class_ratio']['l2ac_train']
+    train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
 
     ## Dataset preparation parameters:
     same_class_reverse = config['same_class_reverse']
@@ -349,7 +351,7 @@ def parseConfigFile(config_file, device, multiple_gpu):
     dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}.npz'
     dataset_class = config['dataset_class']
 
-    trn_phase = 'trn'
+    trn_phase = TrainPhase.META_TRN.value
     test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes,
                                                            train_samples,
                                                            trn_phase, same_class_reverse, same_class_extend_entries)

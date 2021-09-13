@@ -11,15 +11,25 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+from enum import Enum
 import os
 
 import abc
 
 
+
+class TrainPhase(Enum):
+    ENCODER_TRN = 'encoder_trn'
+    ENCODER_VAL = 'encoder_val'
+    META_TRN = 'meta_trn'
+    META_VAL = 'meta_val'
+    META_TST = 'meta_tst'
+
+
 class MetaDataset(data_utils.Dataset):
 
 
-    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase='trn', same_class_reverse=False,
+    def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase=TrainPhase.META_TRN, same_class_reverse=False,
                  same_class_extend_entries=False, unknown_classes=0):
 
         self.n_cls = n_cls
@@ -32,7 +42,7 @@ class MetaDataset(data_utils.Dataset):
         self.train_phase = train_phase
         self.unknown_classes = unknown_classes
         self.memory, self.true_labels = self.load_memory(self.data_path)
-        if self.train_phase == 'tst':
+        if self.train_phase == TrainPhase.META_TST:
             self.load_test_idx(self.data_path)
         else:
             if same_class_extend_entries:
@@ -46,20 +56,20 @@ class MetaDataset(data_utils.Dataset):
 
     #
     def __len__(self):
-        if self.train_phase == 'trn':
+        if self.train_phase == TrainPhase.META_TRN:
             return self.train_X0.shape[0]
-        elif self.train_phase == 'val':
+        elif self.train_phase == TrainPhase.META_VAL:
             return self.valid_X0.shape[0]
-        elif self.train_phase == 'tst':
+        elif self.train_phase == TrainPhase.META_TST:
             return self.test_X0.shape[0]
 
     def __getitem__(self, idx):
         # idx_X0 = np.where(self.train_X0 == idx)
-        if self.train_phase == 'trn':
+        if self.train_phase == TrainPhase.META_TRN:
             idx_X0 = self.train_X0[idx]
             idx_X1 = self.train_X1[idx,:]
             y = torch.tensor(self.train_Y[idx], dtype=torch.float)
-        elif self.train_phase == 'val':
+        elif self.train_phase == TrainPhase.META_VAL:
             idx_X0 = self.valid_X0[idx]
             idx_X1 = self.valid_X1[idx,:]
             y = torch.tensor(self.valid_Y[idx], dtype=torch.float)
@@ -156,7 +166,7 @@ class ObjectDatasetBase(abc.ABC):
         pass
 
     def setupDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
-        if train_phase == "encoder_train":
+        if train_phase == TrainPhase.ENCODER_TRN or train_phase == TrainPhase.ENCODER_VAL:
             self.encoderDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
         else:
             self.metaDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
@@ -173,24 +183,24 @@ class ObjectDatasetBase(abc.ABC):
 
     def setTrainingPhaseIdx(self, class_ratio, train_phase):
         self.class_idx = {key: [] for key in class_ratio.keys()}
-        self.class_idx['encoder_train'] = np.arange(0, class_ratio['encoder_train'])
+        self.class_idx[TrainPhase.ENCODER_TRN.value] = np.arange(0, class_ratio[TrainPhase.ENCODER_TRN.value])
 
-        if self.class_idx['encoder_train'].size == 0:
+        if self.class_idx[TrainPhase.ENCODER_TRN.value].size == 0:
             l2ac_first_idx = 0
 
-            self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx,
-                                                     l2ac_first_idx + class_ratio['l2ac_train'])
+            self.class_idx[TrainPhase.META_TRN.value] = np.arange(l2ac_first_idx,
+                                                     l2ac_first_idx + class_ratio[TrainPhase.META_TRN.value])
 
         else:
-            l2ac_first_idx = self.class_idx['encoder_train'].max()
+            l2ac_first_idx = self.class_idx[TrainPhase.ENCODER_TRN.value].max()
 
-            self.class_idx['l2ac_train'] = np.arange(l2ac_first_idx + 1,
-                                                  l2ac_first_idx + class_ratio['l2ac_train'] + 1)
+            self.class_idx[TrainPhase.META_TRN.value] = np.arange(l2ac_first_idx + 1,
+                                                  l2ac_first_idx + class_ratio[TrainPhase.META_TRN.value] + 1)
 
-        self.class_idx['l2ac_val'] = np.arange(self.class_idx['l2ac_train'].max() + 1,
-                                                  self.class_idx['l2ac_train'].max() + class_ratio['l2ac_val'] + 1)
-        self.class_idx['l2ac_test'] = np.arange(self.class_idx['l2ac_val'].max() + 1,
-                                                  self.class_idx['l2ac_val'].max() + class_ratio['l2ac_test'] + 1)
+        self.class_idx[TrainPhase.META_VAL.value] = np.arange(self.class_idx[TrainPhase.META_TRN.value].max() + 1,
+                                                  self.class_idx[TrainPhase.META_TRN.value].max() + class_ratio[TrainPhase.META_VAL.value] + 1)
+        self.class_idx[TrainPhase.META_TST.value] = np.arange(self.class_idx[TrainPhase.META_VAL.value].max() + 1,
+                                                  self.class_idx[TrainPhase.META_VAL.value].max() + class_ratio[TrainPhase.META_TST.value] + 1)
         self.train_phase = train_phase
 
     def setDataTransforms(self, image_resize):
@@ -201,7 +211,7 @@ class ObjectDatasetBase(abc.ABC):
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
-        if self.train_phase == 'encoder_train':
+        if self.train_phase == TrainPhase.ENCODER_TRN.value:
             self.transform_train = transforms.Compose([
                 transforms.Resize(image_resize),
                 transforms.RandomRotation(20),
@@ -220,7 +230,7 @@ class ObjectDatasetBase(abc.ABC):
 # CIFAR100
 class CIFAR100Dataset(ObjectDatasetBase):
 
-    def __init__(self, dataset_path, class_ratio, train_phase='encoder', image_resize=64):
+    def __init__(self, dataset_path, class_ratio, train_phase=TrainPhase.ENCODER_TRN, image_resize=64):
         super().__init__(dataset_path, class_ratio, train_phase)
 
         self.trn_mean_pixel = [x / 255.0 for x in [129.3, 124.1,  112.4]]
@@ -278,7 +288,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
 class TinyImageNetDataset(ObjectDatasetBase):
 
 
-    def __init__(self, dataset_path, class_ratio, train_phase='encoder', image_resize=64):
+    def __init__(self, dataset_path, class_ratio, train_phase=TrainPhase.ENCODER_TRN, image_resize=64):
         super().__init__(dataset_path, class_ratio, train_phase)
 
         self.trn_mean_pixel = [0.4802, 0.4481, 0.3975]

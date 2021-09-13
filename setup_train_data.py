@@ -2,6 +2,7 @@ import torch
 from open_world import ObjectDatasets
 from open_world import RecognitionModels
 import open_world.meta_learner.meta_learner_utils as meta_utils
+from open_world.ObjectDatasets import TrainPhase
 import yaml
 import numpy as np
 import argparse
@@ -33,7 +34,7 @@ def main():
     unfreeze_layer = config['unfreeze_layer']
     image_resize = config['image_resize']
     feature_scaling = config['feature_scaling']
-    trn_classes = class_ratio['l2ac_train']
+    trn_classes = class_ratio[TrainPhase.META_TRN.value]
     trn_samples_per_cls = sample_ratio['l2ac_train_samples']
     memory_path = f'{dataset_path}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{trn_classes}_{trn_samples_per_cls}_{top_n}'
     feature_path = f'{dataset_path}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_features.npz'
@@ -42,9 +43,9 @@ def main():
         os.makedirs(dataset_path)
 
 
-    complete_cls_idx = np.concatenate([trn_dataset.class_idx['l2ac_train'],
-                                  trn_dataset.class_idx['l2ac_val'],
-                                  trn_dataset.class_idx['l2ac_test']])
+    complete_cls_idx = np.concatenate([trn_dataset.class_idx[TrainPhase.META_TRN.value],
+                                  trn_dataset.class_idx[TrainPhase.META_VAL.value],
+                                  trn_dataset.class_idx[TrainPhase.META_TST.value]])
 
     if not load_features:
         print("Extracting features")
@@ -65,7 +66,7 @@ def main():
         cls_rep = data['cls_rep']
 
     ## Mutually exclusive classes variant uses different classes in trianing and validaton
-    trn_cls_idx = trn_dataset.class_idx['l2ac_train']
+    trn_cls_idx = trn_dataset.class_idx[TrainPhase.META_TRN.value]
 
     ## Non-mutually exclusive classes variant uses same classes, but has to dived the samples in train, validation and test
     input_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
@@ -91,7 +92,7 @@ def main():
     ## Mutually exclusive classes variantsamples available per class
     input_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
 
-    val_cls_idx = trn_dataset.class_idx['l2ac_val']
+    val_cls_idx = trn_dataset.class_idx[TrainPhase.META_VAL.value]
 
     print("Rank validation data, different class")
     X0_val, X1_val, Y_val = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,

@@ -10,6 +10,7 @@ import yaml
 import json
 import torchvision
 from torchvision import transforms
+from open_world.ObjectDatasets import TrainPhase
 import sklearn
 
 import numpy as np
@@ -172,7 +173,7 @@ def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_
     label_list = []
     for cls in top_classes:
 
-        if cls in old_image_dataset.class_idx['l2ac_train']:
+        if cls in old_image_dataset.class_idx[TrainPhase.META_TRN.value]:
 
             im ,  label = old_image_dataset.getImageFromClass(cls)
             object_label = wordnet_to_label(label, old_image_dataset)
@@ -193,7 +194,7 @@ def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_
     images = torch.tensor(np.stack(image_list).transpose(0,3,1,2))
 
 
-    if final_label in old_image_dataset.class_idx['l2ac_train']:
+    if final_label in old_image_dataset.class_idx[TrainPhase.META_TRN.value]:
         final_label_class = wordnet_to_label(final_label, old_image_dataset)
     elif final_label > 0:
         final_label_class = new_image_dataset.classes[0]
@@ -253,9 +254,9 @@ def parseConfigFile(device):
     # L2AC Parameters
     top_k = int(config['top_k'])
     top_n = int(config['top_n'])
-    encoder_classes = config['class_ratio']['encoder_train']
-    train_classes = config['class_ratio']['l2ac_train']
-    test_classes = config['class_ratio']['l2ac_test']
+    encoder_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
+    train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
+    test_classes = config['class_ratio'][TrainPhase.META_TST.value]
     train_samples_per_cls = config['train_samples_per_cls']
 
     encoder = config['encoder']
@@ -279,7 +280,7 @@ def parseConfigFile(device):
     model_class = config['model_class']
     model = eval('RecognitionModels.' + model_class)(train_classes,features_size, batch_size, top_k).to(device)
     OpenWorldUtils.loadModel(model, model_path)
-    num_classes = config['class_ratio']['encoder_train']
+    num_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
     pretrained = True
     figure_size = config['image_resize']
     encoder_class = config['encoder']
@@ -290,7 +291,7 @@ def parseConfigFile(device):
 
     class_ratio = config['class_ratio']
 
-    train_phase = 'l2ac_train'
+    train_phase = TrainPhase.META_TRN.value
     image_dataset = eval('ObjectDatasets.' + config['dataset_path'] + "Dataset")('datasets/' + config['dataset_path'], class_ratio, train_phase, figure_size)
 
 

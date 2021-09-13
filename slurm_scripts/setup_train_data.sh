@@ -41,13 +41,13 @@ var_3=top_n
 array_3=(9)
 var_4=feature_layer
 array_4=(avgpool)
-var_5=l2ac_train
+var_5=meta_trn
 array_5=(80)
-var_6=encoder_train
+var_6=encoder_trn
 array_6=(0)
-var_7=l2ac_val
+var_7=meta_val
 array_7=(20)
-var_8=l2ac_test
+var_8=meta_tst
 array_8=(80)
 len=${#array_1[@]}
 
