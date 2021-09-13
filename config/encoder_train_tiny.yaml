@@ -20,10 +20,10 @@ epochs: 50
   
 ## L2AC parameters
 class_ratio: 
-  encoder_train: 100
-  l2ac_train: 20
-  l2ac_val: 20
-  l2ac_test: 20
+  encoder_trn: 100
+  meta_trn: 20
+  meta_val: 20
+  meta_tst: 20
   
 sample_ratio:
   encoder_train_samples: 500

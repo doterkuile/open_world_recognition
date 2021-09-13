@@ -18,6 +18,7 @@ import shutil
 from torchvision.models import resnet50
 from torchvision import datasets, transforms, models
 import time
+from open_world.ObjectDatasets import TrainPhase
 from tqdm import tqdm
 import copy
 
@@ -47,7 +48,7 @@ def main():
     model_path = exp_folder + '/' + exp_name + '_model.pt'
     dataset_path = f'datasets/{config["dataset_path"]}'
     train_data, val_data, test_data = train_dataset.getData()
-    encoder_train_classes = config['class_ratio']['encoder_train']
+    encoder_train_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
     encoder_file_path = f'{dataset_path}/{config["model_class"]}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_train_classes}.pt'
@@ -316,7 +317,7 @@ def parseConfigFile(device, multiple_gpu):
 
     # L2AC Parameters
     class_ratio = config['class_ratio']
-    train_phase = 'encoder_train'
+    train_phase = TrainPhase.ENCODER_TRN
     dataset_class = config['dataset_class']
     dataset_path = f'datasets' \
                    f'/{config["dataset_path"]}'

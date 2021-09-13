@@ -42,7 +42,7 @@ var_4=model_class
 array_4=(L2AC)
 var_5=two_step_training
 array_5=(False)
-var_6=l2ac_train
+var_6=meta_trn
 array_6=(80)
 
 len=${#array_1[@]}

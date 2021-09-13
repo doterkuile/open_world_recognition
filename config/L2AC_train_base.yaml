@@ -22,10 +22,10 @@ top_k: 5
 top_n: 9
 
 class_ratio: 
-  encoder_train: 50
-  l2ac_train: 80
-  l2ac_val: 20
-  l2ac_test: 80
+  encoder_trn: 50
+  meta_trn: 80
+  meta_val: 20
+  meta_tst: 80
 
 sample_ratio:
   encoder_train_samples: 500

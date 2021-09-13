@@ -41,7 +41,7 @@ def main():
     y_true = [1, 0, 1, 1, 1, 1]
 
     precision(y_pred, y_true)
-    print(tp)
+    # print(tp)
 
     pass
 

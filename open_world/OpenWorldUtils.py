@@ -6,6 +6,7 @@ import yaml
 import os
 import argparse
 import shutil
+from open_world.ObjectDatasets import TrainPhase
 from open_world import loss_functions
 
 from open_world import ObjectDatasets
@@ -47,8 +48,7 @@ def parseConfigFile(device, multiple_gpu):
     # L2AC Parameters
     top_k = int(config['top_k'])
     top_n = int(config['top_n'])
-    train_classes = config['class_ratio']['l2ac_train']
-    test_classes = config['class_ratio']['l2ac_test']
+    train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
     train_samples = config['sample_ratio']['l2ac_train_samples']
 
     # Dataset preparation parameters:
@@ -77,7 +77,7 @@ def parseConfigFile(device, multiple_gpu):
     feature_scaling = config['feature_scaling']
     dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{test_class_selection}.npz'
     dataset_class = config['dataset_class']
-    train_phase = 'trn'
+    train_phase = TrainPhase.META_TRN
     dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples
                                                       ,train_phase,  same_class_reverse, same_class_extend_entries)
 

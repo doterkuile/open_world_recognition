@@ -40,7 +40,7 @@ var_3=model_class
 # array_3=(L2AC_extended_similarity)
 array_3=(L2AC_concat)
 
-var_4=encoder_train
+var_4=encoder_trn
 array_4=(0)
 var_5=feature_layer
 array_5=(avgpool)
@@ -48,7 +48,7 @@ var_6=encoder
 array_6=(ResNet50)
 var_7=unfreeze_layer
 array_7=(0)
-var_8=l2ac_train
+var_8=meta_trn
 array_8=(80)
 len=${#array_1[@]}
 

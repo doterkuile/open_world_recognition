@@ -22,10 +22,10 @@ epochs: 50
 top_k: 5
 top_n: 9
 class_ratio: 
-  encoder_train: 100
-  l2ac_train: 900
-  l2ac_val: 150
-  l2ac_test: 100
+  encoder_trn: 100
+  meta_trn: 900
+  meta_val: 150
+  meta_tst: 100
 
 sample_ratio:
   encoder_train_samples: 500

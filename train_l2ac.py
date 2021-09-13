@@ -13,6 +13,7 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 import time
+from open_world.ObjectDatasets import TrainPhase
 
 
 def main():
@@ -63,14 +64,14 @@ def main():
     dataset_path = train_dataset.data_path
 
     # Get hyperparameters
-    test_classes = config['class_ratio']['l2ac_test']
+    test_classes = config['class_ratio'][TrainPhase.META_TST.value]
     test_samples = config['sample_ratio']['l2ac_test_samples']
     probability_threshold = config['probability_threshold']
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
 
     test_dataset = ObjectDatasets.MetaDataset(dataset_path, config['top_n'], config['top_k'],
-                                              test_classes, test_samples, train_phase='val')
+                                              test_classes, test_samples, train_phase=TrainPhase.META_VAL)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=2)
     pos_weight = torch.tensor(1.0).to(device).to(dtype=torch.float)
     ml_weight = torch.tensor(config['top_n']).to(device).to(dtype=torch.float)
