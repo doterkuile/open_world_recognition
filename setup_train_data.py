@@ -177,7 +177,7 @@ def parseConfigFile(device, multiple_gpu):
     encoder_class = config['model_class']
     pretrained = config['pretrained']
     feature_layer = config['feature_layer']
-    num_classes = config['class_ratio']['encoder_train']
+    num_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
     feature_scaling = config['feature_scaling']
     unfreeze_layer = config['unfreeze_layer']
     model = eval('RecognitionModels.' + encoder_class)(encoder_class, num_classes, feature_layer, unfreeze_layer, feature_scaling, pretrained).to(device)
