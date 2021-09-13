@@ -250,19 +250,19 @@ class CIFAR100Dataset(ObjectDatasetBase):
 
     def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
 
-        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase.value]]
         train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
-        idx = [i for i in range(0,len(train_data.targets)) if train_data.targets[i] in self.class_idx[train_phase]]
+        idx = [i for i in range(0,len(train_data.targets)) if train_data.targets[i] in self.class_idx[train_phase.value]]
         train_data.targets = [train_data.targets[i] for i in idx]
         train_data.data = train_data.data[idx]
 
 
         self.train_data = train_data
 
-        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase.value]]
         test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
 
-        idx = [i for i in range(0,len(test_data.targets)) if test_data.targets[i] in self.class_idx[train_phase]]
+        idx = [i for i in range(0,len(test_data.targets)) if test_data.targets[i] in self.class_idx[train_phase.value]]
         test_data.targets = [test_data.targets[i] for i in idx]
         test_data.data = test_data.data[idx]
         self.test_data = test_data
@@ -307,32 +307,32 @@ class TinyImageNetDataset(ObjectDatasetBase):
         self.setupDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
 
         self.image_shape = [1, 3, image_resize, image_resize]
-        self.classes = [self.class_idx[train_phase]]
+        self.classes = [self.class_idx[train_phase.value]]
 
 
     def encoderDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
 
-        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase.value]]
         train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
-        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase]]
-        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase]]
-        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase]]
+        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase.value]]
 
         self.train_data = train_data
 
-        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase.value]]
         test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
-        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase]]
-        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase]]
-        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]
+        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase.value]]
 
         self.test_data = test_data
 
-        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase]]
+        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase.value]]
         val_data.class_to_idx = {i: val_data.class_to_idx[i] for i in val_data.classes}
-        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase]]
-        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase]]
-        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase]]
+        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase.value]]
 
         self.val_data = val_data
 
@@ -340,27 +340,27 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
     def metaDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
         # Datasplitter for L2AC algorithm
-        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase]]
+        train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase.value]]
         train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
-        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase]]
-        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase]]
-        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase]]
+        train_data.imgs = [(img[0], img[1]) for img in train_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        train_data.samples = [(s[0], s[1]) for s in train_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        train_data.targets = [t for t in train_data.targets if t in self.class_idx[train_phase.value]]
 
         self.train_data = train_data
 
-        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase]]
+        test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase.value]]
         test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}
-        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase]]
-        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase]]
-        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase]]
+        test_data.imgs = [(img[0], img[1]) for img in test_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        test_data.samples = [(s[0], s[1]) for s in test_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        test_data.targets = [t for t in test_data.targets if t in self.class_idx[train_phase.value]]
 
         self.test_data = test_data
 
-        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase]]
+        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase.value]]
         val_data.class_to_idx = {i: val_data.class_to_idx[i] for i in val_data.classes}
-        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase]]
-        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase]]
-        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase]]
+        val_data.imgs = [(img[0], img[1]) for img in val_data.imgs if img[1] in self.class_idx[train_phase.value]]
+        val_data.samples = [(s[0], s[1]) for s in val_data.imgs if s[1] in self.class_idx[train_phase.value]]
+        val_data.targets = [t for t in val_data.targets if t in self.class_idx[train_phase.value]]
 
         self.val_data = val_data
 
