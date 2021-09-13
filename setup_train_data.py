@@ -151,9 +151,9 @@ def parseConfigFile(device, multiple_gpu):
     train_samples_per_cls = config['train_samples_per_cls']  # Number of samples per class
     class_ratio = config['class_ratio']
     sample_ratio = config['sample_ratio']
-    encoder_classes = class_ratio['encoder_train']
-    train_classes = class_ratio['l2ac_train']  # Classes used for training
-    test_classes = class_ratio['l2ac_test']  # Classes used for validation
+    encoder_classes = class_ratio[TrainPhase.ENCODER_TRN.value]
+    train_classes = class_ratio[TrainPhase.META_TRN.value]  # Classes used for training
+    test_classes = class_ratio[TrainPhase.META_TST.value]  # Classes used for validation
     randomize_samples = config['randomize_samples']
 
     # Load dataset
@@ -162,13 +162,13 @@ def parseConfigFile(device, multiple_gpu):
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
 
-    train_phase = 'l2ac_train'
+    train_phase = TrainPhase.META_TRN.value
     train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size)
 
-    test_phase = 'l2ac_val'
+    test_phase = TrainPhase.META_VAL.value
     val_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
 
-    test_phase = 'l2ac_test'
+    test_phase = TrainPhase.META_TST.value
     test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
 
 
