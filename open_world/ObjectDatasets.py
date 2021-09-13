@@ -211,7 +211,7 @@ class ObjectDatasetBase(abc.ABC):
             transforms.Normalize(mean=self.tst_mean_pixel, std=self.tst_std_pixel),
 
         ])
-        if self.train_phase == TrainPhase.ENCODER_TRN.value:
+        if self.train_phase == TrainPhase.ENCODER_TRN or TrainPhase.META_TRN:
             self.transform_train = transforms.Compose([
                 transforms.Resize(image_resize),
                 transforms.RandomRotation(20),
