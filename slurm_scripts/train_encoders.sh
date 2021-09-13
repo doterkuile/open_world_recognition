@@ -88,9 +88,9 @@ do
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
         sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
-	sed -i "s/$var_5:.*/$var_6: ${array_6[$i]}/" $config_file
-	sed -i "s/$var_5:.*/$var_7: ${array_7[$i]}/" $config_file
-	sed -i "s/$var_5:.*/$var_8: ${array_8[$i]}/" $config_file
+	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
 
 
 
