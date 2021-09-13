@@ -331,7 +331,7 @@ def parseConfigFile(device, multiple_gpu):
     pretrained = config['pretrained']
     unfreeze_layer = config['unfreeze_layer']
     feature_scaling = config['feature_scaling']
-    model = eval('RecognitionModels.' + model_class)(model_class, class_ratio[train_phase], feature_layer, unfreeze_layer, feature_scaling, pretrained)
+    model = eval('RecognitionModels.' + model_class)(model_class, class_ratio[train_phase.value], feature_layer, unfreeze_layer, feature_scaling, pretrained)
 
     model.to(device)
 
