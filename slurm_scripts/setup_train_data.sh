@@ -34,15 +34,15 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=model_class
-array_1=(ResNet152)
+array_1=(ResNet50 EfficientNet)
 var_2=unfreeze_layer
-array_2=(0)
+array_2=(0 0)
 var_3=top_n
-array_3=(9)
+array_3=(9 9)
 var_4=feature_layer
-array_4=(avgpool)
+array_4=(avgpool _avg_pooling)
 var_5=meta_trn
-array_5=(80)
+array_5=(80 80)
 var_6=encoder_trn
 array_6=(0)
 var_7=meta_val
@@ -55,7 +55,7 @@ len=${#array_1[@]}
 # conda activate $conda_env
 
 var_n=name
-array_n=(setup_data_rn152)
+array_n=(setup_data_rn50)
 
 
 for ((i=0;i<$len; i++))
