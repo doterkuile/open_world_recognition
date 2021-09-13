@@ -62,7 +62,7 @@ def main():
     # test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=train_dataset.transform_test)
 
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
-    test_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
 
 
     trn_metrics, tst_metrics, best_state = trainMetaModel(model, train_loader, test_loader, epochs, criterion,optimizer,device)

@@ -242,13 +242,14 @@ class CIFAR100Dataset(ObjectDatasetBase):
         self.setDataTransforms(image_resize)
 
         train_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_train)
+        val_data = datasets.CIFAR100(root=dataset_path, train=True, download=True, transform=self.transform_test)
         test_data = datasets.CIFAR100(root=dataset_path, train=False, download=True, transform=self.transform_test)
-        self.setupDataSplit(train_data, test_data, class_ratio, train_phase)
+        self.setupDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
 
         self.image_shape = [1, 3, image_resize, image_resize]
         self.classes = [i for i in range(len(self.train_data.classes))]
 
-    def setupDataSplit(self,train_data, test_data, class_ratio, train_phase):
+    def setupDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):
 
         train_data.classes = [train_data.classes[i] for i in self.class_idx[train_phase.value]]
         train_data.class_to_idx = {i: train_data.class_to_idx[i] for i in train_data.classes}
@@ -256,8 +257,15 @@ class CIFAR100Dataset(ObjectDatasetBase):
         train_data.targets = [train_data.targets[i] for i in idx]
         train_data.data = train_data.data[idx]
 
-
         self.train_data = train_data
+
+        val_data.classes = [val_data.classes[i] for i in self.class_idx[train_phase.value]]
+        val_data.class_to_idx = {i: val_data.class_to_idx[i] for i in val_data.classes}
+        idx = [i for i in range(0,len(val_data.targets)) if val_data.targets[i] in self.class_idx[train_phase.value]]
+        val_data.targets = [val_data.targets[i] for i in idx]
+        val_data.data = val_data.data[idx]
+
+        self.val_data = val_data
 
         test_data.classes = [test_data.classes[i] for i in self.class_idx[train_phase.value]]
         test_data.class_to_idx = {i: test_data.class_to_idx[i] for i in test_data.classes}

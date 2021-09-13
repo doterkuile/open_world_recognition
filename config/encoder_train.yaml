@@ -2,13 +2,13 @@
 name: 'e_c_0004'
 
 ## Paths and classes
-dataset_path: TinyImageNet #'datasets/TinyImageNet' #'datasets/CIFAR100'
-dataset_class: TinyImageNetDataset #TinyImageNetDataset #CIFAR100Dataset
+dataset_path: CIFAR100 #'datasets/TinyImageNet' #'datasets/CIFAR100'
+dataset_class: CIFAR100Dataset #TinyImageNetDataset #CIFAR100Dataset
 image_resize: 224
-model_class: AlexNet
-feature_layer: fc7
+model_class: EfficientNet
+feature_layer: _avg_pooling
 feature_scaling: max_value #sigmoid max_value
-unfreeze_layer: 8
+unfreeze_layer: 74
 pretrained: True
 
 ## Training hyperparameters
@@ -20,9 +20,9 @@ epochs: 50
   
 ## L2AC parameters
 class_ratio: 
-  encoder_trn: 50
-  meta_trn: 20
-  meta_val: 20
+  encoder_trn: 25
+  meta_trn: 50
+  meta_val: 5
   meta_tst: 20
 
 sample_ratio:
