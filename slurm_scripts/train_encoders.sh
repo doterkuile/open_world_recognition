@@ -34,16 +34,22 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(e_t_0010)	
+array_1=(e_c_0001 e_c_0002 e_c_0003 e_c_0004)	
 #array_1=(e_c_0009 e_c_0010 e_c_0011 e_c_0012)
 var_2=model_class
-array_2=(ResNet50)
+array_2=(ResNet50 ResNet152 AlexNet EfficientNet)
 var_3=feature_layer 
-array_3=(avgpool)
+array_3=(avgpool avgpool fc7 _avg_pooling)
 var_4=encoder_trn
-array_4=(100)
+array_4=(25 25 25 25)
 var_5=unfreeze_layer
-array_5=(62) #176 320)
+array_5=(62 62 8 74) #176 320)
+var_6=meta_trn
+array_6=(50 50 50 50)
+var_7=meta_val
+array_7=(5 5 5 5)
+var_8=meta_tst
+array_8=(20 20 20 20)
 len=${#array_1[@]}
 
 
@@ -72,6 +78,9 @@ do
         echo "$var_3 = ${array_3[$i]}"
 	echo "$var_4 = ${array_4[$i]}"
 	echo "$var_5 = ${array_5[$i]}"
+	echo "$var_6 = ${array_6[$i]}"
+	echo "$var_7 = ${array_7[$i]}"
+	echo "$var_8 = ${array_8[$i]}"
 
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
@@ -79,6 +88,9 @@ do
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
         sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
+	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
 
 
 
