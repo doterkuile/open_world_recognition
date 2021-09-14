@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=2:30:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=04:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -18,7 +18,7 @@
 # configuration variables
 python_script_1=setup_train_data.py
 
-base_config_file=TinyImageNet_train_base.yaml
+base_config_file=CIFAR100_train_base.yaml
 conda_env=l2acenv
 
 
@@ -34,28 +34,28 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=model_class
-array_1=(EfficientNet)
+array_1=(ResNet50 ResNet50)
 var_2=unfreeze_layer
-array_2=(0)
+array_2=(0 62)
 var_3=top_n
-array_3=(9)
+array_3=(9 9)
 var_4=feature_layer
-array_4=(_avg_pooling)
+array_4=(avgpool avgpool)
 var_5=meta_trn
-array_5=(80)
+array_5=(50 50)
 var_6=encoder_trn
-array_6=(0)
+array_6=(0 25)
 var_7=meta_val
-array_7=(20)
+array_7=(5 5)
 var_8=meta_tst
-array_8=(80)
+array_8=(20 20)
 len=${#array_1[@]}
 
 
 # conda activate $conda_env
 
 var_n=name
-array_n=(setup_data_ef)
+array_n=(setup_data_rn50)
 
 
 for ((i=0;i<$len; i++))
