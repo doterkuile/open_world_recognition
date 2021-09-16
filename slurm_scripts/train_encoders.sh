@@ -45,11 +45,11 @@ array_4=(0 0 0 0)
 var_5=unfreeze_layer
 array_5=(0 0 0 0) #176 320)
 var_6=meta_trn
-array_6=(50)
+array_6=(50 50 50 50)
 var_7=meta_val
-array_7=(5)
+array_7=(5 5 5 5)
 var_8=meta_tst
-array_8=(20)
+array_8=(20 20 20 20)
 len=${#array_1[@]}
 
 

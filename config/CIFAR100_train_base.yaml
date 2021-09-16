@@ -7,17 +7,17 @@ dataset_class: CIFAR100Dataset
 image_resize: 224
 model_class: ResNet50
 feature_layer: avgpool
-feature_scaling: normal #sigmoid max_value
+feature_scaling: max_value #sigmoid max_value
 unfreeze_layer: 62     #62 62 10 30
 pretrained: True
 
 ## L2AC parameters
-top_n: 4
+top_n: 9
 
 class_ratio: 
-  encoder_trn: 50
-  meta_trn: 20
-  meta_val: 20
+  encoder_trn: 25
+  meta_trn: 50
+  meta_val: 5
   meta_tst: 20
 
 sample_ratio:
