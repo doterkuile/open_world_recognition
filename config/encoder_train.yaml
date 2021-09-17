@@ -8,19 +8,19 @@ image_resize: 224
 model_class: EfficientNet
 feature_layer: _avg_pooling
 feature_scaling: max_value #sigmoid max_value
-unfreeze_layer: 74
+unfreeze_layer: 0
 pretrained: True
 
 ## Training hyperparameters
 criterion: CrossEntropyLoss
 optimizer: SGD
-learning_rate: 0.001
+learning_rate: 0.0001
 batch_size: 100
 epochs: 50
   
 ## L2AC parameters
 class_ratio: 
-  encoder_trn: 25
+  encoder_trn: 0
   meta_trn: 50
   meta_val: 5
   meta_tst: 20

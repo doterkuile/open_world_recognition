@@ -52,13 +52,15 @@ def main():
     loop_variable = {loop_variable_name: []}
     figure_title = config_evaluate['figure_title']
 
-    figure_path = config_evaluate['figure_path'] + figure_title + '/' + config_evaluate['experiment_name']
+    figure_path = config_evaluate['figure_path'] + figure_title + '/' + figure_title
     figure_labels = config_evaluate['figure_labels']
     unknown_classes = config_evaluate['unknown_classes']
     tst_memory_cls = config_evaluate['tst_memory_cls']
 
     if not os.path.exists(config_evaluate['figure_path'] + figure_title):
         os.mkdir(config_evaluate['figure_path'] + figure_title)
+
+    shutil.copy(evaluation_config_file, f'{figure_path}_config.yaml')
 
     metrics_dict = {'loss': [],
                     'accuracy': [],
@@ -116,6 +118,9 @@ def main():
                                                                                                     unknown_class,
                                                                                                     tst_memory_cls)
             tst_data_path = getTestDataPath(config, unknown_class)
+
+            print(f'input classes = {input_classes}')
+            print(f'memory classes = {memory_classes}')
 
             if not os.path.exists(tst_data_path):
                 X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
@@ -177,8 +182,7 @@ def main():
             results[exp]['precision_unknowns'].append(unknown_precision)
 
 
-        # TODO Calculate wilderness impact and wilderness
-        # Adjust from paper, because paper does not take rejection into account
+
 
 
 
@@ -241,6 +245,7 @@ def openWorldError(true_labels, final_labels, unknown_cls_label):
     known_idx = np.where(true_labels != unknown_cls_label)[0]
     unknown_samples = unknown_idx.shape[0]
     known_samples = known_idx.shape[0]
+
     try:
         unknown_error = 1/unknown_samples * (final_labels[unknown_idx] != unknown_cls_label).sum()
     except ZeroDivisionError:
