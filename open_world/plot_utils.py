@@ -341,6 +341,28 @@ def plot_final_unknown_precision(results, figure_labels, title, figure_path):
     return
 
 
+def plot_confusion_matrix(results, figure_labels, title, figure_path):
+
+    for exp in results.keys():
+
+        if not os.path.exists(f"{figure_path}_{exp}"):
+            os.mkdir(f"{figure_path}_{exp}")
+
+        for ii in range(0,len(results[exp]['unknown_classes'])):
+            fig = plt.figure()
+
+
+
+            cf_matrix = results[exp]['confusion_matrix'][ii]
+            unknowns = results[exp]['unknown_classes'][ii]
+            sns.heatmap(np.multiply(cf_matrix, 1.0/(cf_matrix.sum(axis=1).reshape(-1, 1))),annot=False, cmap='Blues')
+            plt.title(f"{unknowns} Unknown objects")
+            fig.savefig(f"{figure_path}_{exp}/{unknowns}")
+            # plt.show()
+            plt.close(fig)
+
+    return
+
 def plot_final_wilderness_impact(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
@@ -359,6 +381,41 @@ def plot_final_wilderness_impact(results, figure_labels, title, figure_path):
 
     fig.savefig(f'{figure_path}_WI')
     return
+
+
+def plot_final_score_distribution(results, title,
+                      figure_path=None):
+    x_label = 'Output score'
+    legend_label = 'Dataset'
+
+    for exp in results.keys():
+
+
+        fig, axs = plt.subplots(len(results[exp]['true_labels']), 1, figsize=(15, 10))
+
+        for ii in range(0,len(results[exp]['true_labels'])):
+            true_labels = results[exp]['true_labels'][ii]
+            final_labels = results[exp]['final_labels'][ii]
+            final_score = results[exp]['final_score'][ii]
+            unknown_label = results[exp]['unknown_label'][ii]
+            unknown_scores = final_score[np.where(true_labels == unknown_label)]
+
+            known_scores = final_score[np.where(true_labels != unknown_label)]
+
+            score_dict = {x_label: np.concatenate([known_scores, unknown_scores], axis=0),
+                               legend_label: np.concatenate([np.full((len(known_scores)), 'Known classes'), np.full((len(unknown_scores)), 'Unknown classes')], axis=0)}
+
+            scores = pd.DataFrame.from_dict(score_dict)
+            axs[ii].set_title(f"{results[exp]['unknown_classes'][ii]} unknown classes", fontweight="bold", size=18)
+            sns.histplot(ax=axs[ii], data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
+                 common_norm=False,
+                 element='bars', binrange=(0, 1), binwidth=0.005)
+
+        if figure_path is not None:
+            fig.savefig(f"{figure_path}_{exp}_score_distribution")
+
+    plt.close(fig)
+
 
 
 def plot_best_loss(loss, loop_variable, figure_path):

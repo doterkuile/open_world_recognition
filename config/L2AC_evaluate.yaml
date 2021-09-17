@@ -1,5 +1,5 @@
 ## Experiment
-name: ['l_c_e_0001', 'l_c_e_0002', 'l_c_e_0003','l_c_e_0004','l_c_e_0005', 'l_c_e_0006', 'l_c_e_0007','l_c_e_0008']
+name: ['l_t_e_0005']# , 'l_c_e_0002', 'l_c_e_0003','l_c_e_0004','l_c_e_0005', 'l_c_e_0006', 'l_c_e_0007','l_c_e_0008']
 #name: ['0021', 'l_t_m_0002', 'l_t_m_0003', 'l_t_m_0004', 'l_t_m_0005', 'l_t_m_0006', 'l_t_m_0007']
 # name: ['l_e', 'l_t_data_aug_0002']
 
@@ -14,7 +14,8 @@ figure_title: 'cifar_encoders'
 experiment_name: 'l2ac_models'
 
 variable: model_class
-unknown_classes: [0, 5, 10, 15, 20]
+unknown_classes: [0, 5, 10]
 tst_memory_cls: 50
+plot_confusion_matrix: True
 figure_path: 'results/'
 
