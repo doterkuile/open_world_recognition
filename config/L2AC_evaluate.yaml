@@ -1,20 +1,20 @@
 ## Experiment
-# name: ['l_t_e_0001', 'l_t_e_0002', 'l_t_e_0003','l_t_e_0004','l_t_e_0005', 'l_t_e_0006', 'l_t_e_0007','l_t_e_0008']
+name: ['l_c_e_0001', 'l_c_e_0002', 'l_c_e_0003','l_c_e_0004','l_c_e_0005', 'l_c_e_0006', 'l_c_e_0007','l_c_e_0008']
 #name: ['0021', 'l_t_m_0002', 'l_t_m_0003', 'l_t_m_0004', 'l_t_m_0005', 'l_t_m_0006', 'l_t_m_0007']
-name: ['l_t_data_aug_0003', 'l_t_data_aug_0004']
+# name: ['l_e', 'l_t_data_aug_0002']
 
-figure_labels: ['RN50 (diff cls)', 'EffNet (diff cls)']
+# figure_labels: ['RN50 (same cls)', 'EffNet (same cls)']
 # figure_labels: ['RN50', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
 
 
-# figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
+figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
 
-figure_title: 'augment_train_data_diff_cls'
+figure_title: 'cifar_encoders'
 
 experiment_name: 'l2ac_models'
 
 variable: model_class
-unknown_classes: [0, 20, 40, 60]
-tst_memory_cls: 40
+unknown_classes: [0, 5, 10, 15, 20]
+tst_memory_cls: 50
 figure_path: 'results/'
 
