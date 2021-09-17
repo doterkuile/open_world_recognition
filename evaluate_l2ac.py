@@ -51,14 +51,17 @@ def main():
     loop_variable_name = config_evaluate['variable']
     loop_variable = {loop_variable_name: []}
     figure_title = config_evaluate['figure_title']
+    plt_conf_matrix = config_evaluate['plot_confusion_matrix']
 
-    figure_path = config_evaluate['figure_path'] + figure_title + '/' + config_evaluate['experiment_name']
+    figure_path = config_evaluate['figure_path'] + figure_title + '/' + figure_title
     figure_labels = config_evaluate['figure_labels']
     unknown_classes = config_evaluate['unknown_classes']
     tst_memory_cls = config_evaluate['tst_memory_cls']
 
     if not os.path.exists(config_evaluate['figure_path'] + figure_title):
         os.mkdir(config_evaluate['figure_path'] + figure_title)
+
+    shutil.copy(evaluation_config_file, f'{figure_path}_config.yaml')
 
     metrics_dict = {'loss': [],
                     'accuracy': [],
@@ -104,7 +107,12 @@ def main():
                         'precision_knowns': [],
                         'precision_unknowns': [],
                         'wilderness_impact': [],
-                        'wilderness_ratio': []
+                        'wilderness_ratio': [],
+                        'confusion_matrix': [],
+                        'true_labels': [],
+                        'final_labels': [],
+                        'final_score': [],
+                        'unknown_label': []
                         }
 
         for unknown_class in unknown_classes:
@@ -116,6 +124,9 @@ def main():
                                                                                                     unknown_class,
                                                                                                     tst_memory_cls)
             tst_data_path = getTestDataPath(config, unknown_class)
+
+            print(f'input classes = {input_classes}')
+            print(f'memory classes = {memory_classes}')
 
             if not os.path.exists(tst_data_path):
                 X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
@@ -151,7 +162,7 @@ def main():
             true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
 
             macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(true_labels, final_label, unknown_label)
-
+            cf_matrix = sklearn.metrics.confusion_matrix(true_labels, final_label)
             true_unknowns = np.where(true_labels == unknown_label)[0]
             true_knowns = np.where(true_labels != unknown_label)[0]
 
@@ -169,16 +180,21 @@ def main():
             results[exp]['accuracy'].append(accuracy)
             results[exp]['open_world_error'].append(open_world_error)
             results[exp]['unknown_classes'].append(unknown_class)
-            # results[exp]['true_labels'].append(true_labels)
-            # results[exp]['final_labels'].append(final_label)
+            results[exp]['true_labels'].append(true_labels)
+            results[exp]['final_labels'].append(final_label)
+            results[exp]['unknown_label'].append(unknown_label)
+
+            results[exp]['final_score'].append(y_score.max(axis=1))
+
             results[exp]['wilderness_impact'].append(wilderness_impact)
             results[exp]['wilderness_ratio'].append(wilderness_ratio)
             results[exp]['precision_knowns'].append(known_precision)
             results[exp]['precision_unknowns'].append(unknown_precision)
+            results[exp]['confusion_matrix'].append(cf_matrix)
 
 
-        # TODO Calculate wilderness impact and wilderness
-        # Adjust from paper, because paper does not take rejection into account
+
+
 
 
 
@@ -190,6 +206,11 @@ def main():
     plot_utils.plot_final_open_world_error(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_known_precision(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_unknown_precision(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_score_distribution(results, figure_title, figure_path)
+
+    if plt_conf_matrix:
+        plot_utils.plot_confusion_matrix(results, figure_labels, figure_title, figure_path)
+
 
 
 
@@ -241,6 +262,7 @@ def openWorldError(true_labels, final_labels, unknown_cls_label):
     known_idx = np.where(true_labels != unknown_cls_label)[0]
     unknown_samples = unknown_idx.shape[0]
     known_samples = known_idx.shape[0]
+
     try:
         unknown_error = 1/unknown_samples * (final_labels[unknown_idx] != unknown_cls_label).sum()
     except ZeroDivisionError:
