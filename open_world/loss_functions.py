@@ -86,7 +86,7 @@ class contrastive_loss(nn.Module):
         # f1 = lambda x: torch.where(x > 0, x, torch.tensor(0,device='cuda',dtype=torch.float))
         f1 = lambda x: torch.clamp(x, min=0.0)
 
-        loss = self.positive_weight * target * torch.pow((1 - x), 2) + (1 - target) * torch.pow(f1(x - 0.5), 2)
+        loss = target * torch.pow((1 - x), 2) + (1 - target) * torch.pow(f1(x - 0.5), 2)
         idx0 = len((target == 0).nonzero())
         idx1 = len((target == 1).nonzero())
 

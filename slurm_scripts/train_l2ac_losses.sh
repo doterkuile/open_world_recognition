@@ -31,7 +31,7 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_l_0001)
+array_1=(l_t_l_0002)
 var_2=criterion
 array_2=(contrastive_loss)
 var_3=model_class
