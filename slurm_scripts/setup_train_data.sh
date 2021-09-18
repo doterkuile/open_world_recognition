@@ -18,7 +18,7 @@
 # configuration variables
 python_script_1=setup_train_data.py
 
-base_config_file=CIFAR100_train_base.yaml
+base_config_file=TinyImageNet_train_base.yaml
 conda_env=l2acenv
 
 
@@ -34,28 +34,28 @@ module load cudnn/10.0-7.6.0.64
 
 # Loop variables
 var_1=model_class
-array_1=(AlexNet)
+array_1=(EfficientNet)
 var_2=unfreeze_layer
-array_2=(8)
+array_2=(0)
 var_3=top_n
-array_3=(9)
+array_3=(21)
 var_4=feature_layer
-array_4=(fc7)
+array_4=(_avg_pooling)
 var_5=meta_trn
-array_5=(50)
+array_5=(80)
 var_6=encoder_trn
-array_6=(25)
+array_6=(0)
 var_7=meta_val
-array_7=(5)
+array_7=(20)
 var_8=meta_tst
-array_8=(20)
+array_8=(80)
 len=${#array_1[@]}
 
 
 # conda activate $conda_env
 
 var_n=name
-array_n=(setup_data_an)
+array_n=(setup_data_n21)
 
 
 for ((i=0;i<$len; i++))

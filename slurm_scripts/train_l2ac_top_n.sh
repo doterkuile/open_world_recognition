@@ -5,10 +5,10 @@
 #SBATCH --qos=long					# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
-#SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=7gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=48:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=25:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -32,16 +32,30 @@ conda_env=l2acenv
 
 
 # Loop variables
-var_1=name	
-array_1=(l_t_n_0001 l_t_n_0002 l_t_n_0003 l_t_n_0004 l_t_n_0005 l_t_n_0006)
-var_2=top_n
-array_2=(1 2 4 9 10 15)
-var_3=model_class
-array_3=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
-var_4=two_step_training
-array_4=(True True True True True True True)
+var_1=name
+array_1=(l_t_n_0008)
+var_2=feature_layer
+array_2=(_avg_pooling)
+var_3=encoder
+array_3=(EfficientNet)
+var_4=(unfreeze_layer)
+array_4=(0)
 var_5=criterion
-array_5=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
+array_5=(bce_loss_default)
+var_6=meta_trn
+array_6=(80)
+var_7=meta_val
+array_7=(20)
+var_8=top_n
+array_8=(21)
+var_9=model_class
+array_9=(L2AC_extended_similarity)
+var_10=encoder_trn
+array_10=(0)
+# var_11=same_class_extend_entries
+# array_11=(True)
+var_11=meta_tst
+array_11=(20)
 len=${#array_1[@]}
 
 
@@ -70,13 +84,24 @@ do
     echo "$var_3 = ${array_3[$i]}"
     echo "$var_4 = ${array_4[$i]}"
     echo "$var_5 = ${array_5[$i]}"
-
+    echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
+    echo "$var_8 = ${array_8[$i]}"
+    echo "$var_9 = ${array_9[$i]}"
+    echo "$var_10 = ${array_10[$i]}"
+    echo "$var_11 = ${array_11[$i]}"
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
+	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
+	sed -i "s/$var_9:.*/$var_9: ${array_9[$i]}/" $config_file
+	sed -i "s/$var_10:.*/$var_10: ${array_10[$i]}/" $config_file
+	sed -i "s/$var_11:.*/$var_11: ${array_11[$i]}/" $config_file
 
 
 	python $python_script $config_file
