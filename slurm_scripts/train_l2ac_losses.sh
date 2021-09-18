@@ -31,7 +31,7 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_l_0003)
+array_1=(l_t_l_0005)
 var_2=criterion
 array_2=(contrastive_loss)
 var_3=model_class
@@ -39,7 +39,7 @@ var_3=model_class
 array_3=(L2AC_extended_similarity)
 
 var_4=learning_rate
-array_4=(0.005)
+array_4=(0.0001)
 var_5=feature_layer
 array_5=(_avg_pooling)
 var_6=encoder

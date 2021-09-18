@@ -1,17 +1,19 @@
 ## Experiment
 # name: ['l_t_e_0001', 'l_t_e_0002', 'l_t_e_0003','l_t_e_0004','l_t_e_0005', 'l_t_e_0006', 'l_t_e_0007','l_t_e_0008']
 # name: ['l_t_m_0001', 'l_t_m_0002', 'l_t_m_0003', 'l_t_m_0004', 'l_t_m_0005', 'l_t_m_0006', 'l_t_m_0007']
+name: ['l_t_m_0008', 'l_t_m_0009', 'l_t_m_0010', 'l_t_m_0011', 'l_t_m_0012', 'l_t_m_0013', 'l_t_m_0014']
+
 # name: ['l_e', 'l_t_data_aug_0002']
-name: ['l_t_n_0001', 'l_t_n_0002', 'l_t_n_0003','l_t_n_0004','l_t_n_0005', 'l_t_n_0006', 'l_t_n_0007','l_t_n_0008']
+# name: ['l_t_n_0001', 'l_t_n_0002', 'l_t_n_0003','l_t_n_0004','l_t_n_0005', 'l_t_n_0006', 'l_t_n_0007','l_t_n_0008']
 
 # figure_labels: ['RN50 (same cls)', 'EffNet (same cls)']
-# figure_labels: ['L2AC', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
+figure_labels: ['L2AC', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
 
 
 # figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
-figure_labels: ['n = 1', 'n = 3', 'n = 6', 'n = 9', 'n = 12', 'n = 15', 'n = 18', 'n = 21']
+# figure_labels: ['n = 1', 'n = 3', 'n = 6', 'n = 9', 'n = 12', 'n = 15', 'n = 18', 'n = 21']
 
-figure_title: 'top_n'
+figure_title: 'models_rn50'
 
 experiment_name: 'l2ac_models'
 
