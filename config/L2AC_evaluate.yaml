@@ -19,7 +19,7 @@ experiment_name: 'l2ac_models'
 
 variable: model_class
 unknown_classes: [0, 20, 40, 60, 80]
-tst_memory_cls: 80
+tst_memory_cls: [80]
 plot_confusion_matrix: True
 figure_path: 'results/'
 

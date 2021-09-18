@@ -30,7 +30,7 @@ class MetaDataset(data_utils.Dataset):
 
 
     def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase=TrainPhase.META_TRN, same_class_reverse=False,
-                 same_class_extend_entries=False, unknown_classes=0):
+                 same_class_extend_entries=False, unknown_classes=0, memory_classes=80):
 
         self.n_cls = n_cls
         self.n_smpl = n_smpl
@@ -41,6 +41,7 @@ class MetaDataset(data_utils.Dataset):
         self.top_k = top_k
         self.train_phase = train_phase
         self.unknown_classes = unknown_classes
+        self.memory_classes = memory_classes
         self.memory, self.true_labels = self.load_memory(self.data_path)
         if self.train_phase == TrainPhase.META_TST:
             self.load_test_idx(self.data_path)
@@ -144,7 +145,7 @@ class MetaDataset(data_utils.Dataset):
         self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
 
     def load_test_idx(self, data_path):
-        test_data_path = data_path.split('.')[0] + f'_{self.unknown_classes}_tst.npz'
+        test_data_path = data_path.split('.')[0] + f'_{self.memory_classes}_{self.unknown_classes}_tst.npz'
 
 
         data = np.load(test_data_path)

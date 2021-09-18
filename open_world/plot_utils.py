@@ -232,12 +232,12 @@ def plot_final_weighted_F1(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['weighted_f1']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('F1-score')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Weighted F1-score')
     plt.legend()
     # plt.show()
@@ -250,12 +250,12 @@ def plot_final_macro_F1(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['macro_f1']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('F1-score')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Macro F1-score')
     plt.legend()
     # plt.show()
@@ -268,12 +268,12 @@ def plot_final_accuracy(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['accuracy']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('Accuracy')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Accuracy')
     plt.legend()
     # plt.show()
@@ -289,12 +289,12 @@ def plot_final_open_world_error(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['open_world_error']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('Open World Error')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Open world error')
     plt.legend()
     # plt.show()
@@ -308,12 +308,12 @@ def plot_final_known_precision(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['precision_knowns']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('E_k')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Prediction error known classes E_K')
     plt.legend()
     # plt.show()
@@ -327,12 +327,12 @@ def plot_final_unknown_precision(results, figure_labels, title, figure_path):
     ii = 0
     for key in results.keys():
         y = results[key]['precision_unknowns']
-        x = results[key]['unknown_classes']
+        x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
 
     plt.ylabel('E_U')
-    plt.xlabel('Unknown classes')
+    plt.xlabel(results[key]['known_unknown'])
     plt.title('Prediction error unknown classes E_U')
     plt.legend()
     # plt.show()
@@ -354,9 +354,9 @@ def plot_confusion_matrix(results, figure_labels, title, figure_path):
 
 
             cf_matrix = results[exp]['confusion_matrix'][ii]
-            unknowns = results[exp]['unknown_classes'][ii]
+            unknowns = results[exp][results[exp]['known_unknown']][ii]
             sns.heatmap(np.multiply(cf_matrix, 1.0/(cf_matrix.sum(axis=1).reshape(-1, 1))),annot=False, cmap='Blues')
-            plt.title(f"{unknowns} Unknown objects")
+            plt.title(f"{unknowns} {results[exp]['known_unknown']} objects")
             fig.savefig(f"{figure_path}_{exp}/{unknowns}")
             # plt.show()
             plt.close(fig)
@@ -393,6 +393,14 @@ def plot_final_score_distribution(results, title,
 
         fig, axs = plt.subplots(len(results[exp]['true_labels']), 1, figsize=(15, 10))
 
+        if results[exp]['known_unknown'] == "unknown_classes":
+            label = "Known classes"
+            title = "unknown classes"
+        else:
+            label = "Unknown classes"
+            title = "known classes"
+
+
         for ii in range(0,len(results[exp]['true_labels'])):
             true_labels = results[exp]['true_labels'][ii]
             final_labels = results[exp]['final_labels'][ii]
@@ -408,7 +416,7 @@ def plot_final_score_distribution(results, title,
             #               legend_label: np.concatenate([np.full((len(unknown_scores)), 'Unknown classes')], axis=0)}
 
             scores = pd.DataFrame.from_dict(score_dict)
-            axs[ii].set_title(f"{results[exp]['unknown_classes'][ii]} unknown classes", fontweight="bold", size=18)
+            axs[ii].set_title(f"{results[exp][results[exp]['known_unknown']][ii]} {title}", fontweight="bold", size=18)
             sns.histplot(ax=axs[ii], data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
                  common_norm=True,
                  element='bars', binrange=(0, 1), binwidth=0.005)
