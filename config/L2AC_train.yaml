@@ -4,14 +4,14 @@ name: '0022'
 ## Paths and classes
 dataset_path: TinyImageNet
 dataset_class: MetaDataset
-model_class: L2AC
+model_class: L2AC_concat
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
 unfreeze_layer: 62   #62 62 6 8
 
 ## Training hyperparameters
-criterion: contrastive_loss
+criterion: bce_loss_default
 optimizer: Adam
 learning_rate: 0.0005
 batch_size: 256
