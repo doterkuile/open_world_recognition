@@ -32,23 +32,36 @@ conda_env=l2acenv
 
 
 # Loop variables
-var_1=name	
-array_1=(l_t_k_0001 l_t_k_0002 l_t_k_0003 l_t_k_0004 l_t_k_0005 l_t_k_000_6)
-var_2=top_k
-array_2=(1 3 5 10 15 20)
-var_3=model_class
-array_3=(L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat L2AC_concat)
-var_4=criterion
-array_4=(bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom bce_loss_custom)
-var_5=two_step_training
-array_5=(True True True True True True True True)
+var_1=name
+array_1=(l_t_k_0001)
+var_2=feature_layer
+array_2=(_avg_pooling)
+var_3=encoder
+array_3=(EfficientNet)
+var_4=(unfreeze_layer)
+array_4=(0)
+var_5=criterion
+array_5=(bce_loss_default)
+var_6=meta_trn
+array_6=(80)
+var_7=meta_val
+array_7=(20)
+var_8=top_k
+array_8=(20)
+var_9=model_class
+array_9=(L2AC_extended_similarity)
+var_10=encoder_trn
+array_10=(0)
+# var_11=same_class_extend_entries
+# array_11=(True)
+var_11=meta_tst
+array_11=(20)
 len=${#array_1[@]}
 
 
 
-
 var_e=epochs
-value_e=400
+value_e=5
 
 conda activate $conda_env
 
@@ -68,14 +81,26 @@ do
 	echo "$var_1 = ${array_1[$i]}"
 	echo "$var_2 = ${array_2[$i]}"
     echo "$var_3 = ${array_3[$i]}"
-	echo "$var_4 = ${array_4[$i]}"
+    echo "$var_4 = ${array_4[$i]}"
     echo "$var_5 = ${array_5[$i]}"
+    echo "$var_6 = ${array_6[$i]}"
+    echo "$var_7 = ${array_7[$i]}"
+    echo "$var_8 = ${array_8[$i]}"
+    echo "$var_9 = ${array_9[$i]}"
+    echo "$var_10 = ${array_10[$i]}"
+    echo "$var_11 = ${array_11[$i]}"
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
 	sed -i "s/$var_2:.*/$var_2: ${array_2[$i]}/" $config_file
 	sed -i "s/$var_3:.*/$var_3: ${array_3[$i]}/" $config_file
 	sed -i "s/$var_4:.*/$var_4: ${array_4[$i]}/" $config_file
 	sed -i "s/$var_5:.*/$var_5: ${array_5[$i]}/" $config_file
+	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
+	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
+	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
+	sed -i "s/$var_9:.*/$var_9: ${array_9[$i]}/" $config_file
+	sed -i "s/$var_10:.*/$var_10: ${array_10[$i]}/" $config_file
+	sed -i "s/$var_11:.*/$var_11: ${array_11[$i]}/" $config_file
 
 	python $python_script $config_file
 

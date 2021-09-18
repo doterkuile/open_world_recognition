@@ -8,7 +8,7 @@ model_class: L2AC
 encoder: ResNet50
 feature_layer: avgpool
 image_resize: 224
-unfreeze_layer: 62    #62 62 6 8
+unfreeze_layer: 0    #62 62 6 8
 
 ## Training hyperparameters
 criterion: bce_loss_default
@@ -22,7 +22,7 @@ top_k: 5
 top_n: 9
 
 class_ratio: 
-  encoder_trn: 50
+  encoder_trn: 0
   meta_trn: 80
   meta_val: 20
   meta_tst: 80
