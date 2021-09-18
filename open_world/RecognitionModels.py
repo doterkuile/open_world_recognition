@@ -431,6 +431,7 @@ class L2AC_extended_similarity(L2AC_base):
 
     def __init__(self, num_classes, feature_size=2048,  batch_size=10, top_k=5):
         super().__init__(num_classes, feature_size, batch_size, top_k)
+        self.input_size = 512
 
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.initialize_weights()
@@ -439,7 +440,7 @@ class L2AC_extended_similarity(L2AC_base):
 
     def setMatchingLayer(self):
         matching_layer = nn.Sequential(nn.Dropout(p=0.5),
-                                       nn.Linear(2 * self.feature_size, self.input_size),
+                                       nn.Linear(2 * self.input_size, self.input_size),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1024),
@@ -461,6 +462,8 @@ class L2AC_extended_similarity(L2AC_base):
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
+        x = F.relu(self.fc_reduce(x))
+        x1 = F.relu(self.fc_reduce(x1))
         x = torch.cat((x, x1), dim=2)
         return x
 
@@ -539,6 +542,8 @@ class L2AC_concat(L2AC_base):
 
     def __init__(self, num_classes, feature_size=2048, batch_size=10, top_k=5):
         super().__init__(num_classes, feature_size, batch_size, top_k)
+        self.input_size = 512
+
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         self.initialize_weights()
 
@@ -560,6 +565,8 @@ class L2AC_concat(L2AC_base):
 
     def similarity_function(self, x0, x1):
         x = x0.repeat_interleave(x1.shape[1], dim=1)
+        x = F.relu(self.fc_reduce(x))
+        x1 = F.relu(self.fc_reduce(x1))
         x = torch.cat((x, x1), dim=2)
         return x
 
