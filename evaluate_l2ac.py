@@ -120,7 +120,7 @@ def main():
                         }
 
         if len(unknown_classes) > len(tst_memory_cls_list):
-            results[exp]['known_unknown'] = 'unkown_classes'
+            results[exp]['known_unknown'] = 'unknown_classes'
         else:
             results[exp]['known_unknown'] = 'memory_classes'
 
