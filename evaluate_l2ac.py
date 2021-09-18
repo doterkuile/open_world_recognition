@@ -56,7 +56,7 @@ def main():
     figure_path = config_evaluate['figure_path'] + figure_title + '/' + figure_title
     figure_labels = config_evaluate['figure_labels']
     unknown_classes = config_evaluate['unknown_classes']
-    tst_memory_cls = config_evaluate['tst_memory_cls']
+    tst_memory_cls_list = config_evaluate['tst_memory_cls']
 
     if not os.path.exists(config_evaluate['figure_path'] + figure_title):
         os.mkdir(config_evaluate['figure_path'] + figure_title)
@@ -93,6 +93,8 @@ def main():
         probability_treshold = config['probability_threshold']
 
 
+
+
         data = np.load(dataset_path)
         data_rep = data['data_rep']
         labels = data['data_labels']
@@ -104,6 +106,8 @@ def main():
                         'accuracy': [],
                         'open_world_error': [],
                         'unknown_classes': [],
+                        'memory_classes': [],
+                        'known_unknown': [],
                         'precision_knowns': [],
                         'precision_unknowns': [],
                         'wilderness_impact': [],
@@ -115,82 +119,89 @@ def main():
                         'unknown_label': []
                         }
 
+        if len(unknown_classes) > len(tst_memory_cls_list):
+            results[exp]['known_unknown'] = 'unkown_classes'
+        else:
+            results[exp]['known_unknown'] = 'memory_classes'
+
+
         for unknown_class in unknown_classes:
-            print(f'Start experiment {exp} with {unknown_class} unknown classes')
-            input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
-                                                                                                    tst_cls_selection,
-                                                                                                    class_ratio,
-                                                                                                    sample_ratio,
-                                                                                                    unknown_class,
-                                                                                                    tst_memory_cls)
-            tst_data_path = getTestDataPath(config, unknown_class)
 
-            print(f'input classes = {input_classes}')
-            print(f'memory classes = {memory_classes}')
-
-            if not os.path.exists(tst_data_path):
-                X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
-                                          memory_samples, input_classes, memory_classes, complete_cls_set, top_n)
+            for tst_memory_cls in tst_memory_cls_list:
+                print(f'Start experiment {exp} with {tst_memory_cls} known classes and {unknown_class} unknown classes')
+                input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
+                                                                                                        tst_cls_selection,
+                                                                                                        class_ratio,
+                                                                                                        sample_ratio,
+                                                                                                        unknown_class,
+                                                                                                        tst_memory_cls)
+                tst_data_path = getTestDataPath(config, unknown_class, tst_memory_cls)
 
 
-                np.savez(f'{tst_data_path}',
-                         test_X0=X0, test_X1=X1, test_Y=Y)
-
-            train_phase = TrainPhase.META_TST
-            test_dataset = ObjectDatasets.MetaDataset(dataset_path, top_n, top_k, train_classes,
-                                                                sample_ratio['l2ac_test_samples'],
-                                                                train_phase, same_cls_reverse, same_cls_extend_entries, unknown_class)
+                if not os.path.exists(tst_data_path):
+                    X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                                              memory_samples, input_classes, memory_classes, complete_cls_set, top_n)
 
 
-            test_loader = DataLoader(test_dataset, batch_size= 30 * top_n, shuffle=False, pin_memory=True)
+                    np.savez(f'{tst_data_path}',
+                             test_X0=X0, test_X1=X1, test_Y=Y)
 
-            y_score, memory_labels, true_labels = meta_utils.test_model(test_loader, model, criterion, device, probability_treshold, top_n)
-
-            # Unknown label is set to max idx + 1
-            unknown_label = complete_cls_set.max() + 1
-
-            # retrieve final label from top n X1 by getting the max prediction score
-            final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
-
-            # Set all final labels lower than threshold to unknown
-            final_label[np.where(y_score.max(axis=1) < probability_treshold)] = unknown_label
+                train_phase = TrainPhase.META_TST
+                test_dataset = ObjectDatasets.MetaDataset(dataset_path, top_n, top_k, train_classes,
+                                                                    sample_ratio['l2ac_test_samples'],
+                                                                    train_phase, same_cls_reverse, same_cls_extend_entries, unknown_class, tst_memory_cls)
 
 
-            # Find all classes that are not in memory but only in input
-            unknown_class_labels = input_classes[~np.isin(input_classes, memory_classes)]
-            # Set all true input labels not in memory to unknown
-            true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
+                test_loader = DataLoader(test_dataset, batch_size= 30 * top_n, shuffle=False, pin_memory=True)
 
-            macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(true_labels, final_label, unknown_label)
-            cf_matrix = sklearn.metrics.confusion_matrix(true_labels, final_label)
-            true_unknowns = np.where(true_labels == unknown_label)[0]
-            true_knowns = np.where(true_labels != unknown_label)[0]
+                y_score, memory_labels, true_labels = meta_utils.test_model(test_loader, model, criterion, device, probability_treshold, top_n)
 
-            correct_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
-            correct_knowns = np.where(final_label[true_knowns] != true_labels[true_knowns].reshape(-1))[0]
-            try:
-                unknown_precision = correct_unknowns.shape[0]/true_unknowns.shape[0]
-            except ZeroDivisionError:
-                unknown_precision = 0
-            known_precision = correct_knowns.shape[0]/true_knowns.shape[0]
+                # Unknown label is set to max idx + 1
+                unknown_label = complete_cls_set.max() + 1
+
+                # retrieve final label from top n X1 by getting the max prediction score
+                final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
+
+                # Set all final labels lower than threshold to unknown
+                final_label[np.where(y_score.max(axis=1) < probability_treshold)] = unknown_label
 
 
-            results[exp]['macro_f1'].append(macro_f1)
-            results[exp]['weighted_f1'].append(weighted_f1)
-            results[exp]['accuracy'].append(accuracy)
-            results[exp]['open_world_error'].append(open_world_error)
-            results[exp]['unknown_classes'].append(unknown_class)
-            results[exp]['true_labels'].append(true_labels)
-            results[exp]['final_labels'].append(final_label)
-            results[exp]['unknown_label'].append(unknown_label)
+                # Find all classes that are not in memory but only in input
+                unknown_class_labels = input_classes[~np.isin(input_classes, memory_classes)]
+                # Set all true input labels not in memory to unknown
+                true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
 
-            results[exp]['final_score'].append(y_score.max(axis=1))
+                macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(true_labels, final_label, unknown_label)
+                cf_matrix = sklearn.metrics.confusion_matrix(true_labels, final_label)
+                true_unknowns = np.where(true_labels == unknown_label)[0]
+                true_knowns = np.where(true_labels != unknown_label)[0]
 
-            results[exp]['wilderness_impact'].append(wilderness_impact)
-            results[exp]['wilderness_ratio'].append(wilderness_ratio)
-            results[exp]['precision_knowns'].append(known_precision)
-            results[exp]['precision_unknowns'].append(unknown_precision)
-            results[exp]['confusion_matrix'].append(cf_matrix)
+                correct_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
+                correct_knowns = np.where(final_label[true_knowns] != true_labels[true_knowns].reshape(-1))[0]
+                try:
+                    unknown_precision = correct_unknowns.shape[0]/true_unknowns.shape[0]
+                except ZeroDivisionError:
+                    unknown_precision = 0
+                known_precision = correct_knowns.shape[0]/true_knowns.shape[0]
+
+
+                results[exp]['macro_f1'].append(macro_f1)
+                results[exp]['weighted_f1'].append(weighted_f1)
+                results[exp]['accuracy'].append(accuracy)
+                results[exp]['open_world_error'].append(open_world_error)
+                results[exp]['unknown_classes'].append(unknown_class)
+                results[exp]['memory_classes'].append(tst_memory_cls)
+                results[exp]['true_labels'].append(true_labels)
+                results[exp]['final_labels'].append(final_label)
+                results[exp]['unknown_label'].append(unknown_label)
+
+                results[exp]['final_score'].append(y_score.max(axis=1))
+
+                results[exp]['wilderness_impact'].append(wilderness_impact)
+                results[exp]['wilderness_ratio'].append(wilderness_ratio)
+                results[exp]['precision_knowns'].append(known_precision)
+                results[exp]['precision_unknowns'].append(unknown_precision)
+                results[exp]['confusion_matrix'].append(cf_matrix)
 
 
 
@@ -222,12 +233,16 @@ def main():
 def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio, unknown_classes, tst_memory_cls):
     if tst_cls_selection == 'same_cls':
         input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + tst_memory_cls)
+        input_classes_extra = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value],
                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + unknown_classes)
+        input_classes = np.concatenate([input_classes, input_classes_extra])
+
         input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
                                   sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
                                   sample_ratio['l2ac_test_samples'])
         memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
-                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value])
+                                   class_ratio[TrainPhase.ENCODER_TRN.value] + tst_memory_cls)
         memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
     else:
         input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value],
@@ -328,7 +343,7 @@ def testIdxExist(config, unknown_class):
         return False
 
 
-def getTestDataPath(config, unknown_classes):
+def getTestDataPath(config, unknown_classes, tst_memory_cls):
     encoder = config['encoder']
     feature_layer = config['feature_layer']
     image_resize = config['image_resize']
@@ -339,7 +354,7 @@ def getTestDataPath(config, unknown_classes):
     train_samples = config['sample_ratio']['l2ac_train_samples']
     train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
 
-    test_data_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}_{unknown_classes}_tst.npz'
+    test_data_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples}_{top_n}_{tst_cls_selection}_{tst_memory_cls}_{unknown_classes}_tst.npz'
     return test_data_path
 
 def parseConfigFile(config_file, device, multiple_gpu):
