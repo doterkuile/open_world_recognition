@@ -404,11 +404,13 @@ def plot_final_score_distribution(results, title,
 
             score_dict = {x_label: np.concatenate([known_scores, unknown_scores], axis=0),
                                legend_label: np.concatenate([np.full((len(known_scores)), 'Known classes'), np.full((len(unknown_scores)), 'Unknown classes')], axis=0)}
+            # score_dict = {x_label: np.concatenate([unknown_scores], axis=0),
+            #               legend_label: np.concatenate([np.full((len(unknown_scores)), 'Unknown classes')], axis=0)}
 
             scores = pd.DataFrame.from_dict(score_dict)
             axs[ii].set_title(f"{results[exp]['unknown_classes'][ii]} unknown classes", fontweight="bold", size=18)
             sns.histplot(ax=axs[ii], data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
-                 common_norm=False,
+                 common_norm=True,
                  element='bars', binrange=(0, 1), binwidth=0.005)
 
         if figure_path is not None:
