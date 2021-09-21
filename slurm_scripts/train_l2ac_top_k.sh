@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=6        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=21:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=12:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -49,13 +49,13 @@ array_7=(20)
 var_8=top_k
 array_8=(20)
 var_9=model_class
-array_9=(L2AC_extended_similarity)
+array_9=(L2AC_smaller_fc)
 var_10=encoder_trn
 array_10=(0)
 # var_11=same_class_extend_entries
 # array_11=(True)
 var_11=meta_tst
-array_11=(20)
+array_11=(80)
 len=${#array_1[@]}
 
 

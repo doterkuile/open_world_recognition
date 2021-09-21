@@ -4,20 +4,25 @@
 # name: ['l_t_m_0008', 'l_t_m_0009', 'l_t_m_0010', 'l_t_m_0011_new', 'l_t_m_0012', 'l_t_m_0013', 'l_t_m_0014_new']
 # name: ['l_t_m_0015', 'l_t_m_0016', 'l_t_m_0017', 'l_t_m_0018_new', 'l_t_m_0019', 'l_t_m_0020', 'l_t_m_0021_new']
 
-name: ['l_t_l_0004', 'l_t_l_0006'] #, 'l_t_l_0007']
-# name: ['l_t_n_0001', 'l_t_n_0002', 'l_t_n_0003','l_t_n_0004','l_t_n_0005', 'l_t_n_0006', 'l_t_n_0007','l_t_n_0008']
+# name: ['l_t_l_0004', 'l_t_l_0006'] #, 'l_t_l_0007']
+# name: ['l_t_m_0005', 'l_t_m_0012', 'l_t_m_0019']
 
-figure_labels: ['Contrastive loss RN50', 'Contrastive loss RN152', 'Contrastive loss EffNet']
+# name: ['l_t_n_0001', 'l_t_n_0002', 'l_t_n_0003','l_t_n_0004','l_t_n_0005', 'l_t_n_0006', 'l_t_n_0007','l_t_n_0008']
+name: ['l_t_k_0001', 'l_t_k_0002', 'l_t_k_0003','l_t_k_0004','l_t_k_0005', 'l_t_k_0006']
+
+# figure_labels: ['EfficientNet', 'ResNet50', 'ResNet152']
+# figure_labels: ['Contrastive loss RN50', 'Contrastive loss RN152', 'Contrastive loss EffNet']
 # figure_labels: ['L2AC', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
 
 
 # figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
 # figure_labels: ['n = 1', 'n = 3', 'n = 6', 'n = 9', 'n = 12', 'n = 15', 'n = 18', 'n = 21']
+figure_labels: ['k = 1', 'k = 3', 'k = 5', 'k = 10', 'k = 15', 'k = 20']
 
-figure_title: 'contrastive_loss'
+figure_title: 'top_k'
 
 experiment_name: 'l2ac_models'
-
+  
 variable: model_class
 unknown_classes: [0, 20, 40, 60, 80]
 tst_memory_cls: [80]
