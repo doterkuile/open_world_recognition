@@ -138,13 +138,13 @@ def main():
                 tst_data_path = getTestDataPath(config, unknown_class, tst_memory_cls)
 
 
-                if not os.path.exists(tst_data_path):
-                    X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
-                                              memory_samples, input_classes, memory_classes, complete_cls_set, tst_memory_cls)
-
-
-                    np.savez(f'{tst_data_path}',
-                             test_X0=X0, test_X1=X1, test_Y=Y)
+                # if not os.path.exists(tst_data_path):
+                #     X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                #                               memory_samples, input_classes, memory_classes, complete_cls_set, top_n)
+                #
+                #
+                #     np.savez(f'{tst_data_path}',
+                #              test_X0=X0, test_X1=X1, test_Y=Y)
 
                 train_phase = TrainPhase.META_TST
                 test_dataset = ObjectDatasets.MetaDataset(dataset_path, top_n, top_k, train_classes,
@@ -165,9 +165,10 @@ def main():
                 # Set all final labels lower than threshold to unknown
                 final_label[np.where(y_score.max(axis=1) < probability_treshold)] = unknown_label
 
-
+                input_cls_set = np.unique(test_dataset.true_labels[test_dataset.test_X0])
+                memory_cls_set = np.unique(test_dataset.true_labels[test_dataset.test_X1])
                 # Find all classes that are not in memory but only in input
-                unknown_class_labels = input_classes[~np.isin(input_classes, memory_classes)]
+                unknown_class_labels = input_cls_set[~np.isin(input_cls_set, memory_cls_set)]
                 # Set all true input labels not in memory to unknown
                 true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
 

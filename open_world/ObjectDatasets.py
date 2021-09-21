@@ -44,7 +44,7 @@ class MetaDataset(data_utils.Dataset):
         self.memory_classes = memory_classes
         self.memory, self.true_labels = self.load_memory(self.data_path)
         if self.train_phase == TrainPhase.META_TST:
-            self.load_test_idx(self.data_path)
+            self.load_test_idx(self.data_path, unknown_classes, memory_classes)
         else:
             if same_class_extend_entries:
                 self.load_balanced_train_idx(self.data_path)
@@ -144,14 +144,59 @@ class MetaDataset(data_utils.Dataset):
         self.valid_X1 = np.concatenate([self.valid_X1, valid_X1_sim], axis=1).reshape(-1, self.top_k)
         self.valid_Y = data['valid_Y'][:, -2:].reshape(-1, )
 
-    def load_test_idx(self, data_path):
-        test_data_path = data_path.split('.')[0] + f'_{self.memory_classes}_{self.unknown_classes}_tst.npz'
+    def load_test_idx(self, data_path, unknown_classes, memory_classes):
+        data = np.load(data_path)
+
+        # Complete data
+        X0_all = data['test_X0']
+        X1_all = data['test_X1']
+        Y_all = data['test_Y']
 
 
-        data = np.load(test_data_path)
-        self.test_X0 = np.repeat(data[f'test_X0'], self.top_n, axis=0)  # the validation data is balanced.
-        self.test_X1 = data[f'test_X1'][:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
-        self.test_Y = data[f'test_Y'][:, -self.top_n:].reshape(-1, )
+        if np.isin(self.true_labels[data['train_X0']], self.true_labels[data['test_X0']]).any():
+            # complete set of classes of memory and input
+            memory_label_set = np.unique(self.true_labels[data['train_X0']])
+            input_label_set = np.unique(self.true_labels[data['test_X0']])
+
+            # Find unknown classes in input
+            input_unknown_labels_set = input_label_set[(~np.isin(input_label_set, memory_label_set)).nonzero()[0]]
+
+            # Randomly select a subset of indices of known (memory) and unknown (input) classes
+            shuffle_idx_known = np.random.permutation(memory_label_set.shape[0])[:memory_classes]
+            shuffle_idx_unknown = input_unknown_labels_set[np.random.permutation(input_unknown_labels_set.shape[0])[:unknown_classes]]
+        else:
+            memory_label_set = np.unique(self.true_labels[data['test_X0']])
+            input_label_set = np.unique(self.true_labels[data['test_X0']])
+            shuffle_idx = np.random.permutation(memory_label_set.shape[0])
+            shuffle_idx_known = shuffle_idx[:memory_classes]
+            shuffle_idx_unknown = shuffle_idx[memory_classes:(memory_classes + unknown_classes)]
+
+        # Select set of classes for known and unknown
+        known_labels_input = memory_label_set[shuffle_idx_known]
+        unknown_labels_input = input_label_set[shuffle_idx_unknown]
+
+        labels_input = np.concatenate([known_labels_input, unknown_labels_input])
+
+        # Find indices of all samples that have input lables
+        idx_X0 = np.where(self.true_labels[X0_all] == labels_input)[0]
+
+        # Filter out right input samples with corresponding memory samples and binary classification label
+        X0 = X0_all[idx_X0]
+        X1_subset = X1_all[idx_X0]
+        Y_subset = Y_all[idx_X0]
+
+        memory_true_labels = self.true_labels[X1_subset]
+
+        memory_idx = np.isin(memory_true_labels[:, :, 0], input_label_set[shuffle_idx_known]).nonzero()
+        X1 = X1_subset[memory_idx[0], memory_idx[1], :].reshape(
+            X0.shape[0], memory_classes, -1)
+        Y = Y_subset[memory_idx[0], memory_idx[1]].reshape(X0.shape[0], memory_classes)
+
+        self.test_X0 = np.repeat(X0, self.top_n, axis=0)  # the validation data is balanced.
+        self.test_X1 = X1[:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
+        self.test_Y = Y[:, -self.top_n:].reshape(-1, )
+
+        return
 
 class ObjectDatasetBase(abc.ABC):
 
