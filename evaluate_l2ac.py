@@ -140,7 +140,7 @@ def main():
 
                 if not os.path.exists(tst_data_path):
                     X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
-                                              memory_samples, input_classes, memory_classes, complete_cls_set, top_n)
+                                              memory_samples, input_classes, memory_classes, complete_cls_set, tst_memory_cls)
 
 
                     np.savez(f'{tst_data_path}',
