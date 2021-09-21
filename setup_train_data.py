@@ -27,7 +27,7 @@ def main():
     trn_dataset, val_dataset, tst_dataset, encoder, class_ratio, sample_ratio, top_n, randomize_samples, config = parseConfigFile(
         device, multiple_gpu)
 
-    load_features = False
+    load_features = True
     feature_layer = config['feature_layer']
     encoder_class = config['model_class']
     dataset_path = f"datasets/{config['dataset_path']}/{encoder_class}"
@@ -68,6 +68,9 @@ def main():
     ## Mutually exclusive classes variant uses different classes in trianing and validaton
     trn_cls_idx = trn_dataset.class_idx[TrainPhase.META_TRN.value]
 
+
+
+
     ## Non-mutually exclusive classes variant uses same classes, but has to dived the samples in train, validation and test
     input_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
     memory_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
@@ -83,11 +86,25 @@ def main():
                                                             memory_sample_idx, trn_cls_idx, complete_cls_idx, 1, randomize_samples)
 
 
+    tst_cls_selection = 'same_cls'
+    input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
+                                                                                                    tst_cls_selection,
+                                                                                                    class_ratio,
+                                                                                                    sample_ratio)
+
+    X0_tst, X1_tst, Y_tst = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                                          memory_samples, input_classes, memory_classes, complete_cls_set,
+                                          memory_classes.shape[0])
+
+
+
+
     print(f'Save results to {memory_path}_same_cls.npz')
     np.savez(f'{memory_path}_same_cls.npz',
              data_rep=data_rep, data_labels=labels, cls_rep=cls_rep,
              train_X0=X0_trn, train_X1=X1_trn, train_Y=Y_trn,
-             valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val)
+             valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val,
+             test_X0=X0_tst, test_X1=X1_tst, test_Y=Y_tst)
 
     ## Mutually exclusive classes variantsamples available per class
     input_sample_idx = np.arange(0, sample_ratio['l2ac_train_samples'])
@@ -98,12 +115,23 @@ def main():
     X0_val, X1_val, Y_val = meta_utils.rank_input_to_memory(data_rep, labels, data_rep, labels, cls_rep, input_sample_idx,
                                                             memory_sample_idx, val_cls_idx, complete_cls_idx, 1, randomize_samples)
 
+    tst_cls_selection = 'diff_cls'
+    input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
+                                                                                                    tst_cls_selection,
+                                                                                                    class_ratio,
+                                                                                                    sample_ratio)
+
+    X0_tst, X1_tst, Y_tst = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                                          memory_samples, input_classes, memory_classes, complete_cls_set,
+                                          memory_classes.shape[0])
+
+
     print(f'Save results to {memory_path}_diff_cls.npz')
     np.savez(f'{memory_path}_diff_cls.npz',
              data_rep=data_rep, data_labels=labels, cls_rep=cls_rep,
              train_X0=X0_trn, train_X1=X1_trn, train_Y=Y_trn,
-             valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val)
-
+             valid_X0=X0_val, valid_X1=X1_val, valid_Y=Y_val,
+             test_X0=X0_tst, test_X1=X1_tst, test_Y=Y_tst)
     return
 
 
@@ -135,6 +163,43 @@ def extract_all_features(dataset, class_set, encoder, device):
     data_rep, labels = sortData(data_rep, labels, class_set)
 
     return data_rep, labels, trn_cls_rep
+
+def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio):
+    if tst_cls_selection == 'same_cls':
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
+                                  sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
+                                  sample_ratio['l2ac_test_samples'])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value])
+        memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
+    else:
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
+                                  sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
+                                  sample_ratio['l2ac_test_samples'])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
+
+    complete_cls_set = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                 class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
+                                 class_ratio[TrainPhase.META_TST.value])
+
+    return input_classes, input_samples, memory_classes, memory_samples, complete_cls_set
+
+
+
 
 def parseConfigFile(device, multiple_gpu):
     # Get config file argument
