@@ -444,7 +444,7 @@ class L2AC_extended_similarity(L2AC_base):
 
     def setMatchingLayer(self):
         matching_layer = nn.Sequential(nn.Dropout(p=0.5),
-                                       nn.Linear(2 * self.input_size, self.input_size),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1024),
@@ -558,7 +558,7 @@ class L2AC_concat(L2AC_base):
 
     def setMatchingLayer(self):
         matching_layer = nn.Sequential(nn.Dropout(p=0.5),
-                                       nn.Linear(2 * self.input_size, self.input_size),
+                                       nn.Linear(2 * self.feature_size, self.input_size),
                                        nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
