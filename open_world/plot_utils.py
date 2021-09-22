@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -11,6 +12,7 @@ import imageio
 import os
 import torch.nn as nn
 from torchvision.utils import make_grid
+
 
 import open_world.loss_functions as loss_func
 
@@ -509,81 +511,53 @@ def plot_final_classification(label_list, images, final_label):
     plt.show()
 
 
+def plot_classes_surface(results, figure_labels, figure_path):
+
+
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+
+    for exp in results.keys():
+        n = np.unique(np.array(results[exp]['memory_classes'])).shape[0]
+        known_classes = np.array(results[exp]['memory_classes']).reshape(-1, n)
+        unknown_classes = np.array(results[exp]['unknown_classes']).reshape(-1, n)
+        F1 = np.array(results[exp]['weighted_f1']).reshape(-1, n)
+
+        light = matplotlib.colors.LightSource(90,45)
+        ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
+        surf = ax.plot_surface(known_classes, unknown_classes, F1, shade=True, antialiased=True, alpha=0.6,
+                               label=f'{figure_labels[exp]}')
+        surf._facecolors2d=surf._facecolor3d
+        surf._edgecolors2d=surf._edgecolor3d
+
+        wf = ax.plot_wireframe(known_classes, unknown_classes, F1, color='white', linewidth=0.4)
+    ax.legend()
+    ax.set(
+        xlabel='# of known classes in memory',
+        ylabel='# of unknown classes',
+        zlabel='F1-score',
+        xlim=[known_classes.min(), known_classes.max()],
+        xticks=np.unique(known_classes),
+        ylim = [unknown_classes.max(), unknown_classes.min()],
+        yticks = np.unique(unknown_classes),
+    )
+
+    fig.savefig(f"{figure_path}_surface_plot", bbox_inches='tight')
+    plt.close(fig)
+
+    return
 
 
 
 def main():
-    # multiple_gpu = True if torch.cuda.device_count() > 1 else False
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # # Parse config file
-    # (train_dataset, model, criterion, optimizer, epochs, batch_size, learning_rate, config) = OpenWorldUtils.parseConfigFile(
-    #     device, multiple_gpu)
-    #
-    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)#, num_workers=4)
-    #
-    # dataset_name = 'cifar'
-    # figure_path = f'figures/{dataset_name}'
-    # for b, ((X0_train, X1_train), y_train, [X0_labels, X1_labels]) in enumerate(train_loader):
-    #
-    #     optimizer.zero_grad()
-    #
-    #     # X0_train = X0_train.to(device)
-    #     # X1_train = X1_train.to(device)
-    #     # y_train = y_train.view(-1, 1).to(device)
-    #
-    #     # Limit the number of batches
-    #     if b == 0:
-    #         break
-    #
-    #
-    #
-    # versions = ['same', 'diff']
-    #
-    # for version in versions:
-    #
-    #     if version == 'same':
-    #         idx = (y_train == 1).nonzero()[0]
-    #     if version == 'diff':
-    #         idx = (y_train == 0).nonzero()[0]
-    #
-    #     x0 = X0_train[idx].view(-1)
-    #     x1 = X1_train[idx][0][0].view(-1)
-    #
-    #     x_abssub = x0.sub((x1))
-    #     x_abssub.abs_()
-    #     x_add = x0.add(x1)
-    #     similarity_vector = torch.cat((x_abssub, x_add))
-    #     plot_feature_vector(x0, f'x_0_{version}', f'{figure_path}_x0_{version}', 4)
-    #     plot_feature_vector(x1, f'x_1_{version}', f'{figure_path}_x1_{version}', 4)
-    #     plot_feature_vector(x_abssub, f'x_abssub_{version}', f'{figure_path}_x_abssub_{version}', 4)
-    #     plot_feature_vector(x_add, f'x_add_{version}', f'{figure_path}_x_add_{version}', 10)
-    #     plot_feature_vector(similarity_vector, f'similarity_vector_{version}', f'{figure_path}_similarity_vector_{version}',10)
 
-    x = torch.tensor(np.arange(0, 1, 0.01)).view(-1, 1)
-    # y = torch.nn.functional.leaky_relu(x-0.5)*-torch.log(1-x)
-    targets = [0, 1]
-    fig = plt.figure()
-    f1 = lambda x: - 1 * x.log()
-    # f2 = lambda x:(target * nn.functional.relu(0.55 - x) + (1 - target) * nn.functional.relu(x - 0.45))
-    f2 = lambda x: 1 * nn.functional.relu(0.55 - x)
-    f3 = lambda x: 1/(x)
-    losses = []
-    color = ['b', 'r']
 
-    for target in targets:
-        logloss = target * f1(x) + (1 - target) * f1(1 - x)
-        # logloss = target * f1(x+0.001) + (1 - target) * f1(1 - (x - 0.001))
+    knowns = np.array([20,  40, 60 ,80])
+    unknowns = np.array([0, 20,  40, 60 ,80])
+    X, Y = np.meshgrid(knowns, unknowns)
 
-        y = target * (f2(x) + f1(x)) + (1 - target) * (f2(1 - x) + f1(1 - x))
-        losses.append(y)
-        # plt.plot(x.numpy(), y.numpy(), 'r', label=f"log*relu_{target}")
-        plt.plot(x.numpy(),y.numpy(), color[target], label=f"y_true = {target}")
-        # plt.plot(x.numpy(), f3(x).numpy())
-        # plt.plot(x.numpy(), f2(x), 'g', label="relu")
-    plt.title('Custom loss function')
-    plt.legend()
+    F1 = np.random.rand(X.shape[0], X.shape[1])
 
-    plt.show()
+    plot_classes_surface(X, Y, F1)
 
     return
 
