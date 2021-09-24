@@ -164,6 +164,7 @@ class MetaDataset(data_utils.Dataset):
             # Randomly select a subset of indices of known (memory) and unknown (input) classes
             shuffle_idx_known = np.random.permutation(memory_label_set.shape[0])[:memory_classes]
             shuffle_idx_unknown = input_unknown_labels_set[np.random.permutation(input_unknown_labels_set.shape[0])[:unknown_classes]]
+            shuffle_idx_unknown = np.where(input_label_set.reshape(-1,1) == shuffle_idx_unknown)[0]
         else:
             memory_label_set = np.unique(self.true_labels[data['test_X0']])
             input_label_set = np.unique(self.true_labels[data['test_X0']])

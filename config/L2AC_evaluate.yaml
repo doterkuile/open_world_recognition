@@ -6,14 +6,14 @@
 
 # name: ['l_t_l_0004', 'l_t_l_0006'] #, 'l_t_l_0007']
 # name: ['l_t_m_0005', 'l_t_m_0012', 'l_t_m_0019']
-name: ['l_t_m_0005']
+name: ['0023']
 
 # name: ['l_t_n_0001', 'l_t_n_0002', 'l_t_n_0003','l_t_n_0004','l_t_n_0005', 'l_t_n_0006', 'l_t_n_0007','l_t_n_0008']
 # name: ['l_t_k_0001', 'l_t_k_0002', 'l_t_k_0003','l_t_k_0004','l_t_k_0005', 'l_t_k_0006']
 
 # figure_labels: ['EfficientNet', 'ResNet50', 'ResNet152']
 # figure_labels: ['Contrastive loss RN50', 'Contrastive loss RN152', 'Contrastive loss EffNet']
-figure_labels: ['test']
+figure_labels: ['test', 'test2']
 
 # figure_labels: ['L2AC', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
 
@@ -22,13 +22,15 @@ figure_labels: ['test']
 # figure_labels: ['n = 1', 'n = 3', 'n = 6', 'n = 9', 'n = 12', 'n = 15', 'n = 18', 'n = 21']
 # figure_labels: ['k = 1', 'k = 3', 'k = 5', 'k = 10', 'k = 15', 'k = 20']
 
-figure_title: 'top_k'
+figure_title: 'test'
 
 experiment_name: 'l2ac_models'
   
 variable: model_class
-unknown_classes: [6]
-tst_memory_cls: [80]
+unknown_classes: [0, 2, 4, 6, 8, 10]
+tst_memory_cls: [5, 7, 10]
 plot_confusion_matrix: True
+surface_plot: True
+surface_plot_metric: 'weighted_f1'
 figure_path: 'results/'
 

@@ -511,7 +511,7 @@ def plot_final_classification(label_list, images, final_label):
     plt.show()
 
 
-def plot_classes_surface(results, figure_labels, figure_path):
+def plot_classes_surface(results,metric, figure_labels, figure_path):
 
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -520,7 +520,7 @@ def plot_classes_surface(results, figure_labels, figure_path):
         n = np.unique(np.array(results[exp]['memory_classes'])).shape[0]
         known_classes = np.array(results[exp]['memory_classes']).reshape(-1, n)
         unknown_classes = np.array(results[exp]['unknown_classes']).reshape(-1, n)
-        F1 = np.array(results[exp]['weighted_f1']).reshape(-1, n)
+        F1 = np.array(results[exp][f'{metric}']).reshape(-1, n)
 
         light = matplotlib.colors.LightSource(90,45)
         ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
@@ -534,7 +534,7 @@ def plot_classes_surface(results, figure_labels, figure_path):
     ax.set(
         xlabel='# of known classes in memory',
         ylabel='# of unknown classes',
-        zlabel='F1-score',
+        zlabel=f'{metric}',
         xlim=[known_classes.min(), known_classes.max()],
         xticks=np.unique(known_classes),
         ylim = [unknown_classes.max(), unknown_classes.min()],

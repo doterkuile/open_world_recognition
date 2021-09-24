@@ -53,6 +53,8 @@ def main():
     figure_title = config_evaluate['figure_title']
     plt_conf_matrix = config_evaluate['plot_confusion_matrix']
     make_surface_plt = config_evaluate['surface_plot']
+    surface_plt_metric = config_evaluate['surface_plot_metric']
+
 
     figure_path = config_evaluate['figure_path'] + figure_title + '/' + figure_title
     figure_labels = config_evaluate['figure_labels']
@@ -211,12 +213,8 @@ def main():
 
 
     if make_surface_plt:
-        key = '0022'
-        X = np.array(results[key]['memory_classes']).reshape(-1,4)
-        Y = np.array(results[key]['unknown_classes']).reshape(-1, 4)
-        F1 = np.array(results[key]['weighted_f1']).reshape(-1, 4)
 
-        plot_utils.plot_classes_surface(results,figure_labels, figure_path)
+        plot_utils.plot_classes_surface(results, surface_plt_metric, figure_labels, figure_path)
         return
         print("plot surface")
 
