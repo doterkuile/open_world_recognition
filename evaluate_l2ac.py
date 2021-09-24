@@ -211,10 +211,7 @@ def main():
 
 
     if make_surface_plt:
-        key = '0022'
-        X = np.array(results[key]['memory_classes']).reshape(-1,4)
-        Y = np.array(results[key]['unknown_classes']).reshape(-1, 4)
-        F1 = np.array(results[key]['weighted_f1']).reshape(-1, 4)
+
 
         plot_utils.plot_classes_surface(results,figure_labels, figure_path)
         return
