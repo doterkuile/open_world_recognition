@@ -16,9 +16,9 @@ top_n: 9
 
 class_ratio: 
   encoder_trn: 25
-  meta_trn: 50
-  meta_val: 5
-  meta_tst: 20
+  meta_trn: 40
+  meta_val: 10
+  meta_tst: 25
 
 sample_ratio:
   encoder_train_samples: 500

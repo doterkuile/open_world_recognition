@@ -304,12 +304,12 @@ def plot_final_open_world_error(results, figure_labels, title, figure_path):
     fig.savefig(f'{figure_path}_e_ow')
     return
 
-def plot_final_known_precision(results, figure_labels, title, figure_path):
+def plot_final_known_error(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
     ii = 0
     for key in results.keys():
-        y = results[key]['precision_knowns']
+        y = results[key]['error_knowns']
         x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
@@ -323,12 +323,12 @@ def plot_final_known_precision(results, figure_labels, title, figure_path):
     fig.savefig(f'{figure_path}_p_known')
     return
 
-def plot_final_unknown_precision(results, figure_labels, title, figure_path):
+def plot_final_unknown_error(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
     ii = 0
     for key in results.keys():
-        y = results[key]['precision_unknowns']
+        y = results[key]['error_unknowns']
         x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
@@ -541,7 +541,7 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
         yticks = np.unique(unknown_classes),
     )
 
-    fig.savefig(f"{figure_path}_surface_plot", bbox_inches='tight')
+    fig.savefig(f"{figure_path}_surface_plot_{metric}", bbox_inches='tight')
     plt.close(fig)
 
     return

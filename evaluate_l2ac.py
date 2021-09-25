@@ -64,7 +64,6 @@ def main():
     if not os.path.exists(config_evaluate['figure_path'] + figure_title):
         os.mkdir(config_evaluate['figure_path'] + figure_title)
 
-    shutil.copy(evaluation_config_file, f'{figure_path}_config.yaml')
 
     metrics_dict = {'loss': [],
                     'accuracy': [],
@@ -111,8 +110,8 @@ def main():
                         'unknown_classes': [],
                         'memory_classes': [],
                         'known_unknown': [],
-                        'precision_knowns': [],
-                        'precision_unknowns': [],
+                        'error_knowns': [],
+                        'error_unknowns': [],
                         'wilderness_impact': [],
                         'wilderness_ratio': [],
                         'confusion_matrix': [],
@@ -180,13 +179,13 @@ def main():
                 true_unknowns = np.where(true_labels == unknown_label)[0]
                 true_knowns = np.where(true_labels != unknown_label)[0]
 
-                correct_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
-                correct_knowns = np.where(final_label[true_knowns] != true_labels[true_knowns].reshape(-1))[0]
+                incorrect_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
+                incorrect_knowns = np.where(final_label[true_knowns] != true_labels[true_knowns].reshape(-1))[0]
                 try:
-                    unknown_precision = correct_unknowns.shape[0]/true_unknowns.shape[0]
+                    unknown_error = incorrect_unknowns.shape[0]/true_unknowns.shape[0]
                 except ZeroDivisionError:
-                    unknown_precision = 0
-                known_precision = correct_knowns.shape[0]/true_knowns.shape[0]
+                    unknown_error = 0
+                known_error = incorrect_knowns.shape[0]/true_knowns.shape[0]
 
 
                 results[exp]['macro_f1'].append(macro_f1)
@@ -203,18 +202,21 @@ def main():
 
                 results[exp]['wilderness_impact'].append(wilderness_impact)
                 results[exp]['wilderness_ratio'].append(wilderness_ratio)
-                results[exp]['precision_knowns'].append(known_precision)
-                results[exp]['precision_unknowns'].append(unknown_precision)
+                results[exp]['error_knowns'].append(known_error)
+                results[exp]['error_unknowns'].append(unknown_error)
                 results[exp]['confusion_matrix'].append(cf_matrix)
 
 
 
 
-
+    plot_metrics = ['macro_f1', 'weighted_f1', 'accuracy', 'wilderness_impact', 'error_knowns', 'error_unknowns']
 
     if make_surface_plt:
 
-        plot_utils.plot_classes_surface(results, surface_plt_metric, figure_labels, figure_path)
+
+        for plot_metric in plot_metrics:
+
+            plot_utils.plot_classes_surface(results, plot_metric, figure_labels, figure_path)
         return
         print("plot surface")
 
@@ -224,8 +226,8 @@ def main():
     plot_utils.plot_final_accuracy(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_wilderness_impact(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_open_world_error(results, figure_labels, figure_title, figure_path)
-    plot_utils.plot_final_known_precision(results, figure_labels, figure_title, figure_path)
-    plot_utils.plot_final_unknown_precision(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_known_error(results, figure_labels, figure_title, figure_path)
+    plot_utils.plot_final_unknown_error(results, figure_labels, figure_title, figure_path)
     plot_utils.plot_final_score_distribution(results, figure_title, figure_path)
 
     if plt_conf_matrix:
