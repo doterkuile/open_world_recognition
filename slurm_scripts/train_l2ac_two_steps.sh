@@ -6,7 +6,7 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=6       		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=15gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=10gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
 #SBATCH --time=25:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
@@ -33,7 +33,7 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_step_0001)
+array_1=(l_t_step_0002)
 var_2=top_n
 array_2=(9)
 var_3=model_class
@@ -41,17 +41,17 @@ array_3=(L2AC_smaller_fc)
 #array_3=(L2AC L2AC_cosine L2AC_no_lstm L2AC_extended_similarity L2AC_smaller_fc L2AC_abssub L2AC_concat)
 
 var_4=encoder
-array_4=(EfficientNet)
+array_4=(ResNet152)
 var_5=two_step_training
 array_5=(True)
-var_6=meta_trn
-array_6=(80)
+var_6=freeze_matching_layer
+array_6=(True)
 var_7=encoder_trn
 array_7=(0)
 var_8=unfreeze_layer
 array_8=(0)
 var_9=feature_layer
-array_9=(_avg_pooling)
+array_9=(avgpool)
 len=${#array_1[@]}
 
 

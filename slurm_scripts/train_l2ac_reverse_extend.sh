@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=2        		# cpu-cores per task (>1 if multi-threaded tasks)
 #SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=18:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=12:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,21 +33,29 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name	
-array_1=(l_t_r_0001 l_t_r_0002)
+array_1=(l_t_r_0002)
 var_2=same_class_reverse
-array_2=(False True)
+array_2=(True)
 var_3=same_class_extend_entries
-array_3=(True False)
+array_3=(False)
 var_4=model_class
-array_4=(L2AC_smaller_fc L2AC_smaller_fc)
+array_4=(L2AC_smaller_fc)
 var_5=encoder
-array_5=(EfficientNet EfficientNet)
+array_5=(ResNet152)
 var_6=feature_layer
-array_6=(_avg_pooling _avg_pooling)
+array_6=(avgpool)
 var_7=unfreeze_layer
-array_7=(0 0)
+array_7=(0)
 var_8=encoder_trn
-array_8=(0 0)
+array_8=(0)
+var_9=meta_trn
+array_9=(80)
+var_10=meta_val
+array_10=(20)
+var_11=meta_tst
+array_11=(80)
+
+
 len=${#array_1[@]}
 
 
@@ -79,6 +87,9 @@ do
     echo "$var_6 = ${array_6[$i]}"
     echo "$var_7 = ${array_7[$i]}"
     echo "$var_8 = ${array_8[$i]}"
+    echo "$var_9 = ${array_9[$i]}"
+    echo "$var_10 = ${array_10[$i]}"
+    echo "$var_11 = ${array_11[$i]}"
 
 
 	sed -i "s/$var_1:.*/$var_1: '${array_1[$i]}'/"  $config_file
@@ -89,6 +100,9 @@ do
 	sed -i "s/$var_6:.*/$var_6: ${array_6[$i]}/" $config_file
 	sed -i "s/$var_7:.*/$var_7: ${array_7[$i]}/" $config_file
 	sed -i "s/$var_8:.*/$var_8: ${array_8[$i]}/" $config_file
+	sed -i "s/$var_9:.*/$var_9: ${array_9[$i]}/" $config_file
+	sed -i "s/$var_10:.*/$var_10: ${array_10[$i]}/" $config_file
+	sed -i "s/$var_11:.*/$var_11: ${array_11[$i]}/" $config_file
 
 
 	python $python_script $config_file
