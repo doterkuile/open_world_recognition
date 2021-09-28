@@ -523,7 +523,7 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
         F1 = np.array(results[exp][f'{metric}']).reshape(-1, n)
 
         light = matplotlib.colors.LightSource(90,45)
-        ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
+        # ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
         surf = ax.plot_surface(known_classes, unknown_classes, F1, shade=True, antialiased=True, alpha=0.6,
                                label=f'{figure_labels[exp]}')
         surf._facecolors2d=surf._facecolor3d
