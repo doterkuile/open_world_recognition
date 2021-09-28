@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=25:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=9:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,11 +33,11 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_t_n_0008)
+array_1=(l_t_n_0002)
 var_2=feature_layer
-array_2=(_avg_pooling)
+array_2=(avgpool)
 var_3=encoder
-array_3=(EfficientNet)
+array_3=(ResNet152)
 var_4=(unfreeze_layer)
 array_4=(0)
 var_5=criterion
@@ -47,15 +47,15 @@ array_6=(80)
 var_7=meta_val
 array_7=(20)
 var_8=top_n
-array_8=(21)
+array_8=(2)
 var_9=model_class
-array_9=(L2AC_extended_similarity)
+array_9=(L2AC_smaller_fc)
 var_10=encoder_trn
 array_10=(0)
 # var_11=same_class_extend_entries
 # array_11=(True)
 var_11=meta_tst
-array_11=(20)
+array_11=(80)
 len=${#array_1[@]}
 
 

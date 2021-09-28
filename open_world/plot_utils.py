@@ -244,7 +244,7 @@ def plot_final_weighted_F1(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_w_f1')
+    fig.savefig(f'{figure_path}_w_f1.eps',format='eps', dpi=1200)
 
 def plot_final_macro_F1(results, figure_labels, title, figure_path):
     fig = plt.figure()
@@ -262,7 +262,7 @@ def plot_final_macro_F1(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_m_f1')
+    fig.savefig(f'{figure_path}_m_f1.eps',format='eps', dpi=1200)
 
 def plot_final_accuracy(results, figure_labels, title, figure_path):
     fig = plt.figure()
@@ -280,7 +280,7 @@ def plot_final_accuracy(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_acc')
+    fig.savefig(f'{figure_path}_acc.eps',format='eps', dpi=1200)
 
 
     return
@@ -301,15 +301,15 @@ def plot_final_open_world_error(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_e_ow')
+    fig.savefig(f'{figure_path}_e_ow.eps',format='eps', dpi=1200)
     return
 
-def plot_final_known_precision(results, figure_labels, title, figure_path):
+def plot_final_known_error(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
     ii = 0
     for key in results.keys():
-        y = results[key]['precision_knowns']
+        y = results[key]['error_knowns']
         x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
@@ -320,15 +320,15 @@ def plot_final_known_precision(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_p_known')
+    fig.savefig(f'{figure_path}_p_known.eps',format='eps', dpi=1200)
     return
 
-def plot_final_unknown_precision(results, figure_labels, title, figure_path):
+def plot_final_unknown_error(results, figure_labels, title, figure_path):
     fig = plt.figure()
 
     ii = 0
     for key in results.keys():
-        y = results[key]['precision_unknowns']
+        y = results[key]['error_unknowns']
         x = results[key][results[key]['known_unknown']]
         plt.plot(x, y, f'-o', label=f'{figure_labels[key]}')
         ii = ii + 1
@@ -339,7 +339,7 @@ def plot_final_unknown_precision(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_p_unknown')
+    fig.savefig(f'{figure_path}_p_unknown.eps',format='eps', dpi=1200)
     return
 
 
@@ -381,7 +381,7 @@ def plot_final_wilderness_impact(results, figure_labels, title, figure_path):
     plt.legend()
     # plt.show()
 
-    fig.savefig(f'{figure_path}_WI')
+    fig.savefig(f'{figure_path}_WI.eps',format='eps', dpi=1200)
     return
 
 
@@ -523,7 +523,7 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
         F1 = np.array(results[exp][f'{metric}']).reshape(-1, n)
 
         light = matplotlib.colors.LightSource(90,45)
-        ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
+        # ill_surf = light.shade(F1,cmap=matplotlib.cm.coolwarm)
         surf = ax.plot_surface(known_classes, unknown_classes, F1, shade=True, antialiased=True, alpha=0.6,
                                label=f'{figure_labels[exp]}')
         surf._facecolors2d=surf._facecolor3d
@@ -541,7 +541,7 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
         yticks = np.unique(unknown_classes),
     )
 
-    fig.savefig(f"{figure_path}_surface_plot", bbox_inches='tight')
+    fig.savefig(f"{figure_path}_surface_plot_{metric}.eps", bbox_inches='tight',format='eps', dpi=1200)
     plt.close(fig)
 
     return

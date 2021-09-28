@@ -2,13 +2,13 @@
 #SBATCH --job-name=train_l2ac_encoders 	# create a short name for your job
 #SBATCH --output=logs/%x-%j.out                 # output_file
 #SBATCH --partition=general				# select partition
-#SBATCH --qos=short					# select quality of service
+#SBATCH --qos=long					# select quality of service
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=6gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=9gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=4:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=09:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -33,36 +33,36 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_c_e_0008)
+array_1=(l_t_e_0007)
 var_2=feature_layer
-array_2=(_avg_pooling)
+array_2=(fc7)
 var_3=encoder
-array_3=(EfficientNet)
+array_3=(AlexNet)
 var_4=(unfreeze_layer)
-array_4=(0)
+array_4=(8)
 var_5=criterion
 array_5=(bce_loss_default)
 var_6=meta_trn
-array_6=(50)
+array_6=(80)
 var_7=meta_val
-array_7=(5)
+array_7=(20)
 var_8=top_n
 array_8=(9)
 var_9=model_class
-array_9=(L2AC_extended_similarity)
+array_9=(L2AC_smaller_fc)
 var_10=encoder_trn
-array_10=(0)
+array_10=(50)
 # var_11=same_class_extend_entries
 # array_11=(True)
 var_11=meta_tst
-array_11=(20)
+array_11=(50)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=200
+value_e=400
 
 conda activate $conda_env
 
