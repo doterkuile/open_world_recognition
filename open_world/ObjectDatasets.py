@@ -30,7 +30,7 @@ class MetaDataset(data_utils.Dataset):
 
 
     def __init__(self, data_path, top_n=9, top_k=5, n_cls=80, n_smpl=100, train_phase=TrainPhase.META_TRN, same_class_reverse=False,
-                 same_class_extend_entries=False, unknown_classes=0, memory_classes=80):
+                 same_class_extend_entries=False, unknown_classes=0, memory_classes=1):
 
         self.n_cls = n_cls
         self.n_smpl = n_smpl
@@ -200,6 +200,17 @@ class MetaDataset(data_utils.Dataset):
 
         return
 
+
+    def replace_test_data(self, data_rep, cls_rep, labels, X0_new, X1_new, Y_new):
+
+
+        self.memory = data_rep
+        self.true_labels = labels
+        self.test_X0 = X0_new
+        self.test_X1 = X1_new
+        self.test_y = Y_new
+        return
+
 class ObjectDatasetBase(abc.ABC):
 
     @abc.abstractmethod
@@ -345,7 +356,7 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
 
     def __init__(self, dataset_path, class_ratio, train_phase=TrainPhase.ENCODER_TRN, image_resize=64):
-        super().__init__(dataset_path, class_ratio, train_phase)
+        super().__init__(dataset_path,   class_ratio, train_phase)
 
         self.trn_mean_pixel = [0.4802, 0.4481, 0.3975]
         self.trn_std_pixel = [0.2302, 0.2265, 0.2262]

@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 
 import time
 
+
 def main():
     torch.manual_seed(42)
 
@@ -34,23 +35,73 @@ def main():
     else:
         print(f"Running with {torch.cuda.device_count()} GPUs")
 
-
-    model, memory,image_dataset, encoder, object_data_folder, image_resize, top_n, top_k, extend_memory = parseConfigFile(device)
-
+    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config = parseConfigFile(
+        device)
 
     transform_train = transforms.Compose([
-        transforms.Resize((image_resize,image_resize)),
+        transforms.Resize((image_resize, image_resize)),
         transforms.ToTensor(),
     ])
-    object_dataset = torchvision.datasets.ImageFolder(object_data_folder, transform=transform_train)
 
-    train_data_loader = torch.utils.data.DataLoader(object_dataset, batch_size=100, shuffle=False)
+    input_dataset = torchvision.datasets.ImageFolder(input_data_folder, transform=transform_train)
+    memory_dataset = torchvision.datasets.ImageFolder(memory_data_folder, transform=transform_train)
+
+    input_loader = torch.utils.data.DataLoader(input_dataset, batch_size=100, shuffle=False)
+    memory_loader = torch.utils.data.DataLoader(memory_dataset, batch_size=100, shuffle=False)
+
+    ## get data_rep, class_rep and labels for memory
+    memory_rep, memory_cls_rep, memory_labels = meta_utils.extract_features(memory_loader, encoder, [0], device)
+    input_rep, input_cls_rep, input_labels = meta_utils.extract_features(input_loader, encoder, [0], device)
 
 
-    sample_rep, class_rep, labels = meta_utils.extract_features(train_data_loader, encoder, [0,1], device)
-    memory_rep, memory_cls_rep, memory_labels, input_rep, input_labels = splitInputfromMemory(sample_rep, class_rep, labels)
+    tst_cls_selection = config['test_class_selection']
+    class_ratio = config['class_ratio']
+    sample_ratio = config['sample_ratio']
 
-    new_class = max(list(set(memory.trn_true_labels))) + 1
+    input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
+        tst_cls_selection,
+        class_ratio,
+        sample_ratio)
+
+
+    old_data = np.load(metadataset_old.data_path)
+
+    data_rep = np.array(torch.cat([memory_rep, input_rep]))
+    data_rep = np.concatenate([old_data['data_rep'], data_rep])
+    new_class = np.max(metadataset_old.true_labels) + 1
+    labels = np.array(torch.cat([memory_labels, input_labels]) + new_class)
+
+    cls_rep = np.concatenate([old_data['cls_rep'], np.array(memory_cls_rep)])
+
+
+    # Ensure new memory has as much samples as the old memory
+    memory_samples = config['sample_ratio']['l2ac_train_samples']
+
+    memory_rep = memory_rep[:memory_samples]
+    memory_labels = memory_labels[:memory_samples]
+
+    if extend_memory:
+        memory_classes = np.concatenate([memory_classes, np.array([new_class])])
+
+
+    complete_cls_set = np.concatenate([complete_cls_set, np.array([new_class])])
+
+    if test_new_cls_only:
+        input_classes = np.array([new_class]).reshape(1,-1)
+    else:
+        input_classes = np.concatenate([input_classes, np.array([new_class])])
+
+    input_samples = input_rep.shape[0]
+
+
+
+
+    X0_tst, X1_tst, Y_tst = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                                                      memory_samples, input_classes, memory_classes, complete_cls_set,
+                                                      top_n)
+
+    ## Get data_rep and labels for input
+
     labels = memory_labels.reshape(-1) + new_class
 
     if extend_memory:
@@ -62,16 +113,15 @@ def main():
     for sample in input_rep:
 
         # sample = getSample(object_dataset, encoder, device)
-        sample = sample.reshape(1,-1)
-        top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels,top_n, top_k)
+        sample = sample.reshape(1, -1)
+        top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels, top_n, top_k)
 
         final_label, probabilities, top_classes_ordered = classifySample(sample, model, x1, top_classes, device)
 
-
-
         sample_image = object_dataset[sample_idx[ii]][0]
         ii = ii + 1
-        label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes, final_label)
+        label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes,
+                                                    final_label)
 
         print(f"top classes are {label_list}")
         if final_label < 0:
@@ -81,11 +131,10 @@ def main():
 
             print(f"the final label is {final_label_class}.")
 
-
     return
 
-def splitInputfromMemory(data_rep, data_cls_rep, labels):
 
+def splitInputfromMemory(data_rep, data_cls_rep, labels):
     # data_rep = data_rep.view(data_rep.shape[0], data_rep.shape[2])
     memory_idx = ((labels == 0).nonzero()).squeeze()
     input_idx = ((labels == 1).nonzero()).squeeze()
@@ -99,12 +148,45 @@ def splitInputfromMemory(data_rep, data_cls_rep, labels):
     return memory_rep.numpy(), memory_cls_rep.numpy(), memory_labels.numpy(), input_rep.numpy(), input_labels.numpy()
 
 
+def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio):
+    if tst_cls_selection == 'same_cls':
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
+                                  sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
+                                  sample_ratio['l2ac_test_samples'])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value])
+        memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
+    else:
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
+                                  sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
+                                  sample_ratio['l2ac_test_samples'])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                   class_ratio[TrainPhase.META_VAL.value],
+                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                   class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+
+        memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
+
+    complete_cls_set = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
+                                 class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
+                                 class_ratio[TrainPhase.META_VAL.value] +
+                                 class_ratio[TrainPhase.META_TST.value])
+
+    return input_classes, input_samples, memory_classes, memory_samples, complete_cls_set
+
 
 def getSample(object_dataset, encoder, device):
-
-    (sample, label)= object_dataset[-1]
+    (sample, label) = object_dataset[-1]
     batch_shape = [1, sample.shape[0], sample.shape[1], sample.shape[2]]
-
 
     sample = sample.view(batch_shape).to(device)
 
@@ -112,8 +194,8 @@ def getSample(object_dataset, encoder, device):
 
     return feature_vector.detach().cpu()
 
-def getSimilarClasses(sample, memory, true_labels, top_n, top_k):
 
+def getSimilarClasses(sample, memory, true_labels, top_n, top_k):
     trn_cls_rep = []
     sort_idx = []
     unique_class_list = np.array(list(set(true_labels)))
@@ -125,7 +207,7 @@ def getSimilarClasses(sample, memory, true_labels, top_n, top_k):
     sort_idx = torch.tensor(sort_idx)
 
     sim = sklearn.metrics.pairwise.cosine_similarity(sample,
-                                             train_cls_rep)
+                                                     train_cls_rep)
     sim_idx = sim.argsort(axis=1).squeeze()
 
     top_classes = unique_class_list[sim_idx[-top_n:]]
@@ -135,21 +217,19 @@ def getSimilarClasses(sample, memory, true_labels, top_n, top_k):
     for cls in top_classes:
         class_vectors = memory.trn_memory[(true_labels == cls)]
         sim1 = sklearn.metrics.pairwise.cosine_similarity(sample,
-                                             class_vectors)
+                                                          class_vectors)
         sim1_idx = sim1.argsort(axis=1).squeeze()
         x1.append(class_vectors[sim1_idx[-top_k:]])
-
 
     x1 = np.stack(x1)
 
     return top_classes, x1
 
 
-
 def classifySample(sample, model, x1, top_classes, device):
-    input_sample = torch.tensor(sample, device=device).reshape(1,1,-1)
-    input_sample = input_sample.repeat_interleave(top_classes.shape[0],dim=0)
-    x1 = torch.tensor(x1,device=device)
+    input_sample = torch.tensor(sample, device=device).reshape(1, 1, -1)
+    input_sample = input_sample.repeat_interleave(top_classes.shape[0], dim=0)
+    x1 = torch.tensor(x1, device=device)
     model.eval()
     with torch.no_grad():
 
@@ -167,15 +247,14 @@ def classifySample(sample, model, x1, top_classes, device):
     return final_label, predicted, top_classes_ordered
 
 
-def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_label):
-
+def showResults(sample, old_image_dataset, new_image_dataset, top_classes, final_label):
     image_list = []
     label_list = []
     for cls in top_classes:
 
         if cls in old_image_dataset.class_idx[TrainPhase.META_TRN.value]:
 
-            im ,  label = old_image_dataset.getImageFromClass(cls)
+            im, label = old_image_dataset.getImageFromClass(cls)
             object_label = wordnet_to_label(label, old_image_dataset)
 
 
@@ -184,15 +263,13 @@ def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_
             im = np.transpose(im.numpy(), (1, 2, 0))
             object_label = new_image_dataset.classes[0]
 
-
         image_list.append(im)
 
         label_list.append(object_label)
 
-    sample = sample.numpy().transpose(1,2,0)
+    sample = sample.numpy().transpose(1, 2, 0)
     image_list.append(sample)
-    images = torch.tensor(np.stack(image_list).transpose(0,3,1,2))
-
+    images = torch.tensor(np.stack(image_list).transpose(0, 3, 1, 2))
 
     if final_label in old_image_dataset.class_idx[TrainPhase.META_TRN.value]:
         final_label_class = wordnet_to_label(final_label, old_image_dataset)
@@ -206,8 +283,6 @@ def showResults(sample, old_image_dataset,new_image_dataset, top_classes, final_
 
 
 def wordnet_to_label(label, dataset):
-
-
     json_file = 'config/ImageNet_wordnet_to_label.json'
 
     with open(json_file) as f:
@@ -225,7 +300,6 @@ def wordnet_to_label(label, dataset):
     return object_class
 
 
-
 def parseConfigFile(device):
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file")
@@ -235,16 +309,17 @@ def parseConfigFile(device):
     with open(evaluation_config_file) as file:
         evaluation_config = yaml.load(file, Loader=yaml.FullLoader)
 
-
     experiment_name = str(evaluation_config['experiment_name'])
     extend_memory = evaluation_config['extend_memory']
     exp_folder = f'output/{experiment_name}'
     trn_config_file = f'{exp_folder}/{experiment_name}_config.yaml'
     object_name = evaluation_config['object_name']
-    object_data_folder = f"datasets/{object_name}/"
+    input_data_folder = f"datasets/{object_name}/{evaluation_config['input_dataset']}/"
+    memory_data_folder = f"datasets/{object_name}/{evaluation_config['memory_dataset']}/"
+    test_new_cls_only = evaluation_config['test_new_cls_only']
+
     with open(trn_config_file) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
-
 
     same_class_reverse = config['same_class_reverse']
     same_class_extend_entries = config['same_class_extend_entries']
@@ -257,7 +332,7 @@ def parseConfigFile(device):
     encoder_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
     train_classes = config['class_ratio'][TrainPhase.META_TRN.value]
     test_classes = config['class_ratio'][TrainPhase.META_TST.value]
-    train_samples_per_cls = config['train_samples_per_cls']
+    train_samples_per_cls = config['sample_ratio']['l2ac_train_samples']
 
     encoder = config['encoder']
     feature_layer = config['feature_layer']
@@ -267,35 +342,34 @@ def parseConfigFile(device):
     feature_scaling = config['feature_scaling']
     dataset_path = f"datasets/{config['dataset_path']}" + f'/{encoder}/{feature_layer}_{feature_scaling}_{image_resize}_{unfreeze_layer}_{train_classes}_{train_samples_per_cls}_{top_n}_{test_class_selection}.npz'
     dataset_class = config['dataset_class']
-    enable_training = True
-    meta_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes, train_samples_per_cls
-                                                      ,enable_training,  same_class_reverse, same_class_extend_entries)
+    train_phase = TrainPhase.META_TST
+    meta_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, top_n, top_k, train_classes,
+                                                           train_samples_per_cls
+                                                           , train_phase, same_class_reverse, same_class_extend_entries)
 
-
-
-    features_size = len(meta_dataset.trn_memory[0])
-
+    features_size = len(meta_dataset.memory[0])
 
     model_path = 'output/' + str(config['name']) + '/' + str(config['name']) + '_model.pt'
     model_class = config['model_class']
-    model = eval('RecognitionModels.' + model_class)(train_classes,features_size, batch_size, top_k).to(device)
+    model = eval('RecognitionModels.' + model_class)(train_classes, features_size, batch_size, top_k).to(device)
     OpenWorldUtils.loadModel(model, model_path)
     num_classes = config['class_ratio'][TrainPhase.ENCODER_TRN.value]
     pretrained = True
     figure_size = config['image_resize']
     encoder_class = config['encoder']
     encoder = eval('RecognitionModels.' + encoder_class)(model_class, num_classes, feature_layer, unfreeze_layer,
-                                                     feature_scaling, pretrained).to(device)
+                                                         feature_scaling, pretrained).to(device)
     encoder_file_path = f'datasets/{config["dataset_path"]}/{encoder_class}/feature_encoder_{figure_size}_{unfreeze_layer}_{encoder_classes}.pt'
     encoder.load_state_dict(torch.load(encoder_file_path))
 
     class_ratio = config['class_ratio']
 
-    train_phase = TrainPhase.META_TRN.value
-    image_dataset = eval('ObjectDatasets.' + config['dataset_path'] + "Dataset")('datasets/' + config['dataset_path'], class_ratio, train_phase, figure_size)
+    train_phase = TrainPhase.META_TRN
+    image_dataset = eval('ObjectDatasets.' + config['dataset_path'] + "Dataset")('datasets/' + config['dataset_path'],
+                                                                                 class_ratio, train_phase, figure_size)
 
+    return model, meta_dataset, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config
 
-    return model, meta_dataset, image_dataset, encoder, object_data_folder, image_resize, top_n, top_k, extend_memory
 
 if __name__ == "__main__":
     main()

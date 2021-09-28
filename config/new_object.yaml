@@ -1,54 +1,9 @@
 ## Experiment
 object_name: 'object_1'
 
-experiment_name: 'l_t_e_0010'
+experiment_name: '0024'
 extend_memory: True
+test_new_cls_only: True
+memory_dataset: 'webots_test'
+input_dataset: 'input'
 
-## Paths and classes
-dataset_path: TinyImageNet
-dataset_class: MetaDataset
-model_experiment_nr: 0001
-encoder: ResNet50
-feature_layer: avgpool
-image_resize: 224
-unfreeze_layer: 62   #62 62 6 8
-
-
-
-## Training hyperparameters
-criterion: bce_loss_custom
-optimizer: Adam
-learning_rate: 0.0001
-batch_size: 256
-epochs: 50
-
-## L2AC parameters
-top_k: 5
-top_n: 4
-
-class_ratio: 
-  encoder_trn: 50
-  meta_trn: 20
-  meta_val: 20
-  meta_tst: 20
-
-sample_ratio:
-  encoder_train_samples: 500
-  l2ac_train_samples: 350
-  l2ac_val_samples: 100
-  l2ac_test_samples: 100
-
-test_class_selection: same_cls
-feature_scaling: max_value #sigmoid max_value
-two_step_training: False
-freeze_matching_layer: False
-
-train_samples_per_cls: 500
-probability_threshold: 0.5
-
-## Dataset preparation parameters
-same_class_reverse: False
-same_class_extend_entries: False
-
-## Training/loading parameters
-create_similarity_gif: True

@@ -623,6 +623,8 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
         # Cosine similarity between the input samples of cls of interest and the mean representation of
         # the remaining classes. Output is of size [input_samples_per_class, len(class_set) -1]
         cls_sample_idx = cls_offset + input_sample_idx
+
+
         sim = metrics.pairwise.cosine_similarity(input_rep[cls_sample_idx],
                                                 memory_cls_rep[rest_cls_idx])
 

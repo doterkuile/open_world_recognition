@@ -13,3 +13,8 @@
 
 
 - Make run of L2AC with all default settings and run with best settings to check difference in performance on tinyimagenet and CIFAR100
+
+# Evaluate new object
+
+-input_dataset -> extract features and get labels
+-memory_dataset -> extract features and get labels
