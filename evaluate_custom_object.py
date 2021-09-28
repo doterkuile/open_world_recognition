@@ -11,6 +11,7 @@ import json
 import torchvision
 from torchvision import transforms
 from open_world.ObjectDatasets import TrainPhase
+from evaluate_l2ac import calculateMetrics
 import sklearn
 
 import numpy as np
@@ -38,8 +39,82 @@ def main():
     model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config = parseConfigFile(
         device)
 
+    probability_threshold = config['probability_threshold']
+
+
+    y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model,encoder, extend_memory, test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder, config, device)
+
+    # Unknown label is set to max idx + 1
+    unknown_label = complete_cls_set.max() + 1
+
+    # retrieve final label from top n X1 by getting the max prediction score
+    final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
+
+    # Set all final labels lower than threshold to unknown
+    final_label[np.where(y_score.max(axis=1) < probability_threshold)] = unknown_label
+
+    input_cls_set = np.unique(metadataset_old.true_labels[metadataset_old.test_X0])
+    memory_cls_set = np.unique(metadataset_old.true_labels[metadataset_old.test_X1])
+    # Find all classes that are not in memory but only in input
+    unknown_class_labels = input_cls_set[~np.isin(input_cls_set, memory_cls_set)]
+    # Set all true input labels not in memory to unknown
+    new_cls_idx = np.where(true_labels == new_class)[0]
+    other_cls_idx = np.where(true_labels != new_class)[0]
+    if not extend_memory:
+        e_u_new_cls = (np.where(final_label[new_cls_idx] != unknown_label)[0]).shape[0]/new_cls_idx.shape[0]
+        e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
+    else:
+        e_k_new_cls = (np.where(final_label[new_cls_idx] != new_class)[0]).shape[0]/new_cls_idx.shape[0]
+        # e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
+
+
+        new_cls_true = np.ones(new_cls_idx.shape)
+        new_cls_pred = np.ones(new_cls_idx.shape)
+        new_cls_pred[np.where(final_label[new_cls_idx] != new_class)] = 0
+        true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
+        F1 = sklearn.metrics.f1_score(y_true=new_cls_true, y_pred=new_cls_pred, zero_division=0)
+
+        
+    macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(
+        true_labels, final_label, unknown_label)
+
+    ## Get data_rep and labels for input
+
+    # labels = memory_labels.reshape(-1) + new_class
+    #
+    # if extend_memory:
+    #     memory.trn_memory = np.concatenate([memory.trn_memory, memory_rep])
+    #     memory.trn_true_labels = np.concatenate([memory.trn_true_labels, labels])
+    #
+    # sample_idx = np.where(np.array(object_dataset.targets) == 1)[0]
+    # ii = 0
+    # for sample in input_rep:
+    #
+    #     # sample = getSample(object_dataset, encoder, device)
+    #     sample = sample.reshape(1, -1)
+    #     top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels, top_n, top_k)
+    #
+    #     final_label, probabilities, top_classes_ordered = classifySample(sample, model, x1, top_classes, device)
+    #
+    #     sample_image = object_dataset[sample_idx[ii]][0]
+    #     ii = ii + 1
+    #     label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes,
+    #                                                 final_label)
+    #
+    #     print(f"top classes are {label_list}")
+    #     if final_label < 0:
+    #         print(f"the final label is {final_label_class}.")
+    #         print(f"The object cannot be identified")
+    #     else:
+    #
+    #         print(f"the final label is {final_label_class}.")
+
+    return
+
+
+def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder, config,device):
     transform_train = transforms.Compose([
-        transforms.Resize((image_resize, image_resize)),
+        transforms.Resize((config['image_resize'], config['image_resize'])),
         transforms.ToTensor(),
     ])
 
@@ -53,6 +128,24 @@ def main():
     memory_rep, memory_cls_rep, memory_labels = meta_utils.extract_features(memory_loader, encoder, [0], device)
     input_rep, input_cls_rep, input_labels = meta_utils.extract_features(input_loader, encoder, [0], device)
 
+    # Ensure new memory has as much samples as the old memory
+    memory_samples = config['sample_ratio']['l2ac_train_samples']
+    top_n = config['top_n']
+    criterion = eval(f'loss_functions.{config["criterion"]}')()
+    probability_threshold = config['probability_threshold']
+    memory_rep = memory_rep[:memory_samples]
+    memory_labels = memory_labels[:memory_samples]
+
+    # Add new data to old dataset
+    old_data = np.load(metadataset_old.data_path)
+
+    # Two times input rep and input labels to fake validation data
+    data_rep = np.array(torch.cat([memory_rep, input_rep, input_rep]))
+    data_rep = np.concatenate([old_data['data_rep'], data_rep])
+    new_class = np.max(metadataset_old.true_labels) + 1
+    labels = np.array(torch.cat([memory_labels, input_labels, input_labels]) + new_class)
+    labels = np.concatenate([old_data['data_labels'], labels])
+    cls_rep = np.concatenate([old_data['cls_rep'], np.array(memory_cls_rep)])
 
     tst_cls_selection = config['test_class_selection']
     class_ratio = config['class_ratio']
@@ -63,76 +156,31 @@ def main():
         class_ratio,
         sample_ratio)
 
-
-    old_data = np.load(metadataset_old.data_path)
-
-    data_rep = np.array(torch.cat([memory_rep, input_rep]))
-    data_rep = np.concatenate([old_data['data_rep'], data_rep])
-    new_class = np.max(metadataset_old.true_labels) + 1
-    labels = np.array(torch.cat([memory_labels, input_labels]) + new_class)
-
-    cls_rep = np.concatenate([old_data['cls_rep'], np.array(memory_cls_rep)])
-
-
-    # Ensure new memory has as much samples as the old memory
-    memory_samples = config['sample_ratio']['l2ac_train_samples']
-
-    memory_rep = memory_rep[:memory_samples]
-    memory_labels = memory_labels[:memory_samples]
-
     if extend_memory:
         memory_classes = np.concatenate([memory_classes, np.array([new_class])])
-
 
     complete_cls_set = np.concatenate([complete_cls_set, np.array([new_class])])
 
     if test_new_cls_only:
-        input_classes = np.array([new_class]).reshape(1,-1)
+        input_classes = np.array([new_class]).reshape(1, -1)
     else:
         input_classes = np.concatenate([input_classes, np.array([new_class])])
 
-    input_samples = input_rep.shape[0]
+    # input_samples = np.arange(0,input_rep.shape[0])
 
+    X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
+                                          memory_samples, input_classes, memory_classes, complete_cls_set,
+                                          memory_classes.shape[0])
 
+    unknown_classes = (~np.isin(input_classes, memory_classes)).nonzero()[0].shape[0]
+    metadataset_old.set_test_data(data_rep, labels, X0, X1, Y, memory_classes.shape[0], unknown_classes)
 
+    test_loader = DataLoader(metadataset_old, batch_size=30 * top_n, shuffle=False, pin_memory=True)
 
-    X0_tst, X1_tst, Y_tst = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
-                                                      memory_samples, input_classes, memory_classes, complete_cls_set,
-                                                      top_n)
+    y_score, memory_labels, true_labels = meta_utils.test_model(test_loader, model, criterion, device,
+                                                                probability_threshold, top_n)
 
-    ## Get data_rep and labels for input
-
-    labels = memory_labels.reshape(-1) + new_class
-
-    if extend_memory:
-        memory.trn_memory = np.concatenate([memory.trn_memory, memory_rep])
-        memory.trn_true_labels = np.concatenate([memory.trn_true_labels, labels])
-
-    sample_idx = np.where(np.array(object_dataset.targets) == 1)[0]
-    ii = 0
-    for sample in input_rep:
-
-        # sample = getSample(object_dataset, encoder, device)
-        sample = sample.reshape(1, -1)
-        top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels, top_n, top_k)
-
-        final_label, probabilities, top_classes_ordered = classifySample(sample, model, x1, top_classes, device)
-
-        sample_image = object_dataset[sample_idx[ii]][0]
-        ii = ii + 1
-        label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes,
-                                                    final_label)
-
-        print(f"top classes are {label_list}")
-        if final_label < 0:
-            print(f"the final label is {final_label_class}.")
-            print(f"The object cannot be identified")
-        else:
-
-            print(f"the final label is {final_label_class}.")
-
-    return
-
+    return y_score, memory_labels, true_labels, new_class, complete_cls_set
 
 def splitInputfromMemory(data_rep, data_cls_rep, labels):
     # data_rep = data_rep.view(data_rep.shape[0], data_rep.shape[2])

@@ -14,9 +14,9 @@ pretrained: True
 top_n: 4
 class_ratio: 
   encoder_trn: 50
-  meta_trn: 10
-  meta_val: 10
-  meta_tst: 15
+  meta_trn: 5
+  meta_val: 5
+  meta_tst: 5
 
 sample_ratio:
   encoder_train_samples: 500
