@@ -34,16 +34,16 @@ name_var=figure_title
 
 conda activate $conda_env
 
-# name=$(cat $base_config_file | grep $name_var: | tail -n1 | awk '{print $2}')
-name=surface_plot_an_fn_cifar
-echo "Run $name"
+name=$(cat $base_config_file | grep $name_var: | tail -n1 | awk '{print $2}')
+# name=encoders_fn
+# echo "Run $name"
 
 config_file=results/${name}/${name}_config.yaml
 
 
 mkdir -p results/${name}
-# cp -r $base_config_file $config_file
-# echo "copied config file to $config_file"
+cp -r $base_config_file $config_file
+echo "copied config file to $config_file"
 
 
 python $python_script $config_file
