@@ -152,11 +152,27 @@ class MetaDataset(data_utils.Dataset):
         X1_all = data['test_X1']
         Y_all = data['test_Y']
 
+        self.set_test_data(self.memory, self.true_labels, X0_all, X1_all, Y_all, memory_classes, unknown_classes)
+
+
+
+
+        return
+
+
+    def set_test_data(self, data_rep, labels, X0_all, X1_all, Y_all, memory_classes, unknown_classes):
+
+        data = np.load(self.data_path)
+        self.memory = data_rep
+        self.true_labels = labels
+
 
         if np.isin(self.true_labels[data['train_X0']], self.true_labels[data['test_X0']]).any():
             # complete set of classes of memory and input
-            memory_label_set = np.unique(self.true_labels[data['train_X0']])
-            input_label_set = np.unique(self.true_labels[data['test_X0']])
+            # memory_label_set = np.unique(self.true_labels[data['train_X0']])
+            memory_label_set = np.unique(self.true_labels[X1_all])
+
+            input_label_set = np.unique(self.true_labels[X0_all])
 
             # Find unknown classes in input
             input_unknown_labels_set = input_label_set[(~np.isin(input_label_set, memory_label_set)).nonzero()[0]]
@@ -189,7 +205,7 @@ class MetaDataset(data_utils.Dataset):
 
         memory_true_labels = self.true_labels[X1_subset]
 
-        memory_idx = np.isin(memory_true_labels[:, :, 0], input_label_set[shuffle_idx_known]).nonzero()
+        memory_idx = np.isin(memory_true_labels[:, :, 0], known_labels_input).nonzero()
         X1 = X1_subset[memory_idx[0], memory_idx[1], :].reshape(
             X0.shape[0], memory_classes, -1)
         Y = Y_subset[memory_idx[0], memory_idx[1]].reshape(X0.shape[0], memory_classes)
@@ -197,18 +213,6 @@ class MetaDataset(data_utils.Dataset):
         self.test_X0 = np.repeat(X0, self.top_n, axis=0)  # the validation data is balanced.
         self.test_X1 = X1[:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
         self.test_Y = Y[:, -self.top_n:].reshape(-1, )
-
-        return
-
-
-    def replace_test_data(self, data_rep, cls_rep, labels, X0_new, X1_new, Y_new):
-
-
-        self.memory = data_rep
-        self.true_labels = labels
-        self.test_X0 = X0_new
-        self.test_X1 = X1_new
-        self.test_y = Y_new
         return
 
 class ObjectDatasetBase(abc.ABC):

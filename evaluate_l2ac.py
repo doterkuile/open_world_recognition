@@ -367,9 +367,10 @@ def wildernessRatio(true_labels, unknown_cls_label):
 
     unknown_idx = np.where(true_labels == unknown_cls_label)[0]
     known_idx = np.where(true_labels != unknown_cls_label)[0]
-
-    wilderness_ratio = unknown_idx.shape[0]/known_idx.shape[0]
-
+    try:
+        wilderness_ratio = unknown_idx.shape[0]/known_idx.shape[0]
+    except ZeroDivisionError:
+        wilderness_ratio = 1000
     return wilderness_ratio
 
 

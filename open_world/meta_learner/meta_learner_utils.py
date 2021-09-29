@@ -603,7 +603,7 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
                          memory_sample_idx, input_cls_set, memory_cls_set, complete_cls_set, top_n, randomize_samples=False):
     X0, X1, Y = [], [], []
     # Use first class of class_set as offset
-    base_cls_offset = input_cls_set[0]  # classes.index(class_set[0])  # -> gives index of first class of the list of c
+    base_cls_offset = complete_cls_set[0]  # classes.index(class_set[0])  # -> gives index of first class of the list of c
     for cls in tqdm(input_cls_set):
         tmp_X1 = []
         tmp_Y = []
@@ -629,9 +629,11 @@ def rank_test_data(input_rep, input_labels, memory_rep, memory_labels, memory_cl
                                                 memory_cls_rep[rest_cls_idx])
 
         # Get indices of a sorted array
-        sim_idx = sim.argsort(axis=1)
+        sim_idx = complete_cls_set[np.array(rest_cls_idx)[sim.argsort(axis=1)]]
         # Add offset of the base class
-        sim_idx += base_cls_offset
+        # sim_idx += base_cls_offset
+
+
         # Plus one idx to correct for the removed class of interest
         # sim_idx[sim_idx >= cls] += 1
 
