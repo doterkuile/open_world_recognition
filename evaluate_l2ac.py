@@ -247,7 +247,13 @@ def main():
             np.savez(results_path, results)
     else:
         print('load results')
-        results = np.load(results_path)
+        data = np.load(results_path, allow_pickle=True)['arr_0']
+        data_keys = list(data.item().keys())
+
+        results = {}
+
+        for data_key in data_keys:
+            results[data_key] = data.item()[data_key]
 
 
 

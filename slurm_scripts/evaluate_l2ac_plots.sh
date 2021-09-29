@@ -29,27 +29,32 @@ python_script=evaluate_l2ac.py
 base_config_file=config/new_object.yaml
 conda_env=l2acenv
 
-name_var=figure_title
+name_array=(top_k top_k)
+len=${#name_array[@]}
 
-# var_1=load_results
-# value_1=True
+var_1=load_results
+value_1=True
 
 conda activate $conda_env
 
-name=$(cat $base_config_file | grep $name_var: | tail -n1 | awk '{print $2}')
-# name=surface_plot_rn152_fn
-# echo "Run $name"
 
-config_file=results/${name}/${name}_config.yaml
-# sed -i "s/$var_1:.*/$var_1: ${value_1}/" $config_file
+for ((i=0;i<$len; i++))
 
+do
+	echo "Run ${name_array[$i]}"
 
-mkdir -p results/${name}
-cp -r $base_config_file $config_file
-echo "copied config file to $config_file"
+	config_file=results/${name_array[$i]}/${name_array[$i]}_config.yaml
+	sed -i "s/$var_1:.*/$var_1: ${value_1}/" $config_file
 
 
-python $python_script $config_file
+	mkdir -p results/${name_array[$i]}
+	# cp -r $base_config_file $config_file
+	# echo "copied config file to $config_file"
+
+
+	python $python_script $config_file
+
+done
 
 
 conda deactivate
