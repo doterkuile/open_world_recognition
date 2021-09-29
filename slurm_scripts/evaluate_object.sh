@@ -35,11 +35,11 @@ name_var=figure_title
 conda activate $conda_env
 
 var_1=experiment_name	
-array_1=(l_c_e_0002)
+array_1=(l_c_t_0002)
 var_2=memory_dataset
 array_2=(webots_dataset_224)
 var_3=input_dataset
-array_3=(teapot_photos )
+array_3=(teapot_photos)
 
 len=${#array_1[@]}
 
