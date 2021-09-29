@@ -10,6 +10,7 @@ feature_layer: avgpool
 feature_scaling: max_value #sigmoid max_value
 unfreeze_layer: 62     #62 62 10 30
 pretrained: True
+remove_teapot: True
 
 ## L2AC parameters
 top_n: 9
