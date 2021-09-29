@@ -31,19 +31,22 @@ conda_env=l2acenv
 
 name_var=figure_title
 
+var_1=load_results
+value_1=True
 
 conda activate $conda_env
 
 name=$(cat $base_config_file | grep $name_var: | tail -n1 | awk '{print $2}')
-# name=encoders_fn
-# echo "Run $name"
+name=top_k
+echo "Run $name"
 
 config_file=results/${name}/${name}_config.yaml
+sed -i "s/$var_1:.*/$var_1: ${value_1}/" $config_file
 
 
 mkdir -p results/${name}
-cp -r $base_config_file $config_file
-echo "copied config file to $config_file"
+# cp -r $base_config_file $config_file
+# echo "copied config file to $config_file"
 
 
 python $python_script $config_file
