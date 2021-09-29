@@ -419,6 +419,8 @@ def plot_final_score_distribution(results, title,
 
             scores = pd.DataFrame.from_dict(score_dict)
             axs[ii].set_title(f"{results[exp][results[exp]['known_unknown']][ii]} {title}", fontweight="bold", size=18)
+            axs[ii].set_ylabel('Density')
+
             sns.histplot(ax=axs[ii], data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
                  common_norm=True,
                  element='bars', binrange=(0, 1), binwidth=0.005)

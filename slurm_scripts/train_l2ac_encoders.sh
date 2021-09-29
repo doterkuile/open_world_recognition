@@ -33,36 +33,36 @@ conda_env=l2acenv
 
 # Loop variables
 var_1=name
-array_1=(l_t_e_0007)
+array_1=(l_t_e_comparison_en)
 var_2=feature_layer
-array_2=(fc7)
+array_2=(_avg_pooling)
 var_3=encoder
-array_3=(AlexNet)
+array_3=(EfficientNet)
 var_4=(unfreeze_layer)
-array_4=(8)
+array_4=(0)
 var_5=criterion
 array_5=(bce_loss_default)
 var_6=meta_trn
-array_6=(80)
+array_6=(40)
 var_7=meta_val
-array_7=(20)
+array_7=(10)
 var_8=top_n
 array_8=(9)
 var_9=model_class
 array_9=(L2AC_smaller_fc)
 var_10=encoder_trn
-array_10=(50)
+array_10=(25)
 # var_11=same_class_extend_entries
 # array_11=(True)
 var_11=meta_tst
-array_11=(50)
+array_11=(0)
 len=${#array_1[@]}
 
 
 
 
 var_e=epochs
-value_e=400
+value_e=200
 
 conda activate $conda_env
 
