@@ -445,6 +445,53 @@ def plot_best_loss(loss, loop_variable, figure_path):
 
     return
 
+def plot_top_n(results, metric, figure_path):
+    fig = plt.figure()
+    n = np.array([1, 2, 3, 6, 9, 12, 18 ,21])
+    y = []
+
+
+    for exp_name in results.keys():
+        unknown_classes_labels = results[exp_name]['unknown_classes']
+
+        y.append(np.array(results[exp_name][metric]))
+
+    y = np.stack(y)
+
+    for ii in range(1,len(unknown_classes_labels)):
+        plt.plot(n, y[:,ii], '-o', label=f'{unknown_classes_labels[ii]} unknown cls')
+    plt.xticks(n)
+    plt.xlabel('top-n')
+    plt.ylabel(metric)
+    plt.legend()
+    fig.savefig(figure_path + f'top_n_{metric}.eps', bbox_inches='tight',format='eps', dpi=1200)
+    plt.close(fig)
+    return
+
+def plot_top_k(results, metric, figure_path):
+    fig = plt.figure()
+    k = np.array([1, 3, 5, 8, 10, 12, 15, 20])
+    y = []
+
+
+    for exp_name in results.keys():
+        unknown_classes_labels = results[exp_name]['unknown_classes']
+
+        y.append(np.array(results[exp_name][metric]))
+
+    y = np.stack(y)
+
+    for ii in range(1,len(unknown_classes_labels)):
+        plt.plot(k, y[:,ii], '-o', label=f'{unknown_classes_labels[ii]} unknown cls')
+    plt.xticks(k)
+    plt.xlabel('top-k')
+    plt.ylabel(metric)
+    plt.legend()
+    fig.savefig(figure_path + f'top_k_{metric}.eps', bbox_inches='tight',format='eps', dpi=1200)
+    plt.close(fig)
+    return
+
+
 
 def plot_best_accuracy(accuracy, loop_variable, figure_path):
     fig = plt.figure()
@@ -550,15 +597,18 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
 
 def main():
 
+    results_name = "top_n"
+    metrics = ["weighted_f1", "error_knowns", "error_unknowns", "wilderness_impact", "open_world_error" ]
+    data_folder = f"results/{results_name}/"
+    data_path = data_folder + f'{results_name}.npz'
+    data = np.load(data_path,allow_pickle=True)['arr_0']
+    data_keys = list(data.item().keys())
 
-    knowns = np.array([20,  40, 60 ,80])
-    unknowns = np.array([0, 20,  40, 60 ,80])
-    X, Y = np.meshgrid(knowns, unknowns)
-
-    F1 = np.random.rand(X.shape[0], X.shape[1])
-
-    plot_classes_surface(X, Y, F1)
-
+    results = {}
+    for data_key in data_keys:
+        results[data_key] = data.item()[data_key]
+    for metric in metrics:
+        plot_top_n(results, metric, data_folder)
     return
 
 
