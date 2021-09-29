@@ -359,7 +359,7 @@ class CIFAR100Dataset(ObjectDatasetBase):
 class TinyImageNetDataset(ObjectDatasetBase):
 
 
-    def __init__(self, dataset_path, class_ratio, train_phase=TrainPhase.ENCODER_TRN, image_resize=64):
+    def __init__(self, dataset_path, class_ratio, train_phase=TrainPhase.ENCODER_TRN, image_resize=64, remove_teapot=False):
         super().__init__(dataset_path,   class_ratio, train_phase)
 
         self.trn_mean_pixel = [0.4802, 0.4481, 0.3975]
@@ -373,6 +373,13 @@ class TinyImageNetDataset(ObjectDatasetBase):
         train_data = datasets.ImageFolder(root=f'{dataset_path}/train', transform=self.transform_train)
         test_data = datasets.ImageFolder(root=f'{dataset_path}/test', transform=self.transform_test)
         val_data = datasets.ImageFolder(root=f'{dataset_path}/val', transform=self.transform_test)
+
+        if remove_teapot:
+            teapot_cls = 'n04398044'
+
+            self.remove_teapot_cls(train_data, teapot_cls)
+            self.remove_teapot_cls(test_data, teapot_cls)
+            self.remove_teapot_cls(val_data, teapot_cls)
 
 
         self.setupDataSplit(train_data, test_data, val_data, class_ratio, train_phase)
@@ -407,6 +414,13 @@ class TinyImageNetDataset(ObjectDatasetBase):
 
         self.val_data = val_data
 
+        return
+
+    def remove_teapot_cls(self, dataset, teapot_cls):
+        try:
+            dataset.classes.remove(teapot_cls)
+        except ValueError:
+            print("no teapot class exists in dataset")
         return
 
     def metaDataSplit(self, train_data, test_data, val_data, class_ratio, train_phase):

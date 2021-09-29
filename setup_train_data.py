@@ -226,15 +226,16 @@ def parseConfigFile(device, multiple_gpu):
     dataset_class = config['dataset_class']
     figure_size = config['image_resize']
     unfreeze_layer = config['unfreeze_layer']
+    remove_teapot_cls = config['remove_teapot']
 
     train_phase = TrainPhase.META_TRN
-    train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size)
+    train_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, train_phase, figure_size, remove_teapot_cls)
 
     test_phase = TrainPhase.META_VAL
-    val_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
+    val_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size, remove_teapot_cls)
 
     test_phase = TrainPhase.META_TST
-    test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size)
+    test_dataset = eval('ObjectDatasets.' + dataset_class)(dataset_path, class_ratio, test_phase, figure_size, remove_teapot_cls)
 
 
 
