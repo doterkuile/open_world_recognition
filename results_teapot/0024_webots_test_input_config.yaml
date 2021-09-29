@@ -4,6 +4,6 @@ object_name: 'object_1'
 experiment_name: '0024'
 extend_memory: True
 test_new_cls_only: False
-memory_dataset: 'webots_test'
-input_dataset: 'input'
+memory_dataset: webots_test
+input_dataset: input
 

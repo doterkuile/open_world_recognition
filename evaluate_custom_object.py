@@ -36,12 +36,12 @@ def main():
     else:
         print(f"Running with {torch.cuda.device_count()} GPUs")
 
-    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config = parseConfigFile(
+    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config = parseConfigFile(
         device)
 
     probability_threshold = config['probability_threshold']
 
-
+    extend_memory = False
     y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model,encoder, extend_memory, test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder, config, device)
 
     # Unknown label is set to max idx + 1
@@ -60,21 +60,70 @@ def main():
     # Set all true input labels not in memory to unknown
     new_cls_idx = np.where(true_labels == new_class)[0]
     other_cls_idx = np.where(true_labels != new_class)[0]
-    if not extend_memory:
-        e_u_new_cls = (np.where(final_label[new_cls_idx] != unknown_label)[0]).shape[0]/new_cls_idx.shape[0]
-        e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
-    else:
-        e_k_new_cls = (np.where(final_label[new_cls_idx] != new_class)[0]).shape[0]/new_cls_idx.shape[0]
-        # e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
+    e_u_new = (np.where(final_label[new_cls_idx] != unknown_label)[0]).shape[0]/new_cls_idx.shape[0]
+    try:
+        e_u_other = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
+    except ZeroDivisionError:
+        e_u_other = 0
+    no_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_before.npz"
+    np.savez(no_memory_file_path, e_u_new_cls=e_u_new, e_u_other_cls=e_u_other)
 
 
-        new_cls_true = np.ones(new_cls_idx.shape)
-        new_cls_pred = np.ones(new_cls_idx.shape)
-        new_cls_pred[np.where(final_label[new_cls_idx] != new_class)] = 0
-        true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
-        F1 = sklearn.metrics.f1_score(y_true=new_cls_true, y_pred=new_cls_pred, zero_division=0)
 
-        
+    # Run with memory
+    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config = parseConfigFile(
+        device)
+
+    extend_memory = True
+    y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model, encoder, extend_memory,
+                                                                                      test_new_cls_only,
+                                                                                      metadataset_old,
+                                                                                      input_data_folder,
+                                                                                      memory_data_folder, config,
+                                                                                      device)
+
+    # Unknown label is set to max idx + 1
+    unknown_label = complete_cls_set.max() + 1
+
+    # retrieve final label from top n X1 by getting the max prediction score
+    final_label = memory_labels[np.arange(len(memory_labels)), y_score.argmax(axis=1)]
+
+    # Set all final labels lower than threshold to unknown
+    final_label[np.where(y_score.max(axis=1) < probability_threshold)] = unknown_label
+
+    input_cls_set = np.unique(metadataset_old.true_labels[metadataset_old.test_X0])
+    memory_cls_set = np.unique(metadataset_old.true_labels[metadataset_old.test_X1])
+    # Find all classes that are not in memory but only in input
+    unknown_class_labels = input_cls_set[~np.isin(input_cls_set, memory_cls_set)]
+    # Set all true input labels not in memory to unknown
+    new_cls_idx = np.where(true_labels == new_class)[0]
+    other_cls_idx = np.where(true_labels != new_class)[0]
+
+    e_k_new_cls = (np.where(final_label[new_cls_idx] != new_class)[0]).shape[0]/new_cls_idx.shape[0]
+    # e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
+
+
+    new_cls_true = np.ones(new_cls_idx.shape)
+    new_cls_pred = np.ones(new_cls_idx.shape)
+    new_cls_pred[np.where(final_label[new_cls_idx] != new_class)] = 0
+    true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
+    F1 = sklearn.metrics.f1_score(y_true=new_cls_true, y_pred=new_cls_pred, zero_division=0)
+
+    ## F1 seconde verison, over all data
+    new_cls_true_all = np.ones(final_label.shape)
+    new_cls_true_all[np.where(true_labels != new_class)] = 0
+
+    new_cls_pred_all = np.ones(final_label.shape)
+    new_cls_pred_all[np.where(final_label != new_class)] = 0
+
+    F1_all = sklearn.metrics.f1_score(y_true=new_cls_true_all, y_pred=new_cls_pred_all, zero_division=0)
+
+
+
+
+    extended_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_after.npz"
+    np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all)
+
     macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(
         true_labels, final_label, unknown_label)
 
@@ -416,7 +465,7 @@ def parseConfigFile(device):
     image_dataset = eval('ObjectDatasets.' + config['dataset_path'] + "Dataset")('datasets/' + config['dataset_path'],
                                                                                  class_ratio, train_phase, figure_size)
 
-    return model, meta_dataset, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config
+    return model, meta_dataset, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config
 
 
 if __name__ == "__main__":
