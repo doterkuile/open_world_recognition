@@ -36,104 +36,50 @@ def main():
     else:
         print(f"Running with {torch.cuda.device_count()} GPUs")
 
-    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config = parseConfigFile(
-        device)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config_file")
+    args = parser.parse_args()
+    evaluation_config_file = args.config_file
 
-    probability_threshold = config['probability_threshold']
-
-    extend_memory = False
-    y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model,
-                                                                                      encoder,
-                                                                                      extend_memory,
-                                                                                      test_new_cls_only,
-                                                                                      metadataset_old,
-                                                                                      input_data_folder,
-                                                                                      memory_data_folder,
-                                                                                      config, device)
-
-    e_u_new, e_u_other = getUnknown_error(memory_labels, y_score, true_labels,
-                                          complete_cls_set, probability_threshold, new_class)
+    with open(evaluation_config_file) as file:
+        evaluation_config = yaml.load(file, Loader=yaml.FullLoader)
 
     no_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_before.npz"
-
-    print("Saving data")
-    print(f"e_u_new_cls = {e_u_new}")
-    print(f"e_u_other_cls = {e_u_other}")
-
-    np.savez(no_memory_file_path,
-             complete_cls_set=complete_cls_set,
-             new_class=new_class,
-             probability_threshold=probability_threshold,
-             y_score=y_score,
-             true_labels=true_labels,
-             memory_labels=memory_labels)
-
-
-
-    # Run with memory
-    model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config = parseConfigFile(
-        device)
-
-    extend_memory = True
-    y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model, encoder, extend_memory,
-                                                                                      test_new_cls_only,
-                                                                                      metadataset_old,
-                                                                                      input_data_folder,
-                                                                                      memory_data_folder, config,
-                                                                                      device)
-
-    F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probability_threshold, new_class)
-
     extended_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_after.npz"
 
-    print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
-    print(f"e_k_new_cls = {e_k_new_cls}")
-    print(f"F1_new_cls_idx = {F1}")
-    print(f"F1_all_idx = {F1_all}")
+    no_memory_data = np.load(no_memory_file_path)
+    extended_memory_data = np.load(extended_memory_file_path)
 
-    np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all, y_score=y_score, true_labels=true_labels, memory_labels=memory_labels)
+    memory_labels = no_memory_data['memory_labels']
+    y_score = no_memory_data['y_score']
+    true_labels = no_memory_data['true_labels']
+    complete_cls_set = no_memory_data['complete_cls_set']
+    new_class = no_memory_data['new_class']
+    probability_threshold = no_memory_data['probability_threshold']
 
-    np.savez(extended_memory_file_path,
-             complete_cls_set=complete_cls_set,
-             new_class=new_class,
-             probability_threshold=probability_threshold,
-             y_score=y_score,
-             true_labels=true_labels,
-             memory_labels=memory_labels)
 
-    # macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(
-    #     true_labels, final_label, unknown_label)
+    e_u_new, e_u_other = getUnknown_error(memory_labels,
+                                          y_score,
+                                          true_labels,
+                                          complete_cls_set,
+                                          probability_threshold,
+                                          new_class)
 
-    ## Get data_rep and labels for input
+    memory_labels = extended_memory_data['memory_labels']
+    y_score = extended_memory_data['y_score']
+    true_labels = extended_memory_data['true_labels']
+    complete_cls_set = extended_memory_data['complete_cls_set']
+    new_class = extended_memory_data['new_class']
 
-    # labels = memory_labels.reshape(-1) + new_class
-    #
-    # if extend_memory:
-    #     memory.trn_memory = np.concatenate([memory.trn_memory, memory_rep])
-    #     memory.trn_true_labels = np.concatenate([memory.trn_true_labels, labels])
-    #
-    # sample_idx = np.where(np.array(object_dataset.targets) == 1)[0]
-    # ii = 0
-    # for sample in input_rep:
-    #
-    #     # sample = getSample(object_dataset, encoder, device)
-    #     sample = sample.reshape(1, -1)
-    #     top_classes, x1 = getSimilarClasses(sample, memory, memory.trn_true_labels, top_n, top_k)
-    #
-    #     final_label, probabilities, top_classes_ordered = classifySample(sample, model, x1, top_classes, device)
-    #
-    #     sample_image = object_dataset[sample_idx[ii]][0]
-    #     ii = ii + 1
-    #     label_list, final_label_class = showResults(sample_image, image_dataset, object_dataset, top_classes,
-    #                                                 final_label)
-    #
-    #     print(f"top classes are {label_list}")
-    #     if final_label < 0:
-    #         print(f"the final label is {final_label_class}.")
-    #         print(f"The object cannot be identified")
-    #     else:
-    #
-    #         print(f"the final label is {final_label_class}.")
+
+    F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels,
+                                            y_score,
+                                            true_labels,
+                                            complete_cls_set,
+                                            probability_threshold,
+                                            new_class)
+
+
 
     return
 
@@ -147,7 +93,6 @@ def getUnknown_error(memory_labels, y_score, true_labels, complete_cls_set, prob
 
     # Set all final labels lower than threshold to unknown
     final_label[np.where(y_score.max(axis=1) < probability_threshold)] = unknown_label
-
 
     # Set all true input labels not in memory to unknown
     new_cls_idx = np.where(true_labels == new_class)[0]
@@ -174,7 +119,18 @@ def get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probabi
     # Set all true input labels not in memory to unknown
     new_cls_idx = np.where(true_labels == new_class)[0]
     other_cls_idx = np.where(true_labels != new_class)[0]
+    # true_labels[np.isin(true_labels, unknown_class_labels)] = unknown_label
+    input_class_set = np.unique(true_labels)
+    unknown_class_set = input_class_set[~np.isin(input_class_set, np.unique(memory_labels))]
 
+    true_labels[np.isin(true_labels, unknown_class_set)] = unknown_label
+    true_unknowns = np.where(true_labels == unknown_label)[0]
+
+    incorrect_unknowns = np.where(final_label[true_unknowns] != unknown_label)[0]
+    try:
+        e_u = incorrect_unknowns.shape[0] / true_unknowns.shape[0]
+    except ZeroDivisionError:
+        e_u = 0
     e_k_new_cls = (np.where(final_label[new_cls_idx] != new_class)[0]).shape[0] / new_cls_idx.shape[0]
     # e_u_other_cls = (np.where(final_label[other_cls_idx] != unknown_label)[0]).shape[0]/other_cls_idx.shape[0]
 
@@ -194,7 +150,8 @@ def get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probabi
     F1_all = sklearn.metrics.f1_score(y_true=new_cls_true_all, y_pred=new_cls_pred_all, zero_division=0)
     return F1, F1_all, e_k_new_cls
 
-def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder, config,device):
+def evaluateObject(model, encoder, extend_memory, test_new_cls_only, metadataset_old, input_data_folder,
+                   memory_data_folder, config, device):
     transform_train = transforms.Compose([
         transforms.Resize((config['image_resize'], config['image_resize'])),
         transforms.ToTensor(),
@@ -263,6 +220,7 @@ def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_
                                                                 probability_threshold, top_n)
 
     return y_score, memory_labels, true_labels, new_class, complete_cls_set
+
 
 def splitInputfromMemory(data_rep, data_cls_rep, labels):
     # data_rep = data_rep.view(data_rep.shape[0], data_rep.shape[2])
