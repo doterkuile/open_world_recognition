@@ -541,7 +541,7 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
         yticks = np.unique(unknown_classes),
     )
 
-    fig.savefig(f"{figure_path}_surface_plot_{metric}.eps", bbox_inches='tight',format='eps', dpi=1200)
+    fig.savefig(f"{figure_path}_surface_plot_{metric}.png", bbox_inches='tight')
     plt.close(fig)
 
     return
