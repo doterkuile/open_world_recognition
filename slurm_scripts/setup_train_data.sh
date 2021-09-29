@@ -38,25 +38,25 @@ var_1=model_class
 array_1=(ResNet152)
 var_2=unfreeze_layer
 array_2=(0)
-var_3=top_n
-array_3=(9)
+var_3=remove_teapot
+array_3=(True)
 var_4=feature_layer
 array_4=(avgpool)
 var_5=meta_trn
-array_5=(40)
+array_5=(70)
 var_6=encoder_trn
 array_6=(0)
 var_7=meta_val
-array_7=(10)
+array_7=(20)
 var_8=meta_tst
-array_8=(25)
+array_8=(100)
 len=${#array_1[@]}
 
 
 # conda activate $conda_env
 
 var_n=name
-array_n=(setup_data_rn152)
+array_n=(setup_data_no_teapot)
 
 
 for ((i=0;i<$len; i++))
