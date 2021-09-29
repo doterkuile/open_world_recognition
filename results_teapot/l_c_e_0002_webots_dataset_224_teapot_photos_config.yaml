@@ -1,0 +1,9 @@
+## Experiment
+object_name: 'object_1'
+
+experiment_name: 'l_c_e_0002'
+extend_memory: True
+test_new_cls_only: False
+memory_dataset: webots_dataset_224
+input_dataset: teapot_photos
+

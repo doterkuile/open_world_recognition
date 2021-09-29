@@ -66,6 +66,11 @@ def main():
     except ZeroDivisionError:
         e_u_other = 0
     no_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_before.npz"
+    
+    print("Saving e_u_new_cls and e_u_other_cls")
+    print(f"e_u_new_cls = {e_u_new}")
+    print(f"e_u_other_cls = {e_u_other}")
+
     np.savez(no_memory_file_path, e_u_new_cls=e_u_new, e_u_other_cls=e_u_other)
 
 
@@ -122,6 +127,12 @@ def main():
 
 
     extended_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_after.npz"
+    
+    print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
+    print(f"e_k_new_cls = {e_k_new_cls}")
+    print(f"F1_new_cls_idx = {F1}")
+    print(f"F1_all_idx = {F1_all}")
+
     np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all)
 
     macro_f1, weighted_f1, accuracy, open_world_error, wilderness_impact, wilderness_ratio = calculateMetrics(
