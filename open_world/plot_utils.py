@@ -697,6 +697,7 @@ def plot_model_output_distribution(result_dir):
     text = ["Meta-classifier: L2AIC-default \n Encoder: EfficientNet",
             "Meta-classifier: L2AIC-no-lstm \n Encoder: EfficientNet",
             "Meta-classifier: L2AIC-smaller-fc \n Encoder: EfficientNet",
+            # "Meta-classifier: L2AIC-default \n Encoder: ResNet152",
             "Meta-classifier: L2AIC-cosine \n Encoder: ResNet152",
             "Meta-classifier: L2AIC-smaller-fc \n Encoder: ResNet152"]
     ii = 0
@@ -734,7 +735,8 @@ def plot_model_output_distribution(result_dir):
         axs[ii].axvline(x=0.5, color='red', linestyle='--')
         axs[ii].text(0.1, 0.7*axs[ii].get_yticks().max(), text[ii],fontsize=14, bbox={'facecolor': 'blue', 'edgecolor': 'none', 'boxstyle': 'round', 'alpha': 0.05})
 
-        axs[ii].set_xticklabels([])
+        # if axs[ii] != axs[-1]:
+        #     axs[ii].set_xticklabels([])
 
 
         ii = ii + 1
