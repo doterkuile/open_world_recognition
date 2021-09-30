@@ -238,7 +238,7 @@ class L2AC_base(torch.nn.Module):
         self.feature_size = feature_size
         self.input_size = 2048
         self.batch_size = batch_size
-        self.hidden_size = 1
+        self.hidden_size = top_k
         self.top_k = top_k
         # self.embedding_layer = self.setEmbeddingLayer(data_path)
         self.matching_layer = self.setMatchingLayer()
@@ -324,13 +324,13 @@ class L2AC(L2AC_base):
 
         super().__init__(num_classes, feature_size, batch_size, top_k)
         self.lstm = nn.LSTM(input_size=top_k, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
-        # self.initialize_weights()
+        self.initialize_weights()
 
     def setMatchingLayer(self):
         matching_layer = nn.Sequential(
-                                       # nn.Dropout(p=0.5),
+                                       nn.Dropout(p=0.5),
                                        nn.Linear(2 * self.feature_size, self.input_size),
-                                       nn.ReLU(),
+                                       nn.LeakyReLU(),
                                        nn.Dropout(p=0.5),
                                        nn.Linear(self.input_size, 1),
                                        # nn.Sigmoid(),

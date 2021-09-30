@@ -23,8 +23,8 @@ class bce_loss_default(nn.Module):
 
         lossmean = loss.sum() / (idx1 * int(self.positive_weight) + idx0)
 
-        # return lossmean
-        return self.criterion(input, target)
+        return lossmean
+        # return self.criterion(input, target)
 
 class bce_loss_matching_layer(nn.Module):
 
