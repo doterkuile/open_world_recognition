@@ -593,22 +593,109 @@ def plot_classes_surface(results,metric, figure_labels, figure_path):
 
     return
 
+def plot_e_k_encoders(results, figure_path):
+    fig = plt.figure()
+    encoder_list = ['ResNet50','ResNet152','AlexNet','EfficientNet','ResNet50','ResNet152', 'AlexNet', 'EfficientNet']
+    pretrain_list = ['Pretrained','Pretrained','Pretrained','Pretrained','Fine-tuned','Fine-tuned','Fine-tuned','Fine-tuned']
+    encoder_list = np.array(encoder_list)
+    y = []
+
+
+    for exp_name in results.keys():
+        unknown_classes_labels = results[exp_name]['unknown_classes']
+
+        y.append(np.array(results[exp_name]['error_knowns'][0]))
+    e_k = np.stack(y)
+
+    e_k_dict = {'E_k': e_k,
+                'Encoders':encoder_list,
+                'Encoder':pretrain_list}
+    e_k_dataframe = pd.DataFrame.from_dict(data=e_k_dict)
+
+    ax = sns.barplot(x="Encoders", y="E_k", hue='Encoder', data=e_k_dataframe)
+    plt.xticks(rotation=45)
+    # plt.title('Known prediction error per encoder')
+    fig.savefig(figure_path + f'encoder_e_k.eps', bbox_inches='tight',format='eps', dpi=1200)
+    plt.close(fig)
+    return
+
+def model_architecture_table(result_folder):
+
+    dirs = os.listdir(result_folder)
+    partial_name = "surface_plot_models_00"
+    files = [f"{result_folder}{dir}/{dir}.npz"for dir in dirs if partial_name in dir]
+    files.sort()
+
+    f1_same = []
+    f1_diff = []
+    e_o_same = []
+    e_o_diff = []
+    w_i_same = []
+    w_i_diff = []
+
+    for file in files:
+        data = np.load(file, allow_pickle=True)['arr_0']
+        data_keys = list(data.item().keys())
+        same_cls_result = data.item()[[key for key in data_keys if "diff" not in key][0]]
+        diff_cls_result = data.item()[[key for key in data_keys if "diff" in key][0]]
+        f1_same.append(same_cls_result['weighted_f1'][-1])
+        f1_diff.append(diff_cls_result['weighted_f1'][-1])
+        e_o_same.append(same_cls_result['open_world_error'][-1])
+        e_o_diff.append(diff_cls_result['open_world_error'][-1])
+        w_i_same.append(same_cls_result['wilderness_impact'][-1])
+        w_i_diff.append(diff_cls_result['wilderness_impact'][-1])
+
+
+    idx_reshuffle = []
+    for n in range(0,7):
+        idx_reshuffle.extend([n+7, n+14, n])
+    idx_reshuffle = np.array(idx_reshuffle)
+
+    f1_same = np.array(f1_same)[idx_reshuffle]
+    f1_diff = np.array(f1_diff)[idx_reshuffle]
+    e_o_same = np.array(e_o_same)[idx_reshuffle]
+    e_o_diff = np.array(e_o_diff)[idx_reshuffle]
+    w_i_same = np.array(w_i_same)[idx_reshuffle]
+    w_i_diff = np.array(w_i_diff)[idx_reshuffle]
+
+    table_same_results = np.stack([f1_same, e_o_same, w_i_same])
+    table_same_results = np.transpose(np.round(table_same_results, 3))
+
+    table_diff_results = np.stack([f1_diff, e_o_diff, w_i_diff])
+    table_diff_results = np.transpose(np.round(table_diff_results, 3))
+
+
+
+    for row in table_same_results:
+        print(f"{row[0]} \\\\ {row[1]} \\\\ {row[2]}")
+    print("\ndiff results\n")
+    for row in table_same_results:
+        print(f"{row[0]} \\\\ {row[1]} \\\\ {row[2]}")
+
+
+
+
+    return
 
 
 def main():
 
-    results_name = "top_n"
+    results_name = "encoders_fn"
     metrics = ["weighted_f1", "error_knowns", "error_unknowns", "wilderness_impact", "open_world_error" ]
     data_folder = f"results/{results_name}/"
+    result_folder = "results/"
     data_path = data_folder + f'{results_name}.npz'
     data = np.load(data_path,allow_pickle=True)['arr_0']
     data_keys = list(data.item().keys())
+    model_architecture_table(result_folder)
 
     results = {}
     for data_key in data_keys:
         results[data_key] = data.item()[data_key]
-    for metric in metrics:
-        plot_top_n(results, metric, data_folder)
+    # for metric in metrics:
+        # plot_top_n(results, metric, data_folder)
+        # plot_e_k_encoders(results, data_folder)
+
     return
 
 
