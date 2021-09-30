@@ -692,17 +692,22 @@ def plot_model_output_distribution(result_dir):
     partial_name = 'surface_plot_models_00'
     result_names = [f'{partial_name}01', f'{partial_name}03', f'{partial_name}05', f'{partial_name}16', f'{partial_name}19']
 
-
+    fig, axs = plt.subplots(nrows=len(result_names), figsize=(15, 15), sharex=True)
+    fig.subplots_adjust(hspace=.0)
+    text = ["Meta-classifier: L2AIC-default \n Encoder: EfficientNet",
+            "Meta-classifier: L2AIC-no-lstm \n Encoder: EfficientNet",
+            "Meta-classifier: L2AIC-smaller-fc \n Encoder: EfficientNet",
+            "Meta-classifier: L2AIC-cosine \n Encoder: ResNet152",
+            "Meta-classifier: L2AIC-smaller-fc \n Encoder: ResNet152"]
+    ii = 0
+    figure_path = f"{result_dir}{result_names[0]}/{result_names[0]}_output_score_distribution"
 
     for result_name in result_names:
-        figure_path = f"{result_dir}{result_name}/{result_name}_output_score_distribution"
         data_path = f"{result_dir}{result_name}/{result_name}.npz"
         data = np.load(data_path, allow_pickle=True)['arr_0']
         data_key = list(data.item().keys())[-1]
         results = data.item()[data_key]
 
-
-        fig, axs = plt.subplots(1, 1, figsize=(15, 3))
 
         true_labels = results['true_labels'][-1]
         final_labels = results['final_labels'][-1]
@@ -719,20 +724,30 @@ def plot_model_output_distribution(result_dir):
 
         scores = pd.DataFrame.from_dict(score_dict)
         # axs[ii].set_title(f"{results[exp][results[exp]['known_unknown']][ii]} {title}", fontweight="bold", size=18)
-        axs.set_ylabel('Density')
+        axs[ii].set_ylabel('Density',fontsize=14)
 
-        sns.histplot(ax=axs, data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
+
+        sns.histplot(ax=axs[ii], data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
              common_norm=True,
              element='bars', binrange=(0, 1), binwidth=0.005)
-        axs.text(0.51, 1 - plt.yticks()[0].max()  , 'Classification\nboundary',
-                verticalalignment='top', horizontalalignment='left',
-                transform=axs.transAxes,
-                color='blue', fontsize=15)
-        axs.axvline(x=0.5, color='red', linestyle='--')
 
-        if figure_path is not None:
-            fig.savefig(f"{figure_path}")
+        axs[ii].axvline(x=0.5, color='red', linestyle='--')
+        axs[ii].text(0.1, 0.7*axs[ii].get_yticks().max(), text[ii],fontsize=14, bbox={'facecolor': 'blue', 'edgecolor': 'none', 'boxstyle': 'round', 'alpha': 0.05})
 
+        axs[ii].set_xticklabels([])
+
+
+        ii = ii + 1
+    axs[0].text(0.51, 1 - plt.yticks()[0].max()  , 'Classification\nboundary',
+            verticalalignment='top', horizontalalignment='left',
+            transform=axs[0].transAxes,
+            color='blue', fontsize=15)
+    axs[-1].set_xlabel('Output score', fontsize=14)
+
+    fig.subplots_adjust(hspace=.0)
+    fig.tight_layout()
+    if figure_path is not None:
+        fig.savefig(f"{figure_path}")
     plt.close(fig)
 
 
