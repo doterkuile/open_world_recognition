@@ -630,8 +630,10 @@ def model_architecture_table(result_folder):
 
     f1_same = []
     f1_diff = []
-    e_o_same = []
-    e_o_diff = []
+    e_u_same = []
+    e_u_diff = []
+    e_k_same = []
+    e_k_diff = []
     w_i_same = []
     w_i_diff = []
 
@@ -642,8 +644,10 @@ def model_architecture_table(result_folder):
         diff_cls_result = data.item()[[key for key in data_keys if "diff" in key][0]]
         f1_same.append(same_cls_result['weighted_f1'][-1])
         f1_diff.append(diff_cls_result['weighted_f1'][-1])
-        e_o_same.append(same_cls_result['open_world_error'][-1])
-        e_o_diff.append(diff_cls_result['open_world_error'][-1])
+        e_u_same.append(same_cls_result['error_unknowns'][-1])
+        e_u_diff.append(diff_cls_result['error_unknowns'][-1])
+        e_k_same.append(same_cls_result['error_knowns'][-1])
+        e_k_diff.append(diff_cls_result['error_knowns'][-1])
         w_i_same.append(same_cls_result['wilderness_impact'][-1])
         w_i_diff.append(diff_cls_result['wilderness_impact'][-1])
 
@@ -653,31 +657,87 @@ def model_architecture_table(result_folder):
         idx_reshuffle.extend([n+7, n+14, n])
     idx_reshuffle = np.array(idx_reshuffle)
 
-    f1_same = np.array(f1_same)[idx_reshuffle]
-    f1_diff = np.array(f1_diff)[idx_reshuffle]
-    e_o_same = np.array(e_o_same)[idx_reshuffle]
-    e_o_diff = np.array(e_o_diff)[idx_reshuffle]
-    w_i_same = np.array(w_i_same)[idx_reshuffle]
-    w_i_diff = np.array(w_i_diff)[idx_reshuffle]
+    f1_same_sorted = np.array(f1_same)[idx_reshuffle]
+    f1_diff_sorted = np.array(f1_diff)[idx_reshuffle]
+    e_u_same_sorted = np.array(e_u_same)[idx_reshuffle]
+    e_u_diff_sorted = np.array(e_u_diff)[idx_reshuffle]
+    e_k_same_sorted = np.array(e_k_same)[idx_reshuffle]
+    e_k_diff_sorted = np.array(e_k_diff)[idx_reshuffle]
+    w_i_same_sorted = np.array(w_i_same)[idx_reshuffle]
+    w_i_diff_sorted = np.array(w_i_diff)[idx_reshuffle]
 
-    table_same_results = np.stack([f1_same, e_o_same, w_i_same])
-    table_same_results = np.transpose(np.round(table_same_results, 3))
+    table_same_results = np.stack([f1_same_sorted, e_u_same_sorted,e_k_same_sorted])
+    table_same_results = np.round(table_same_results, 3)
 
-    table_diff_results = np.stack([f1_diff, e_o_diff, w_i_diff])
-    table_diff_results = np.transpose(np.round(table_diff_results, 3))
+    table_diff_results = np.stack([f1_diff_sorted, e_u_diff_sorted,e_k_diff_sorted])
+    table_diff_results = np.round(table_diff_results, 3)
 
-
-
-    for row in table_same_results:
-        print(f"{row[0]} \\\\ {row[1]} \\\\ {row[2]}")
-    print("\ndiff results\n")
-    for row in table_same_results:
-        print(f"{row[0]} \\\\ {row[1]} \\\\ {row[2]}")
+    str_begin = "& \\makecell[l]{"
 
 
+    for col in range(0,21, 3):
+        for ii in range(0,3):
+            print(f"{str_begin}{table_same_results[ii, col]} \\\\ {table_same_results[ii, col + 1]} \\\\ {table_same_results[ii, col+2]} }}")
+            print(f"{str_begin}{table_diff_results[ii, col]} \\\\ {table_diff_results[ii, col + 1]} \\\\ {table_diff_results[ii, col+2]} }}")
 
+        print(" \\\\ \n")
 
     return
+
+
+def plot_model_output_distribution(result_dir):
+    x_label = 'Output score'
+    legend_label = 'Classes'
+
+    partial_name = 'surface_plot_models_00'
+    result_names = [f'{partial_name}01', f'{partial_name}03', f'{partial_name}05', f'{partial_name}16', f'{partial_name}19']
+
+
+
+    for result_name in result_names:
+        figure_path = f"{result_dir}{result_name}/{result_name}_output_score_distribution"
+        data_path = f"{result_dir}{result_name}/{result_name}.npz"
+        data = np.load(data_path, allow_pickle=True)['arr_0']
+        data_key = list(data.item().keys())[-1]
+        results = data.item()[data_key]
+
+
+        fig, axs = plt.subplots(1, 1, figsize=(15, 3))
+
+        true_labels = results['true_labels'][-1]
+        final_labels = results['final_labels'][-1]
+        final_score = results['final_score'][-1]
+        unknown_label = results['unknown_label'][-1]
+        unknown_scores = final_score[np.where(true_labels == unknown_label)]
+
+        known_scores = final_score[np.where(true_labels != unknown_label)]
+
+        score_dict = {x_label: np.concatenate([known_scores, unknown_scores], axis=0),
+                           legend_label: np.concatenate([np.full((len(known_scores)), 'Known'), np.full((len(unknown_scores)), 'Unknown')], axis=0)}
+        # score_dict = {x_label: np.concatenate([unknown_scores], axis=0),
+        #               legend_label: np.concatenate([np.full((len(unknown_scores)), 'Unknown classes')], axis=0)}
+
+        scores = pd.DataFrame.from_dict(score_dict)
+        # axs[ii].set_title(f"{results[exp][results[exp]['known_unknown']][ii]} {title}", fontweight="bold", size=18)
+        axs.set_ylabel('Density')
+
+        sns.histplot(ax=axs, data=scores, x=x_label, hue=legend_label, stat='probability', kde=False,
+             common_norm=True,
+             element='bars', binrange=(0, 1), binwidth=0.005)
+        axs.text(0.51, 1 - plt.yticks()[0].max()  , 'Classification\nboundary',
+                verticalalignment='top', horizontalalignment='left',
+                transform=axs.transAxes,
+                color='blue', fontsize=15)
+        axs.axvline(x=0.5, color='red', linestyle='--')
+
+        if figure_path is not None:
+            fig.savefig(f"{figure_path}")
+
+    plt.close(fig)
+
+
+
+
 
 
 def main():
@@ -689,8 +749,8 @@ def main():
     data_path = data_folder + f'{results_name}.npz'
     data = np.load(data_path,allow_pickle=True)['arr_0']
     data_keys = list(data.item().keys())
-    model_architecture_table(result_folder)
-
+    # model_architecture_table(result_folder)
+    plot_model_output_distribution(result_folder)
     results = {}
     for data_key in data_keys:
         results[data_key] = data.item()[data_key]
