@@ -51,14 +51,14 @@ def main():
                                                                                       memory_data_folder,
                                                                                       config, device)
 
-    e_u_new, e_u_other = getUnknown_error(memory_labels, y_score, true_labels,
-                                          complete_cls_set, probability_threshold, new_class)
+    # e_u_new, e_u_other = getUnknown_error(memory_labels, y_score, true_labels,
+    #                                       complete_cls_set, probability_threshold, new_class)
 
     no_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_before.npz"
 
-    print("Saving data")
-    print(f"e_u_new_cls = {e_u_new}")
-    print(f"e_u_other_cls = {e_u_other}")
+    # print("Saving data")
+    # print(f"e_u_new_cls = {e_u_new}")
+    # print(f"e_u_other_cls = {e_u_other}")
 
     np.savez(no_memory_file_path,
              complete_cls_set=complete_cls_set,
@@ -82,16 +82,16 @@ def main():
                                                                                       memory_data_folder, config,
                                                                                       device)
 
-    F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probability_threshold, new_class)
+    # F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probability_threshold, new_class)
 
     extended_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_after.npz"
 
-    print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
-    print(f"e_k_new_cls = {e_k_new_cls}")
-    print(f"F1_new_cls_idx = {F1}")
-    print(f"F1_all_idx = {F1_all}")
+    # print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
+    # print(f"e_k_new_cls = {e_k_new_cls}")
+    # print(f"F1_new_cls_idx = {F1}")
+    # print(f"F1_all_idx = {F1_all}")
 
-    np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all, y_score=y_score, true_labels=true_labels, memory_labels=memory_labels)
+    # np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all, y_score=y_score, true_labels=true_labels, memory_labels=memory_labels)
 
     np.savez(extended_memory_file_path,
              complete_cls_set=complete_cls_set,
