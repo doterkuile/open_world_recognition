@@ -7,7 +7,6 @@
 # name: ['l_t_l_0004', 'l_t_l_0006'] #, 'l_t_l_0007']
 # name: ['l_c_e_0004', 'l_c_e_0008']
 # name: ['l_c_e_0002', 'l_t_e_comparison_en']
-#name: ['l_t_m_0015','l_t_m_diff_0015']
 # name: ['l_t_k_0003', 'l_t_k_0005']
 # name: ['l_t_n_0005', 'l_t_step_0001']
 
@@ -22,7 +21,6 @@ figure_labels: ['test']
 # figure_labels: ['n=9, k=5', 'n=9, k=10']
 # figure_labels: ['Training default', 'Two step training']
 
-#figure_labels: ['ResNet152 same_cls', 'ResNet152 diff_cls']
 
 
 # figure_labels: ['L2AC', 'L2AC-cosine', 'L2AC-no-lstm', 'L2AC-extended-similarity', 'L2AC-smaller-fc', 'L2AC-abssub', 'L2AC_concat']
@@ -31,17 +29,16 @@ figure_labels: ['test']
 # figure_labels: ['ResNet50','ResNet152','Alexnet','EfficientNet','ResNet50 (fn)','ResNet152 (fn)','Alexnet (fn)','EfficientNet (fn)']
 # figure_labels: ['n = 1', 'n = 2', 'n = 3', 'n = 6', 'n = 9', 'n = 12', 'n = 18', 'n = 21']
 # figure_labels: ['k = 1', 'k = 3', 'k = 5', 'k = 8', 'k = 10', 'k = 12', 'k = 15', 'k = 20']
-figure_title: test
 
 experiment_name: 'l2ac_models'
   
 variable: model_class
-unknown_classes: [0,40]
-tst_memory_cls: [40]
+unknown_classes: [0,10]
+tst_memory_cls: [15]
 plot_confusion_matrix: False
 surface_plot: False
 load_results: False
-repeat_runs: 1
+repeat_runs: 10
 surface_plot_metric: 'unknown_precision'
 figure_path: 'results/'
 

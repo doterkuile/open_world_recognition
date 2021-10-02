@@ -1,11 +1,10 @@
 ## Experiment
 object_name: 'object_1'
 
-experiment_name: '0025'
+experiment_name: 'l_t_teapot_no_lstm_same'
 extend_memory: True
 test_new_cls_only: False
-memory_dataset: 'webots_test'
-input_dataset: 'input'
-memory_classes: 3
-unknown_classes: 2
-
+memory_dataset: 'webots_dataset_224_close'
+input_dataset: 'teapot_photos'
+memory_classes: 70
+unknown_classes: 30

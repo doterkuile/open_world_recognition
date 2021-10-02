@@ -13,3 +13,5 @@
 .idea/
 /results/*
 !/results/.gitignore
+/results_teapot/*
+!/results_teapot/.gitignore

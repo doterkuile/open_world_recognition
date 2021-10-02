@@ -6,9 +6,9 @@
 #SBATCH --nodes=1                		# node count
 #SBATCH --ntasks=1               		# total number of tasks across all nodes
 #SBATCH --cpus-per-task=4      		# cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=12gb                		# total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=20gb                		# total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             		# number of gpus per node
-#SBATCH --time=04:00:00          		# total run time limit (HH:MM:SS)
+#SBATCH --time=03:00:00          		# total run time limit (HH:MM:SS)
 #SBATCH --mail-type=begin        		# send mail when job begins
 #SBATCH --mail-type=end          		# send mail when job ends
 #SBATCH --mail-type=fail         		# send mail if job fails
@@ -35,9 +35,9 @@ name_var=figure_title
 conda activate $conda_env
 
 var_1=experiment_name	
-array_1=(l_c_t_0002)
+array_1=(l_t_teapot_small_fc_diff)
 var_2=memory_dataset
-array_2=(webots_dataset_224)
+array_2=(webots_dataset_224_close)
 var_3=input_dataset
 array_3=(teapot_photos)
 
