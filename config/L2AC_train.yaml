@@ -15,7 +15,7 @@ criterion: bce_loss_default
 optimizer: Adam
 learning_rate: 0.0005
 batch_size: 256
-epochs: 5
+epochs: 10
 
 ## L2AC parameters
 top_k: 5

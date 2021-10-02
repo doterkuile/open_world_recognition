@@ -1,9 +1,11 @@
 ## Experiment
 object_name: 'object_1'
 
-experiment_name: '0024'
+experiment_name: '0025'
 extend_memory: True
 test_new_cls_only: False
 memory_dataset: 'webots_test'
 input_dataset: 'input'
+memory_classes: 3
+unknown_classes: 2
 

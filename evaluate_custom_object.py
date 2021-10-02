@@ -40,6 +40,8 @@ def main():
         device)
 
     probability_threshold = config['probability_threshold']
+    memory_classes = evaluation_config['memory_classes']
+    input_classes = evaluation_config['unknown_classes']
 
     extend_memory = False
     y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model,
@@ -49,16 +51,18 @@ def main():
                                                                                       metadataset_old,
                                                                                       input_data_folder,
                                                                                       memory_data_folder,
+                                                                                      memory_classes,
+                                                                                      input_classes,
                                                                                       config, device)
 
-    e_u_new, e_u_other = getUnknown_error(memory_labels, y_score, true_labels,
-                                          complete_cls_set, probability_threshold, new_class)
+    # e_u_new, e_u_other = getUnknown_error(memory_labels, y_score, true_labels,
+    #                                       complete_cls_set, probability_threshold, new_class)
 
     no_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_before.npz"
 
-    print("Saving data")
-    print(f"e_u_new_cls = {e_u_new}")
-    print(f"e_u_other_cls = {e_u_other}")
+    # print("Saving data")
+    # print(f"e_u_new_cls = {e_u_new}")
+    # print(f"e_u_other_cls = {e_u_other}")
 
     np.savez(no_memory_file_path,
              complete_cls_set=complete_cls_set,
@@ -73,25 +77,29 @@ def main():
     # Run with memory
     model, metadataset_old, image_dataset, encoder, input_data_folder, memory_data_folder, image_resize, top_n, top_k, extend_memory, test_new_cls_only, config, evaluation_config = parseConfigFile(
         device)
-
+    memory_classes = evaluation_config['memory_classes']
+    input_classes = evaluation_config['unknown_classes']
     extend_memory = True
     y_score, memory_labels, true_labels, new_class, complete_cls_set = evaluateObject(model, encoder, extend_memory,
                                                                                       test_new_cls_only,
                                                                                       metadataset_old,
                                                                                       input_data_folder,
-                                                                                      memory_data_folder, config,
+                                                                                      memory_data_folder,
+                                                                                      memory_classes,
+                                                                                      input_classes,
+                                                                                      config,
                                                                                       device)
 
-    F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probability_threshold, new_class)
+    # F1, F1_all, e_k_new_cls = get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probability_threshold, new_class)
 
     extended_memory_file_path = f"results_teapot/{evaluation_config['experiment_name']}_{evaluation_config['memory_dataset']}_{evaluation_config['input_dataset']}_after.npz"
 
-    print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
-    print(f"e_k_new_cls = {e_k_new_cls}")
-    print(f"F1_new_cls_idx = {F1}")
-    print(f"F1_all_idx = {F1_all}")
+    # print("Saving e_k_new_cls, F1_new_cls_idx and F1_all_idx")
+    # print(f"e_k_new_cls = {e_k_new_cls}")
+    # print(f"F1_new_cls_idx = {F1}")
+    # print(f"F1_all_idx = {F1_all}")
 
-    np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all, y_score=y_score, true_labels=true_labels, memory_labels=memory_labels)
+    # np.savez(extended_memory_file_path, e_k_new=e_k_new_cls, f1=F1, f1_all=F1_all, y_score=y_score, true_labels=true_labels, memory_labels=memory_labels)
 
     np.savez(extended_memory_file_path,
              complete_cls_set=complete_cls_set,
@@ -194,7 +202,7 @@ def get_f1_scores(memory_labels, y_score, true_labels, complete_cls_set, probabi
     F1_all = sklearn.metrics.f1_score(y_true=new_cls_true_all, y_pred=new_cls_pred_all, zero_division=0)
     return F1, F1_all, e_k_new_cls
 
-def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder, config,device):
+def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_old, input_data_folder, memory_data_folder,memory_classes, input_classes, config,device):
     transform_train = transforms.Compose([
         transforms.Resize((config['image_resize'], config['image_resize'])),
         transforms.ToTensor(),
@@ -233,29 +241,31 @@ def evaluateObject(model,encoder, extend_memory,test_new_cls_only , metadataset_
     class_ratio = config['class_ratio']
     sample_ratio = config['sample_ratio']
 
-    input_classes, input_samples, memory_classes, memory_samples, complete_cls_set = getTestIdxSelection(
+    input_cls_set, input_samples, memory_cls_set, memory_samples, complete_cls_set = getTestIdxSelection(
         tst_cls_selection,
         class_ratio,
-        sample_ratio)
+        sample_ratio,
+        input_classes,
+        memory_classes)
 
     if extend_memory:
-        memory_classes = np.concatenate([memory_classes, np.array([new_class])])
+        memory_cls_set = np.concatenate([memory_cls_set, np.array([new_class])])
 
     complete_cls_set = np.concatenate([complete_cls_set, np.array([new_class])])
 
     if test_new_cls_only:
-        input_classes = np.array([new_class]).reshape(1, -1)
+        input_cls_set = np.array([new_class]).reshape(1, -1)
     else:
-        input_classes = np.concatenate([input_classes, np.array([new_class])])
+        input_cls_set = np.concatenate([input_cls_set, np.array([new_class])])
 
     # input_samples = np.arange(0,input_rep.shape[0])
 
     X0, X1, Y = meta_utils.rank_test_data(data_rep, labels, data_rep, labels, cls_rep, input_samples,
-                                          memory_samples, input_classes, memory_classes, complete_cls_set,
-                                          memory_classes.shape[0])
+                                          memory_samples, input_cls_set, memory_cls_set, complete_cls_set,
+                                          memory_cls_set.shape[0])
 
-    unknown_classes = (~np.isin(input_classes, memory_classes)).nonzero()[0].shape[0]
-    metadataset_old.set_test_data(data_rep, labels, X0, X1, Y, memory_classes.shape[0], unknown_classes)
+    unknown_classes = (~np.isin(input_cls_set, memory_cls_set)).nonzero()[0].shape[0]
+    metadataset_old.set_teapot_test_data(data_rep, labels, X0, X1, Y, memory_cls_set.shape[0], unknown_classes)
 
     test_loader = DataLoader(metadataset_old, batch_size=30 * top_n, shuffle=False, pin_memory=True)
 
@@ -278,7 +288,7 @@ def splitInputfromMemory(data_rep, data_cls_rep, labels):
     return memory_rep.numpy(), memory_cls_rep.numpy(), memory_labels.numpy(), input_rep.numpy(), input_labels.numpy()
 
 
-def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio):
+def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio, unknown_classes, tst_memory_cls):
     if tst_cls_selection == 'same_cls':
         input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value],
                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
@@ -291,18 +301,15 @@ def getTestIdxSelection(tst_cls_selection, class_ratio, sample_ratio):
                                    class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value])
         memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
     else:
-        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
-                                  class_ratio[TrainPhase.META_VAL.value],
-                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
-                                  class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
-
+        input_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
+                                  tst_memory_cls + unknown_classes)
         input_samples = np.arange(sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'],
                                   sample_ratio['l2ac_train_samples'] + sample_ratio['l2ac_val_samples'] +
                                   sample_ratio['l2ac_test_samples'])
-        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
-                                   class_ratio[TrainPhase.META_VAL.value],
-                                   class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] +
-                                   class_ratio[TrainPhase.META_VAL.value] + class_ratio[TrainPhase.META_TST.value])
+        memory_classes = np.arange(class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value],
+                                  class_ratio[TrainPhase.ENCODER_TRN.value] + class_ratio[TrainPhase.META_TRN.value] + class_ratio[TrainPhase.META_VAL.value] +
+                                  tst_memory_cls)
 
         memory_samples = np.arange(0, sample_ratio['l2ac_train_samples'])
 

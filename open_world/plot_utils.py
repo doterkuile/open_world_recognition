@@ -12,6 +12,10 @@ import imageio
 import os
 import torch.nn as nn
 from torchvision.utils import make_grid
+import glob
+import cv2
+import math
+
 
 
 import open_world.loss_functions as loss_func
@@ -685,6 +689,134 @@ def model_architecture_table(result_folder):
     return
 
 
+def training_procedure_table(result_folder):
+
+    dirs = os.listdir(result_folder)
+    files = ["surface_plot_rank_reverse", "surface_plot_rank_extended", "surface_plot_train_two_step","surface_plot_train_freeze_ml" ]
+    # files.sort()
+
+    f1_same = []
+    f1_diff = []
+    e_u_same = []
+    e_u_diff = []
+    e_k_same = []
+    e_k_diff = []
+    w_i_same = []
+    w_i_diff = []
+
+
+    # First entry is the default training/ranking l2aic
+    file_name = f"{result_folder}{files[3]}/{files[3]}.npz"
+    data = np.load(file_name, allow_pickle=True)['arr_0']
+    data_keys = list(data.item().keys())
+    same_cls_result = data.item()[[key for key in data_keys if "diff" not in key][0]]
+
+    f1_same.append(same_cls_result['weighted_f1'][-1])
+    e_u_same.append(same_cls_result['error_unknowns'][-1])
+    e_k_same.append(same_cls_result['error_knowns'][-1])
+    w_i_same.append(same_cls_result['wilderness_impact'][-1])
+
+    # Iterate over the differetn settings runs
+    for file in files:
+        file_name = f"{result_folder}{file}/{file}.npz"
+        data = np.load(file_name, allow_pickle=True)['arr_0']
+        data_keys = list(data.item().keys())
+        same_cls_result = data.item()[[key for key in data_keys if "diff" not in key][-1]]
+
+        f1_same.append(same_cls_result['weighted_f1'][-1])
+        # f1_diff.append(diff_cls_result['weighted_f1'][-1])
+        e_u_same.append(same_cls_result['error_unknowns'][-1])
+        # e_u_diff.append(diff_cls_result['error_unknowns'][-1])
+        e_k_same.append(same_cls_result['error_knowns'][-1])
+        # e_k_diff.append(diff_cls_result['error_knowns'][-1])
+        w_i_same.append(same_cls_result['wilderness_impact'][-1])
+        # w_i_diff.append(diff_cls_result['wilderness_impact'][-1])
+
+
+
+    f1_same_sorted = np.array(f1_same)
+    f1_diff_sorted = np.array(f1_diff)
+    e_u_same_sorted = np.array(e_u_same)
+    e_u_diff_sorted = np.array(e_u_diff)
+    e_k_same_sorted = np.array(e_k_same)
+    e_k_diff_sorted = np.array(e_k_diff)
+
+    table_same_results = np.stack([f1_same_sorted, e_u_same_sorted,e_k_same_sorted])
+    table_same_results = np.round(table_same_results, 3)
+
+    for ii in range(0, table_same_results.shape[1]):
+
+        print(f"& {table_same_results[0,ii]} & {table_same_results[1,ii]} & {table_same_results[2,ii]} \\\\")
+
+
+
+    return
+
+def best_model_table(result_folder):
+
+    dirs = os.listdir(result_folder)
+
+    datasets = ['tinyimage', 'cifar']
+    for dataset in datasets:
+        files = [f"l2ac_original_{dataset}_en",f"l2ac_original_{dataset}_rn152", f"l2aic_best_{dataset}_no_lstm", f"l2aic_best_{dataset}_small_fc"]
+
+        f1_same = []
+        f1_diff = []
+        e_u_same = []
+        e_u_diff = []
+        e_k_same = []
+        e_k_diff = []
+        w_i_same = []
+        w_i_diff = []
+
+
+        for file in files:
+            file_name = f"{result_folder}{file}/{file}.npz"
+
+            data = np.load(file_name, allow_pickle=True)['arr_0']
+            data_keys = list(data.item().keys())
+            same_cls_result = data.item()[[key for key in data_keys if "diff" not in key][0]]
+            diff_cls_result = data.item()[[key for key in data_keys if "diff" in key][0]]
+            f1_same.append(same_cls_result['weighted_f1'][-1])
+            f1_diff.append(diff_cls_result['weighted_f1'][-1])
+            e_u_same.append(same_cls_result['error_unknowns'][-1])
+            e_u_diff.append(diff_cls_result['error_unknowns'][-1])
+            e_k_same.append(same_cls_result['error_knowns'][-1])
+            e_k_diff.append(diff_cls_result['error_knowns'][-1])
+            w_i_same.append(same_cls_result['wilderness_impact'][-1])
+            w_i_diff.append(diff_cls_result['wilderness_impact'][-1])
+
+
+
+
+
+        f1_same_sorted = np.array(f1_same)
+        f1_diff_sorted = np.array(f1_diff)
+        e_u_same_sorted = np.array(e_u_same)
+        e_u_diff_sorted = np.array(e_u_diff)
+        e_k_same_sorted = np.array(e_k_same)
+        e_k_diff_sorted = np.array(e_k_diff)
+        w_i_same_sorted = np.array(w_i_same)
+        w_i_diff_sorted = np.array(w_i_diff)
+
+
+        table_same_results = np.stack([f1_same_sorted, e_u_same_sorted,e_k_same_sorted,w_i_same_sorted])
+        table_same_results = np.round(table_same_results, 3)
+
+        table_diff_results = np.stack([f1_diff_sorted, e_u_diff_sorted,e_k_diff_sorted, w_i_diff_sorted])
+        table_diff_results = np.round(table_diff_results, 3)
+
+        str_begin = "& \\makecell[l]{"
+        print(f"\n Dataset: {dataset}\n")
+        for ii in range(0, table_same_results.shape[1]):
+            print(f"& {table_same_results[0, ii]}& {table_diff_results[0, ii]} & {table_same_results[1, ii]} & {table_diff_results[1, ii]} & {table_same_results[2, ii]}  & {table_diff_results[2, ii]}& {table_same_results[3, ii]}  & {table_diff_results[3, ii]}\\\\")
+            # print(f"{str_begin}{table_diff_results[ii, col]} \\\\ {table_diff_results[ii, col + 1]} \\\\ {table_diff_results[ii, col+2]} }}")
+
+    return
+
+
+
+
 def plot_model_output_distribution(result_dir):
     x_label = 'Output score'
     legend_label = 'Classes'
@@ -759,24 +891,43 @@ def plot_model_output_distribution(result_dir):
 
 def main():
 
-    results_name = "encoders_fn"
-    metrics = ["weighted_f1", "error_knowns", "error_unknowns", "wilderness_impact", "open_world_error" ]
-    data_folder = f"results/{results_name}/"
-    result_folder = "results/"
-    data_path = data_folder + f'{results_name}.npz'
-    data = np.load(data_path,allow_pickle=True)['arr_0']
-    data_keys = list(data.item().keys())
-    # model_architecture_table(result_folder)
-    plot_model_output_distribution(result_folder)
-    results = {}
-    for data_key in data_keys:
-        results[data_key] = data.item()[data_key]
+    # results_name = "encoders_fn"
+    # metrics = ["weighted_f1", "error_knowns", "error_unknowns", "wilderness_impact", "open_world_error" ]
+    # data_folder = f"results/{results_name}/"
+    # result_folder = "results/"
+    # data_path = data_folder + f'{results_name}.npz'
+    # data = np.load(data_path,allow_pickle=True)['arr_0']
+    # data_keys = list(data.item().keys())
+    # best_model_table(result_folder)
+    # # plot_model_output_distribution(result_folder)
+    # results = {}
+    # for data_key in data_keys:
+    #     results[data_key] = data.item()[data_key]
     # for metric in metrics:
         # plot_top_n(results, metric, data_folder)
         # plot_e_k_encoders(results, data_folder)
 
-    return
+    all_images = glob.glob('datasets/object_1/teapot_photos_224/cropped/*')
 
+    for image in all_images:
+        print(f'resize {image}')
+        crop_img(image)
+
+    return
+def crop_img(image_path):
+    img = cv2.imread(image_path)
+    height, width, channels = img.shape
+    imdim = np.array([height, width])
+
+    square_size = math.floor(imdim.min()/2)
+    y = math.floor(height/2)
+    x = math.floor(width/2)
+    print(square_size)
+    img = img[(y-square_size):(y+square_size), (x-square_size):(x+square_size)]
+    cv2.imwrite(image_path,img)
+
+
+    return
 
 if __name__ == '__main__':
     main()

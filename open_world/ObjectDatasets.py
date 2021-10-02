@@ -215,6 +215,60 @@ class MetaDataset(data_utils.Dataset):
         self.test_Y = Y[:, -self.top_n:].reshape(-1, )
         return
 
+    def set_teapot_test_data(self, data_rep, labels, X0_all, X1_all, Y_all, memory_classes, unknown_classes):
+
+        data = np.load(self.data_path)
+        self.memory = data_rep
+        self.true_labels = labels
+
+
+        if np.isin(self.true_labels[data['train_X0']], self.true_labels[data['test_X0']]).any():
+            # complete set of classes of memory and input
+            # memory_label_set = np.unique(self.true_labels[data['train_X0']])
+            memory_label_set = np.unique(labels[X1_all])
+
+            input_label_set = np.unique(labels[X0_all])
+
+            # Find unknown classes in input
+            input_unknown_labels_set = input_label_set[(~np.isin(input_label_set, memory_label_set)).nonzero()[0]]
+
+            # Randomly select a subset of indices of known (memory) and unknown (input) classes
+            shuffle_idx_known = np.random.permutation(memory_label_set.shape[0])[:memory_classes]
+            input_label_set = input_unknown_labels_set[np.random.permutation(input_unknown_labels_set.shape[0])[:unknown_classes]]
+            # shuffle_idx_unknown = np.where(input_label_set.reshape(-1,1) == shuffle_idx_unknown)[0]
+
+        else:
+            memory_label_set = np.unique(labels[X1_all])
+            input_label_set = np.unique(labels[X0_all])
+            input_label_set = input_label_set[~np.isin(np.unique(labels[X0_all]), np.unique(labels[X1_all]))]
+
+
+        # Select set of classes for known and unknown
+        known_labels_input = memory_label_set
+        unknown_labels_input = input_label_set
+
+        labels_input = np.concatenate([known_labels_input, unknown_labels_input])
+
+        # Find indices of all samples that have input lables
+        idx_X0 = np.where(labels[X0_all] == labels_input)[0]
+
+        # Filter out right input samples with corresponding memory samples and binary classification label
+        X0 = X0_all[idx_X0]
+        X1_subset = X1_all[idx_X0]
+        Y_subset = Y_all[idx_X0]
+
+        memory_true_labels = self.true_labels[X1_subset]
+
+        memory_idx = np.isin(memory_true_labels[:, :, 0], known_labels_input).nonzero()
+        X1 = X1_subset[memory_idx[0], memory_idx[1], :].reshape(
+            X0.shape[0], memory_classes, -1)
+        Y = Y_subset[memory_idx[0], memory_idx[1]].reshape(X0.shape[0], memory_classes)
+
+        self.test_X0 = np.repeat(X0, self.top_n, axis=0)  # the validation data is balanced.
+        self.test_X1 = X1[:, -self.top_n:, -self.top_k:].reshape(-1,self.top_k)
+        self.test_Y = Y[:, -self.top_n:].reshape(-1, )
+        return
+
 class ObjectDatasetBase(abc.ABC):
 
     @abc.abstractmethod
